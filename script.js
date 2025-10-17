@@ -33,6 +33,7 @@ function setupEventListeners() {
 }
 
 function handleDataUpdate(data) {
+    console.log('Data update received:', data);
     // Обновляем данные на странице при изменениях
     if (data) {
         if (data.countries) {
@@ -285,6 +286,7 @@ function scrollToDestinations() {
 
 // Принудительная перезагрузка данных (для отладки)
 function reloadData() {
+    console.log('Manual data reload triggered');
     if (window.dataManager) {
         const data = window.dataManager.getData();
         console.log('Current data:', data);
@@ -296,3 +298,8 @@ function reloadData() {
 window.reloadData = reloadData;
 window.openAdminPanel = openAdminPanel;
 window.scrollToDestinations = scrollToDestinations;
+
+// Инициализация синхронизации
+if (typeof DataSync !== 'undefined') {
+    window.dataSync = new DataSync();
+}

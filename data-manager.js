@@ -26,6 +26,11 @@ class DataManager {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             this.triggerDataUpdate();
+            
+            // Уведомляем о изменении данных
+            if (window.dataSync) {
+                window.dataSync.notifyDataChange();
+            }
             return true;
         } catch (error) {
             console.error('Error saving data:', error);
@@ -96,8 +101,8 @@ class DataManager {
             ...country
         };
         data.countries.push(newCountry);
-        this.setData(data);
-        return newCountry;
+        const success = this.setData(data);
+        return success ? newCountry : null;
     }
 
     updateCountry(id, updates) {
@@ -107,18 +112,18 @@ class DataManager {
         const countryIndex = data.countries.findIndex(c => c.id === id);
         if (countryIndex !== -1) {
             data.countries[countryIndex] = { ...data.countries[countryIndex], ...updates };
-            this.setData(data);
-            return data.countries[countryIndex];
+            const success = this.setData(data);
+            return success ? data.countries[countryIndex] : null;
         }
         return null;
     }
 
     deleteCountry(id) {
         const data = this.getData();
-        if (!data) return;
+        if (!data) return false;
         
         data.countries = data.countries.filter(c => c.id !== id);
-        this.setData(data);
+        return this.setData(data);
     }
 
     // Туры
@@ -134,21 +139,22 @@ class DataManager {
             };
             if (!country.tours) country.tours = [];
             country.tours.push(newTour);
-            this.setData(data);
-            return newTour;
+            const success = this.setData(data);
+            return success ? newTour : null;
         }
         return null;
     }
 
     deleteTour(countryId, tourId) {
         const data = this.getData();
-        if (!data) return;
+        if (!data) return false;
         
         const country = data.countries.find(c => c.id === countryId);
         if (country && country.tours) {
             country.tours = country.tours.filter(t => t.id !== tourId);
-            this.setData(data);
+            return this.setData(data);
         }
+        return false;
     }
 
     // Контакты
@@ -162,8 +168,8 @@ class DataManager {
         if (!data) return {};
         
         data.contacts = { ...data.contacts, ...updates };
-        this.setData(data);
-        return data.contacts;
+        const success = this.setData(data);
+        return success ? data.contacts : {};
     }
 
     // Настройки
@@ -177,8 +183,8 @@ class DataManager {
         if (!data) return {};
         
         data.settings = { ...data.settings, ...updates };
-        this.setData(data);
-        return data.settings;
+        const success = this.setData(data);
+        return success ? data.settings : {};
     }
 
     // События обновления данных

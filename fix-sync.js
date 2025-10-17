@@ -1,21 +1,55 @@
-// fix-sync.js
-document.addEventListener('DOMContentLoaded', function() {
-    // Принудительная синхронизация каждые 2 секунды
-    setInterval(async () => {
-        if (window.dataManager && typeof renderCountries === 'function') {
-            const data = await window.dataManager.loadData();
-            if (data && data.countries) {
-                window.countriesData = data.countries;
-                renderCountries();
+// Fix for data synchronization between tabs
+class DataSync {
+    constructor() {
+        this.storageKey = 'worldtravel_data';
+        this.init();
+    }
+
+    init() {
+        // Слушаем изменения в localStorage
+        window.addEventListener('storage', (e) => {
+            if (e.key === this.storageKey) {
+                console.log('Data changed in another tab, reloading...');
+                this.triggerDataReload();
             }
+        });
+
+        // Также слушаем наши собственные события
+        window.addEventListener('dataUpdated', () => {
+            console.log('Data updated event received');
+            this.triggerDataReload();
+        });
+    }
+
+    triggerDataReload() {
+        // Обновляем данные на странице
+        if (typeof reloadData === 'function') {
+            reloadData();
         }
-    }, 2000);
-    
-    // Слушатель сообщений от админки
-    window.addEventListener('message', function(e) {
-        if (e.data && e.data.type === 'DATA_UPDATED') {
-            console.log('🔄 Получено обновление от админки');
-            location.reload();
+        
+        // Если мы в админке, перезагружаем таблицы
+        if (typeof loadCountriesTable === 'function') {
+            setTimeout(() => {
+                loadCountriesTable();
+                loadToursTable();
+                loadCountrySelect();
+            }, 100);
         }
-    });
-});
+    }
+
+    // Уведомляем другие вкладки об изменении данных
+    notifyDataChange() {
+        // Триггерим событие storage для других вкладок
+        const event = new StorageEvent('storage', {
+            key: this.storageKey,
+            newValue: localStorage.getItem(this.storageKey)
+        });
+        window.dispatchEvent(event);
+
+        // Триггерим кастомное событие
+        window.dispatchEvent(new CustomEvent('dataUpdated'));
+    }
+}
+
+// Глобальный экземпляр синхронизации
+window.dataSync = new DataSync();
