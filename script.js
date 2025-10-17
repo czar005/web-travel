@@ -75,8 +75,8 @@ function displayCountries(countries) {
     container.innerHTML = countries.map(country => `
         <div class="country-card">
             <div class="country-image">
-                <img src="${country.image || 'images/travel-placeholder.jpg'}" alt="${country.name}" 
-                     onerror="this.src='images/travel-placeholder.jpg'">
+                <img src="${country.image || 'images/travel-placeholder.svg'}" alt="${country.name}" 
+                     onerror="this.src='images/travel-placeholder.svg'">
             </div>
             <div class="country-info">
                 <h3>${country.name}</h3>

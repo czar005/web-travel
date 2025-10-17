@@ -312,7 +312,7 @@ async function addNewCountry(name, description) {
         id: newId,
         name: name,
         description: description,
-        image: "images/travel-placeholder.jpg"
+        image: "images/travel-placeholder.svg"
     });
     
     if (window.dataManager) {
