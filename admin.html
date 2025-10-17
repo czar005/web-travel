@@ -8,154 +8,326 @@
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial; background: #f5f7fb; padding: 20px; }
         .container { max-width: 1200px; margin: 0 auto; }
-        .header { background: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        .btn { background: #2c5aa0; color: white; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; margin: 5px; }
+        .header { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            margin-bottom: 20px; 
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .btn { 
+            background: #2c5aa0; 
+            color: white; 
+            border: none; 
+            padding: 10px 20px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            margin: 5px; 
+        }
         .btn-success { background: #28a745; }
-        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); align-items: center; justify-content: center; }
+        .btn-danger { background: #dc3545; }
+        .modal { 
+            display: none; 
+            position: fixed; 
+            top: 0; 
+            left: 0; 
+            width: 100%; 
+            height: 100%; 
+            background: rgba(0,0,0,0.5); 
+            align-items: center; 
+            justify-content: center; 
+            z-index: 1000;
+        }
         .modal.active { display: flex; }
-        .modal-content { background: white; padding: 20px; border-radius: 10px; width: 500px; }
-        .form-group { margin: 10px 0; }
-        .form-control { width: 100%; padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
+        .modal-content { 
+            background: white; 
+            padding: 20px; 
+            border-radius: 10px; 
+            width: 90%;
+            max-width: 500px;
+        }
+        .form-group { margin: 15px 0; }
+        .form-control { 
+            width: 100%; 
+            padding: 10px; 
+            border: 1px solid #ddd; 
+            border-radius: 4px; 
+            font-size: 16px;
+        }
+        .country-card {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2c5aa0;
+        }
     </style>
 </head>
 <body>
+    <!-- Проверка авторизации -->
+    <script>
+        if (!localStorage.getItem('adminAuthenticated')) {
+            alert('Требуется авторизация!');
+            window.location.href = 'admin-login.html';
+        }
+    </script>
+
     <div class="container">
         <div class="header">
-            <h1>WorldTravel Admin</h1>
-            <button class="btn" onclick="logout()">Выйти</button>
+            <div>
+                <h1>🌍 WorldTravel Admin</h1>
+                <p>Управление странами и контентом</p>
+            </div>
+            <button class="btn btn-danger" onclick="logout()">🚪 Выйти</button>
         </div>
         
-        <button class="btn btn-success" onclick="openModal()">Добавить страну</button>
+        <div style="margin: 20px 0;">
+            <button class="btn btn-success" onclick="openModal()">➕ Добавить страну</button>
+            <button class="btn" onclick="window.open('index.html', '_blank')">🏠 На главную</button>
+        </div>
         
-        <div id="countries-list" style="margin-top: 20px;"></div>
+        <div id="countries-list">
+            <!-- Страны будут здесь -->
+        </div>
     </div>
 
-    <div class="modal" id="modal">
+    <!-- Модальное окно -->
+    <div class="modal" id="countryModal">
         <div class="modal-content">
-            <h3>Добавить страну</h3>
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 id="modalTitle">Добавить страну</h3>
+                <button onclick="closeModal()" style="background: none; border: none; font-size: 20px; cursor: pointer;">×</button>
+            </div>
+            
             <form onsubmit="saveCountry(event)">
                 <div class="form-group">
-                    <label>Название:</label>
-                    <input type="text" id="name" class="form-control" required>
+                    <label><strong>Название страны:</strong></label>
+                    <input type="text" id="countryName" class="form-control" placeholder="Например: Франция" required>
                 </div>
+                
                 <div class="form-group">
-                    <label>Описание:</label>
-                    <textarea id="description" class="form-control" required></textarea>
+                    <label><strong>Описание:</strong></label>
+                    <textarea id="countryDescription" class="form-control" rows="3" placeholder="Описание страны..." required></textarea>
                 </div>
+                
                 <div class="form-group">
-                    <label>Цена:</label>
-                    <input type="text" id="price" class="form-control" required>
+                    <label><strong>Цена от:</strong></label>
+                    <input type="text" id="countryPrice" class="form-control" placeholder="от $500" required>
                 </div>
-                <button type="submit" class="btn btn-success">Сохранить</button>
-                <button type="button" class="btn" onclick="closeModal()">Отмена</button>
+                
+                <div style="display: flex; gap: 10px; justify-content: flex-end; margin-top: 20px;">
+                    <button type="button" class="btn" onclick="closeModal()">❌ Отмена</button>
+                    <button type="submit" class="btn btn-success">💾 Сохранить</button>
+                </div>
             </form>
         </div>
     </div>
 
     <script src="data-manager.js"></script>
     <script>
-    // Проверка авторизации
-    if (!localStorage.getItem('adminAuthenticated')) {
-        alert('Требуется авторизация!');
-        window.location.href = 'admin-login.html';
-    }
+    console.log('🚀 Загрузка админки...');
+
+    // Переменные
+    let currentEditingId = null;
 
     // Функции модального окна
-    function openModal() {
-        console.log('Открытие модального окна');
-        document.getElementById('modal').classList.add('active');
+    function openModal(countryId = null) {
+        console.log('📝 Открытие модального окна для страны:', countryId);
+        currentEditingId = countryId;
+        const modal = document.getElementById('countryModal');
+        
+        if (!modal) {
+            console.error('❌ Модальное окно не найдено!');
+            alert('Ошибка: модальное окно не найдено');
+            return;
+        }
+
+        if (countryId) {
+            document.getElementById('modalTitle').textContent = 'Редактировать страну';
+            fillCountryForm(countryId);
+        } else {
+            document.getElementById('modalTitle').textContent = 'Добавить страну';
+            resetCountryForm();
+        }
+        
+        modal.classList.add('active');
+        console.log('✅ Модальное окно открыто');
     }
 
     function closeModal() {
-        document.getElementById('modal').classList.remove('active');
+        const modal = document.getElementById('countryModal');
+        if (modal) {
+            modal.classList.remove('active');
+        }
+        currentEditingId = null;
+        console.log('✅ Модальное окно закрыто');
+    }
+
+    function fillCountryForm(countryId) {
+        const countries = window.dataManager.getCountries();
+        const country = countries.find(c => c.id === countryId);
+        if (country) {
+            document.getElementById('countryName').value = country.name || '';
+            document.getElementById('countryDescription').value = country.description || '';
+            document.getElementById('countryPrice').value = country.price || '';
+        }
+    }
+
+    function resetCountryForm() {
+        document.getElementById('countryName').value = '';
+        document.getElementById('countryDescription').value = '';
+        document.getElementById('countryPrice').value = '';
     }
 
     // Сохранение страны
     function saveCountry(event) {
-        event.preventDefault();
+        if (event) event.preventDefault();
         
-        const name = document.getElementById('name').value;
-        const description = document.getElementById('description').value;
-        const price = document.getElementById('price').value;
+        console.log('💾 Сохранение страны...');
+        
+        const name = document.getElementById('countryName').value;
+        const description = document.getElementById('countryDescription').value;
+        const price = document.getElementById('countryPrice').value;
 
         if (!name || !description || !price) {
-            alert('Заполните все поля!');
+            alert('❌ Заполните все обязательные поля!');
             return;
         }
 
-        const country = {
-            id: Date.now().toString(),
+        const countryData = {
+            id: currentEditingId || 'country-' + Date.now(),
             name: name,
             description: description,
-            price: price
+            price: price,
+            image: "images/travel-placeholder.jpg"
         };
 
-        // Сохраняем через dataManager
-        const countries = window.dataManager.getCountries();
-        countries.push(country);
-        window.dataManager.updateCountries(countries);
+        console.log('📦 Данные страны:', countryData);
 
-        // Обновляем список
-        loadCountries();
-        
-        // Закрываем модальное окно
-        closeModal();
-        
-        // Очищаем форму
-        document.getElementById('name').value = '';
-        document.getElementById('description').value = '';
-        document.getElementById('price').value = '';
+        try {
+            const countries = window.dataManager.getCountries();
+            
+            if (currentEditingId) {
+                // Редактирование
+                const index = countries.findIndex(c => c.id === currentEditingId);
+                if (index !== -1) {
+                    countries[index] = countryData;
+                    console.log('✏️ Страна обновлена');
+                }
+            } else {
+                // Добавление
+                countries.push(countryData);
+                console.log('➕ Новая страна добавлена');
+            }
 
-        alert('Страна добавлена!');
+            const success = window.dataManager.updateCountries(countries);
+            
+            if (success) {
+                showNotification(`✅ Страна "${name}" ${currentEditingId ? 'обновлена' : 'добавлена'}!`);
+                closeModal();
+                loadCountries();
+            } else {
+                showNotification('❌ Ошибка сохранения страны', 'error');
+            }
+            
+        } catch (error) {
+            console.error('❌ Ошибка при сохранении страны:', error);
+            showNotification('❌ Ошибка при сохранении страны', 'error');
+        }
     }
 
-    // Загрузка стран
+    // Загрузка и отображение стран
     function loadCountries() {
         const container = document.getElementById('countries-list');
+        if (!container) {
+            console.error('❌ Контейнер стран не найден');
+            return;
+        }
+
         const countries = window.dataManager.getCountries();
+        console.log('📊 Загружено стран:', countries.length);
 
         if (countries.length === 0) {
-            container.innerHTML = '<p>Стран пока нет</p>';
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: #666; background: white; border-radius: 10px;">
+                    <div style="font-size: 48px; margin-bottom: 20px;">🌍</div>
+                    <h3>Стран пока нет</h3>
+                    <p>Добавьте первую страну, нажав кнопку выше</p>
+                </div>
+            `;
             return;
         }
 
         container.innerHTML = countries.map(country => `
-            <div style="background: white; padding: 15px; margin: 10px 0; border-radius: 5px;">
-                <h3>${country.name}</h3>
-                <p>${country.description}</p>
-                <p><strong>${country.price}</strong></p>
-                <button class="btn" onclick="editCountry('${country.id}')">Редактировать</button>
-                <button class="btn" style="background: #dc3545;" onclick="deleteCountry('${country.id}')">Удалить</button>
+            <div class="country-card">
+                <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 10px;">
+                    <h3 style="margin: 0; color: #2c5aa0;">${country.name}</h3>
+                    <strong style="color: #28a745; font-size: 18px;">${country.price}</strong>
+                </div>
+                <p style="color: #666; line-height: 1.5; margin-bottom: 15px;">${country.description}</p>
+                <div style="display: flex; gap: 10px;">
+                    <button class="btn" onclick="openModal('${country.id}')">
+                        ✏️ Редактировать
+                    </button>
+                    <button class="btn btn-danger" onclick="deleteCountry('${country.id}')">
+                        🗑️ Удалить
+                    </button>
+                </div>
             </div>
         `).join('');
     }
 
-    function editCountry(id) {
-        const countries = window.dataManager.getCountries();
-        const country = countries.find(c => c.id === id);
-        if (country) {
-            document.getElementById('name').value = country.name;
-            document.getElementById('description').value = country.description;
-            document.getElementById('price').value = country.price;
-            openModal();
+    function deleteCountry(countryId) {
+        if (!confirm('❌ Удалить эту страну?')) return;
+        
+        try {
+            const countries = window.dataManager.getCountries().filter(c => c.id !== countryId);
+            const success = window.dataManager.updateCountries(countries);
+            
+            if (success) {
+                loadCountries();
+                showNotification('✅ Страна удалена!');
+            }
+        } catch (error) {
+            console.error('❌ Ошибка удаления страны:', error);
+            showNotification('❌ Ошибка при удалении страны', 'error');
         }
     }
 
-    function deleteCountry(id) {
-        if (confirm('Удалить страну?')) {
-            const countries = window.dataManager.getCountries().filter(c => c.id !== id);
-            window.dataManager.updateCountries(countries);
-            loadCountries();
-        }
+    function showNotification(message, type = 'success') {
+        // Простое уведомление через alert
+        alert(message);
     }
 
     function logout() {
-        localStorage.removeItem('adminAuthenticated');
-        window.location.href = 'admin-login.html';
+        if (confirm('Выйти из админ-панели?')) {
+            localStorage.removeItem('adminAuthenticated');
+            localStorage.removeItem('adminUsername');
+            window.location.href = 'admin-login.html';
+        }
     }
 
-    // Загружаем страны при старте
-    document.addEventListener('DOMContentLoaded', loadCountries);
+    // Инициализация при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('📄 DOM загружен');
+        
+        // Проверяем dataManager
+        if (typeof window.dataManager === 'undefined') {
+            console.error('❌ dataManager не загружен!');
+            alert('Ошибка: dataManager не загружен');
+            return;
+        }
+        
+        console.log('✅ dataManager доступен');
+        console.log('📊 Функции dataManager:', Object.keys(window.dataManager));
+        
+        // Загружаем страны
+        loadCountries();
+        
+        console.log('✅ Админка готова к работе');
+    });
     </script>
 </body>
 </html>
