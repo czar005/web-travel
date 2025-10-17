@@ -80,13 +80,49 @@ class DataManager {
             settings: {
                 siteTitle: 'WorldTravel - Туристическая компания',
                 companyName: 'WorldTravel'
+            },
+            // Совместимость со старым форматом
+            content: {
+                countries: [],
+                contacts: {}
             }
         };
         this.setData(defaultData);
         return defaultData;
     }
 
-    // Страны
+    // СОВМЕСТИМОСТЬ СО СТАРЫМИ МЕТОДАМИ
+    getContent() {
+        const data = this.getData();
+        return {
+            countries: data?.countries || [],
+            contacts: data?.contacts || {}
+        };
+    }
+
+    updateContent(newContent) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        if (newContent.countries) {
+            data.countries = newContent.countries;
+        }
+        if (newContent.contacts) {
+            data.contacts = newContent.contacts;
+        }
+        
+        return this.setData(data);
+    }
+
+    updateCountries(countries) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        data.countries = countries;
+        return this.setData(data);
+    }
+
+    // НОВЫЕ МЕТОДЫ
     getCountries() {
         const data = this.getData();
         return data?.countries || [];
