@@ -182,57 +182,72 @@
         let currentAuthCode = '';
         let currentUsername = '';
 
-        async function handleLogin() {
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
+      async function handleLogin() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
 
-            // Простая проверка логина и пароля
-            if (username !== 'admin' || password !== 'admin') {
-                showMessage('Неверный логин или пароль', 'error');
-                return;
-            }
+    // Простая проверка логина и пароля
+    if (username !== 'admin' || password !== 'admin') {
+        showMessage('Неверный логин или пароль', 'error');
+        return;
+    }
 
-            showMessage('Отправка кода на вашу почту...', 'success');
-            setLoadingState(true);
+    showMessage('Отправка кода на вашу почту...', 'success');
+    setLoadingState(true);
 
-            try {
-                // Генерируем 6-значный код
-                currentAuthCode = Math.floor(100000 + Math.random() * 900000).toString();
-                currentUsername = username;
+    try {
+        // Генерируем 6-значный код
+        currentAuthCode = Math.floor(100000 + Math.random() * 900000).toString();
+        currentUsername = username;
+        
+        console.log('Сгенерирован код:', currentAuthCode);
 
-                // Отправка кода на почту через Formspree
-                const response = await fetch('https://formspree.io/f/mpwybjkj', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        email: 'narekgrigoryan424@gmail.com',
-                        subject: 'Код аутентификации Admin Panel - WorldTravel',
-                        message: `Код для входа в админ-панель: ${currentAuthCode}\n\nЛогин: ${username}\nВремя: ${new Date().toLocaleString()}\n\nНикому не сообщайте этот код!`
-                    })
-                });
+        // Отправка кода на почту через Formspree
+        const response = await fetch('https://formspree.io/f/mpwybjkj', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            body: JSON.stringify({
+                _replyto: 'narekgrigoryan424@gmail.com',
+                _subject: 'Код аутентификации Admin Panel - WorldTravel',
+                message: `Код для входа в админ-панель: ${currentAuthCode}\n\nЛогин: ${username}\nВремя: ${new Date().toLocaleString()}\n\nНикому не сообщайте этот код!`,
+                code: currentAuthCode,
+                login: username
+            })
+        });
 
-                if (response.ok) {
-                    showMessage('✅ Код отправлен! Проверьте вашу почту narekgrigoryan424@gmail.com', 'success');
-                    // Переключаемся на ввод кода
-                    document.getElementById('loginSection').classList.add('hidden');
-                    document.getElementById('codeSection').classList.remove('hidden');
-                    // Очищаем поля ввода кода
-                    clearCodeInputs();
-                    // Фокус на первое поле ввода кода
-                    document.querySelector('.code-inputs input').focus();
-                } else {
-                    showMessage('❌ Ошибка отправки кода. Попробуйте еще раз.', 'error');
-                }
-            } catch (error) {
-                console.error('Error sending code:', error);
-                showMessage('❌ Ошибка сети. Проверьте подключение.', 'error');
-            } finally {
-                setLoadingState(false);
-            }
+        console.log('Response status:', response.status);
+        console.log('Response ok:', response.ok);
+
+        if (response.ok) {
+            const result = await response.json();
+            console.log('Formspree response:', result);
+            
+            showMessage('✅ Код отправлен! Проверьте вашу почту narekgrigoryan424@gmail.com', 'success');
+            // Переключаемся на ввод кода
+            document.getElementById('loginSection').classList.add('hidden');
+            document.getElementById('codeSection').classList.remove('hidden');
+            // Очищаем поля ввода кода
+            clearCodeInputs();
+            // Фокус на первое поле ввода кода
+            document.querySelector('.code-inputs input').focus();
+            
+            // ПОКАЗЫВАЕМ КОД ДЛЯ ТЕСТА (удалите потом эту строку)
+            showMessage(`✅ Код отправлен! Тестовый код: ${currentAuthCode}`, 'success');
+        } else {
+            const errorText = await response.text();
+            console.error('Formspree error:', errorText);
+            showMessage('❌ Ошибка отправки кода. Попробуйте еще раз.', 'error');
         }
-
+    } catch (error) {
+        console.error('Network error:', error);
+        showMessage('❌ Ошибка сети. Проверьте подключение.', 'error');
+    } finally {
+        setLoadingState(false);
+    }
+}
         function moveToNext(input, nextIndex) {
             const inputs = document.querySelectorAll('.code-inputs input');
             
