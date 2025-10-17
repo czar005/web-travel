@@ -33,40 +33,58 @@ function initializePage() {
     startAutoSync();
 }
 
-// script.js - ЗАМЕНИТЬ функцию loadData:
-
+// Загрузка данных (сначала из localStorage, потом из файла)
 async function loadData() {
     try {
-        // Сначала пробуем загрузить из LocalStorage
-        const localData = window.dataManager ? window.dataManager.getData() : null;
-        
-        if (localData && localData.countries && localData.countries.length > 0) {
-            console.log('Данные загружены из LocalStorage');
-            return localData;
+        // Пробуем загрузить из localStorage (данные из админки)
+        const savedData = localStorage.getItem('worldtravel_current_data');
+        if (savedData) {
+            const data = JSON.parse(savedData);
+            console.log('✅ Данные загружены из админки');
+            return data;
         }
         
-        // Если в LocalStorage нет данных, загружаем из файла
+        // Если в localStorage нет, загружаем из файла
         const response = await fetch('./data/content.json');
         if (!response.ok) throw new Error('Файл не найден');
         
-        const data = await response.json();
-        console.log('Данные загружены из content.json');
-        return data;
+        const fileData = await response.json();
+        console.log('✅ Данные загружены из content.json');
+        return fileData;
     } catch (error) {
         console.error('Ошибка загрузки данных:', error);
-        // Возвращаем заглушку
-        return {
-            countries: [
-                {
-                    id: 1,
-                    name: "Пример страны",
-                    description: "Описание появится после настройки админки",
-                    image: "images/travel-placeholder.jpg"
-                }
-            ],
-            cities: []
-        };
+        return getDefaultData();
     }
+}
+
+// Данные по умолчанию
+function getDefaultData() {
+    return {
+        countries: [
+            {
+                id: 1,
+                name: "Франция",
+                description: "Страна искусства и культуры",
+                image: "images/france.jpg",
+                price: "от $500"
+            },
+            {
+                id: 2,
+                name: "Италия", 
+                description: "Страна древней истории и кухни",
+                image: "images/italy.jpg",
+                price: "от $450"
+            }
+        ],
+        content: {
+            heroTitle: "Откройте мир с WorldTravel",
+            heroText: "Мы создаем незабываемые путешествия по всему миру",
+            contactPhone: "+7 (999) 123-45-67",
+            contactEmail: "info@worldtravel.com",
+            contactAddress: "Москва, ул. Туристическая, 15",
+            contactHours: "Пн-Пт: 9:00-18:00"
+        }
+    };
 }
 
 // Применение данных редактора

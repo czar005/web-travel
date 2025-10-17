@@ -531,7 +531,7 @@
     </div>
 
     <!-- Кнопка домой -->
-    <button class="btn btn-home" onclick="window.open('/', '_blank')" title="На главную">
+    <button class="btn btn-home" onclick="window.open('index.html', '_blank')" title="На главную">
         <i class="fas fa-home"></i>
     </button>
 
@@ -757,6 +757,11 @@
         }
 
         saveContent() {
+            if (this.dataManager.updateContent(content)) {
+    // СИНХРОНИЗИРУЕМ С ГЛАВНОЙ СТРАНИЦЕЙ
+    this.dataManager.syncWithMainPage();
+    this.showNotification('✅ Контент сохранен! Главная страница обновлена.');
+}
             const content = {
                 heroTitle: document.getElementById('hero-title').value,
                 heroText: document.getElementById('hero-text').value,
@@ -775,6 +780,11 @@
         }
 
         saveDesignSettings() {
+            if (this.dataManager.updateDesign(design)) {
+    // СИНХРОНИЗИРУЕМ С ГЛАВНОЙ СТРАНИЦЕЙ
+    this.dataManager.syncWithMainPage();
+    this.showNotification('✅ Настройки дизайна сохранены! Главная страница обновлена.');
+}
             const design = {
                 blocks: {
                     hero: document.getElementById('block-hero').checked,
@@ -852,6 +862,13 @@ closeModal() {
             const name = document.getElementById('country-name').value;
             const description = document.getElementById('country-description').value;
             const price = document.getElementById('country-price').value;
+            if (this.dataManager.updateCountries(countries)) {
+    // СИНХРОНИЗИРУЕМ С ГЛАВНОЙ СТРАНИЦЕЙ
+    this.dataManager.syncWithMainPage();
+    this.closeModal();
+    this.renderCountries();
+    this.showNotification('✅ Страна добавлена! Главная страница обновлена.');
+}
 
             if (!name || !description || !price) {
                 this.showNotification('Заполните все поля', 'error');

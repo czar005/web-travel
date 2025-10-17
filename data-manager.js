@@ -141,7 +141,24 @@ class DataManager {
     }
 }
 // data-manager.js - ДОБАВИТЬ в конец файла:
+// Функция для синхронизации данных с главной страницей
+window.dataManager.syncWithMainPage = function() {
+    const data = this.getData();
+    
+    // Сохраняем данные в localStorage для главной страницы
+    localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
+    
+    // Также обновляем data/content.json через GitHub API (если нужно)
+    this.updateContentJson(data);
+    
+    console.log('✅ Данные синхронизированы с главной страницей');
+};
 
+// Обновление content.json (для статических данных)
+window.dataManager.updateContentJson = function(data) {
+    // Этот метод может быть реализован позже для работы с GitHub API
+    console.log('📝 content.json должен быть обновлен:', data);
+};
 // Работа с LocalStorage
 window.dataManager = {
     // Сохранить данные в LocalStorage
