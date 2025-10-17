@@ -1,0 +1,132 @@
+{
+  "countries": [
+    {
+      "id": "armenia",
+      "name": "Армения",
+      "description": "Древняя страна с богатой историей и гостеприимными людьми",
+      "price": "от $600",
+      "images": ["images/countries/armenia1.jpg", "images/countries/armenia2.jpg"],
+      "shortDescription": "Тайны древних монастырей и вкуснейшая кухня",
+      "details": {
+        "capital": "Ереван",
+        "language": "Армянский",
+        "currency": "Армянский драм",
+        "bestTime": "Апрель-Июнь, Сентябрь-Октябрь",
+        "highlights": ["Гарни", "Гегард", "Озеро Севан", "Хор Вирап"]
+      },
+      "tours": [
+        { "name": "Классический тур", "duration": "7 дней", "price": "$600" },
+        { "name": "Гастрономический тур", "duration": "5 дней", "price": "$450" },
+        { "name": "Исторический тур", "duration": "10 дней", "price": "$800" }
+      ]
+    },
+    {
+      "id": "greece",
+      "name": "Греция",
+      "description": "Колыбель западной цивилизации с потрясающими островами",
+      "price": "от $800",
+      "images": ["images/countries/greece1.jpg", "images/countries/greece2.jpg"],
+      "shortDescription": "Античные руины, лазурное море и белоснежные дома",
+      "details": {
+        "capital": "Афины",
+        "language": "Греческий",
+        "currency": "Евро",
+        "bestTime": "Май-Июнь, Сентябрь-Октябрь",
+        "highlights": ["Акрополь", "Санторини", "Метеоры", "Крит"]
+      },
+      "tours": [
+        { "name": "Островной тур", "duration": "8 дней", "price": "$800" },
+        { "name": "Исторический тур", "duration": "6 дней", "price": "$650" },
+        { "name": "Пляжный отдых", "duration": "7 дней", "price": "$700" }
+      ]
+    },
+    {
+      "id": "egypt",
+      "name": "Египет",
+      "description": "Земля фараонов и древних пирамид",
+      "price": "от $500",
+      "images": ["images/countries/egypt1.jpg", "images/countries/egypt2.jpg"],
+      "shortDescription": "Величественные пирамиды и Красное море",
+      "details": {
+        "capital": "Каир",
+        "language": "Арабский",
+        "currency": "Египетский фунт",
+        "bestTime": "Октябрь-Апрель",
+        "highlights": ["Пирамиды Гизы", "Луксор", "Шарм-эль-Шейх", "Абу-Симбел"]
+      },
+      "tours": [
+        { "name": "Экскурсионный тур", "duration": "7 дней", "price": "$500" },
+        { "name": "Дайвинг тур", "duration": "10 дней", "price": "$900" },
+        { "name": "Нил круиз", "duration": "8 дней", "price": "$750" }
+      ]
+    },
+    {
+      "id": "mexico",
+      "name": "Мексика",
+      "description": "Страна древних цивилизаций и яркой культуры",
+      "price": "от $900",
+      "images": ["images/countries/mexico1.jpg", "images/countries/mexico2.jpg"],
+      "shortDescription": "Пирамиды майя, сеноты и карибские пляжи",
+      "details": {
+        "capital": "Мехико",
+        "language": "Испанский",
+        "currency": "Мексиканское песо",
+        "bestTime": "Ноябрь-Апрель",
+        "highlights": ["Чичен-Ица", "Канкун", "Мехико", "Тулум"]
+      },
+      "tours": [
+        { "name": "Тур по Юкатану", "duration": "9 дней", "price": "$900" },
+        { "name": "Пляжный отдых", "duration": "7 дней", "price": "$750" },
+        { "name": "Культурный тур", "duration": "12 дней", "price": "$1200" }
+      ]
+    },
+    {
+      "id": "cuba",
+      "name": "Куба",
+      "description": "Остров свободы с уникальной атмосферой",
+      "price": "от $700",
+      "images": ["images/countries/cuba1.jpg", "images/countries/cuba2.jpg"],
+      "shortDescription": "Ретро-автомобили, сигары и зажигательные ритмы",
+      "details": {
+        "capital": "Гавана",
+        "language": "Испанский",
+        "currency": "Кубинское песо",
+        "bestTime": "Декабрь-Май",
+        "highlights": ["Гавана", "Тринидад", "Виньялес", "Варадеро"]
+      },
+      "tours": [
+        { "name": "Классическая Куба", "duration": "8 дней", "price": "$700" },
+        { "name": "Пляжный тур", "duration": "10 дней", "price": "$850" },
+        { "name": "Музыкальный тур", "duration": "7 дней", "price": "$650" }
+      ]
+    },
+    {
+      "id": "spain",
+      "name": "Испания",
+      "description": "Страна страстного фламенко и изысканной архитектуры",
+      "price": "от $750",
+      "images": ["images/countries/spain1.jpg", "images/countries/spain2.jpg"],
+      "shortDescription": "Гауди, тапас и солнечное побережье",
+      "details": {
+        "capital": "Мадрид",
+        "language": "Испанский",
+        "currency": "Евро",
+        "bestTime": "Май-Июнь, Сентябрь",
+        "highlights": ["Барселона", "Мадрид", "Севилья", "Коста-Брава"]
+      },
+      "tours": [
+        { "name": "Города Испании", "duration": "10 дней", "price": "$750" },
+        { "name": "Побережье", "duration": "8 дней", "price": "$600" },
+        { "name": "Гастрономический тур", "duration": "7 дней", "price": "$550" }
+      ]
+    }
+  ],
+  "content": {
+    "heroTitle": "Откройте мир с WorldTravel",
+    "heroText": "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.",
+    "contactPhone": "+7 (999) 123-45-67",
+    "contactEmail": "info@worldtravel.com",
+    "contactAddress": "Москва, ул. Туристическая, 15"
+  },
+  "lastUpdate": "2024-01-15T10:00:00.000Z"
+}
