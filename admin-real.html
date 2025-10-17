@@ -397,6 +397,21 @@
         </div>
     </div>
     <script>
+// Упрощенная проверка авторизации
+document.addEventListener('DOMContentLoaded', function() {
+    const isAuthenticated = localStorage.getItem('adminAuthenticated');
+    console.log('Auth status:', isAuthenticated);
+    
+    // Только если НЕТ авторизации - перенаправляем
+    if (!isAuthenticated || isAuthenticated !== 'true') {
+        console.log('Not authenticated, redirecting...');
+        window.location.href = 'admin-login.html';
+    } else {
+        console.log('Authenticated, showing admin panel');
+    }
+});
+</script>
+    <script>
 // Проверка авторизации при загрузке админ-панели
 document.addEventListener('DOMContentLoaded', function() {
     const isAuthenticated = localStorage.getItem('adminAuthenticated');
