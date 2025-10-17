@@ -201,15 +201,15 @@
             console.log('Auth check:', isAuthenticated);
             
             // Только если нет авторизации - перенаправляем
-            if (!isAuthenticated || isAuthenticated !== 'true') {
-                console.log('Redirecting to login...');
-                window.location.href = 'admin-login.html';
-            } else {
+          //  if (!isAuthenticated || isAuthenticated !== 'true') {
+            //    console.log('Redirecting to login...');
+              //  window.location.href = 'admin-login.html';
+            //} else {
                 console.log('Access granted to admin panel');
                 loadCountries();
                 updateStats();
             }
-        });
+        );
 
         function logout() {
             localStorage.removeItem('adminAuthenticated');

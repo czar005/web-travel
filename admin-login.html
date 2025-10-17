@@ -263,38 +263,44 @@
             }
         }
 
-        function verifyCode() {
-            const inputs = document.querySelectorAll('.code-inputs input');
-            const enteredCode = Array.from(inputs).map(input => input.value).join('');
+       function verifyCode() {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    const enteredCode = Array.from(inputs).map(input => input.value).join('');
+    
+    if (enteredCode.length !== 6) {
+        showMessage('Введите все 6 цифр кода', 'error');
+        return;
+    }
+
+    setLoadingState(true);
+
+    // Имитация загрузки для лучшего UX
+    setTimeout(() => {
+        if (enteredCode === currentAuthCode) {
+            showMessage('✅ Успешный вход! Перенаправление...', 'success');
             
-            if (enteredCode.length !== 6) {
-                showMessage('Введите все 6 цифр кода', 'error');
-                return;
-            }
-
-            setLoadingState(true);
-
-            // Имитация загрузки для лучшего UX
+            // СОХРАНЯЕМ ДАННЫЕ ПРАВИЛЬНО
+            localStorage.setItem('adminAuthenticated', 'true');
+            localStorage.setItem('adminUsername', currentUsername);
+            localStorage.setItem('authTime', Date.now().toString());
+            
+            console.log('Auth data saved:', {
+                authenticated: localStorage.getItem('adminAuthenticated'),
+                username: localStorage.getItem('adminUsername'),
+                time: localStorage.getItem('authTime')
+            });
+            
+            // Перенаправляем в админ-панель через 2 секунды
             setTimeout(() => {
-                if (enteredCode === currentAuthCode) {
-                    showMessage('✅ Успешный вход! Перенаправление...', 'success');
-                    // Сохраняем статус авторизации
-                    localStorage.setItem('adminAuthenticated', 'true');
-localStorage.setItem('adminUsername', currentUsername);
-localStorage.setItem('authTime', Date.now().toString());
-                    
-                    // Перенаправляем в админ-панель через 2 секунды
-                    setTimeout(() => {
-                        window.location.href = 'admin-real.html';
-                    }, 2000);
-                } else {
-                    showMessage('❌ Неверный код. Попробуйте еще раз.', 'error');
-                    shakeCodeInputs();
-                }
-                setLoadingState(false);
-            }, 1000);
+                window.location.href = 'admin-real.html';
+            }, 2000);
+        } else {
+            showMessage('❌ Неверный код. Попробуйте еще раз.', 'error');
+            shakeCodeInputs();
         }
-
+        setLoadingState(false);
+    }, 1000);
+}
         function goBackToLogin() {
             document.getElementById('codeSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
