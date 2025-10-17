@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeAdmin() {
     loadAdminData();
     setupAdminEventListeners();
-    loadCountrySelect();
 }
 
 function setupAdminEventListeners() {
@@ -253,6 +252,9 @@ function handleUpdateContacts(e) {
     if (window.dataManager) {
         window.dataManager.updateContacts(contactData);
         showAdminNotification('Контактная информация обновлена!', 'success');
+        
+        // Вместо window.open используем кнопку для перехода
+        showMainPageButton();
     }
 }
 
@@ -269,6 +271,9 @@ function handleUpdateSettings(e) {
     if (window.dataManager) {
         window.dataManager.updateSettings(settingsData);
         showAdminNotification('Настройки сайта обновлены!', 'success');
+        
+        // Вместо window.open используем кнопку для перехода
+        showMainPageButton();
     }
 }
 
@@ -322,6 +327,45 @@ function deleteTour(countryId, tourId) {
     }
 }
 
+// Показываем кнопку для перехода на главную вместо window.open
+function showMainPageButton() {
+    // Создаем или находим контейнер для кнопки
+    let buttonContainer = document.getElementById('main-page-button-container');
+    if (!buttonContainer) {
+        buttonContainer = document.createElement('div');
+        buttonContainer.id = 'main-page-button-container';
+        buttonContainer.style.cssText = `
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-left: 4px solid #4CAF50;
+        `;
+        document.body.appendChild(buttonContainer);
+    }
+    
+    buttonContainer.innerHTML = `
+        <p style="margin: 0 0 10px 0; font-weight: bold;">Данные сохранены!</p>
+        <a href="index.html" target="_blank" class="btn-admin" style="display: block; text-align: center;">
+            <i class="fas fa-external-link-alt"></i> Открыть главную страницу
+        </a>
+        <button onclick="this.parentElement.remove()" style="margin-top: 8px; background: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; width: 100%;">
+            Закрыть
+        </button>
+    `;
+    
+    // Автоматически скрываем через 10 секунд
+    setTimeout(() => {
+        if (buttonContainer && buttonContainer.parentElement) {
+            buttonContainer.remove();
+        }
+    }, 10000);
+}
+
 function showAdminNotification(message, type = 'info') {
     // Создаем уведомление
     const notification = document.createElement('div');
@@ -349,7 +393,9 @@ function showAdminNotification(message, type = 'info') {
     document.body.appendChild(notification);
     
     setTimeout(() => {
-        notification.remove();
+        if (notification.parentElement) {
+            notification.remove();
+        }
     }, 3000);
 }
 
