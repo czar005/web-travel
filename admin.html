@@ -3,756 +3,307 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WorldTravel - Полная админ-панель</title>
+    <title>Админ-панель - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body {
-            font-family: 'Inter', sans-serif;
-            background: #f5f7fb;
-            color: #333;
-            padding: 20px;
-        }
-
-        .admin-container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .admin-header {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .tabs {
-            display: flex;
-            gap: 1rem;
-            margin-bottom: 2rem;
-            background: white;
-            padding: 1rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-        }
-
-        .tab-btn {
-            padding: 12px 24px;
-            border: none;
-            background: #f8f9fa;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .tab-btn.active {
-            background: #2c5aa0;
-            color: white;
-        }
-
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-        }
-
-        .content-section {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            margin-bottom: 2rem;
-        }
-
-        .section-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 2px solid #f1f3f4;
-        }
-
-        .btn {
-            background: #2c5aa0;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            display: inline-flex;
-            align-items: center;
-            gap: 0.5rem;
-        }
-
-        .btn:hover {
-            background: #1e3d72;
-            transform: translateY(-2px);
-        }
-
-        .btn-success {
-            background: #28a745;
-        }
-
-        .btn-success:hover {
-            background: #218838;
-        }
-
-        .btn-danger {
-            background: #dc3545;
-        }
-
-        .btn-danger:hover {
-            background: #c82333;
-        }
-
-        .btn-logout {
-            background: #dc3545;
-        }
-
-        .btn-home {
-            background: #17a2b8;
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 1000;
-            padding: 15px;
-            border-radius: 50%;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
-        }
-
-        .form-group {
-            margin-bottom: 1.5rem;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .form-control {
-            width: 100%;
-            padding: 12px;
-            border: 2px solid #e1e5ee;
-            border-radius: 8px;
-            font-size: 14px;
-            transition: border-color 0.3s ease;
-        }
-
-        .form-control:focus {
-            outline: none;
-            border-color: #2c5aa0;
-        }
-
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 1rem;
-        }
-
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 1.5rem;
-            margin-top: 1.5rem;
-        }
-
-        .card {
-            background: white;
-            border-radius: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            overflow: hidden;
-            transition: transform 0.3s ease;
-            border: 1px solid #e1e5ee;
-        }
-
-        .card:hover {
-            transform: translateY(-5px);
-        }
-
-        .card-header {
-            background: linear-gradient(135deg, #2c5aa0, #4a7bc8);
-            color: white;
-            padding: 1.5rem;
-        }
-
-        .card-body {
-            padding: 1.5rem;
-        }
-
-        .card-actions {
-            padding: 1rem 1.5rem;
-            background: #f8f9fa;
-            display: flex;
-            gap: 0.5rem;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 10000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background: white;
-            padding: 2rem;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 500px;
-            max-height: 90vh;
-            overflow-y: auto;
-            position: relative;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
-        }
-
         .notification {
             position: fixed;
             top: 20px;
             right: 20px;
-            background: white;
-            padding: 1rem 1.5rem;
-            border-radius: 8px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
-            display: flex;
-            align-items: center;
-            gap: 1rem;
+            padding: 15px 20px;
+            border-radius: 5px;
             z-index: 10000;
-            border-left: 4px solid #28a745;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: white;
         }
-
-        .notification.error {
-            border-left-color: #dc3545;
+        .notification.success { background: #28a745; }
+        .notification.error { background: #dc3545; }
+        .notification.warning { background: #ffc107; color: #000; }
+        .notification.info { background: #007bff; }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .main-page-button {
+            position: fixed;
+            top: 100px;
+            right: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            z-index: 1000;
+            border-left: 4px solid #4CAF50;
         }
     </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <!-- Проверка авторизации -->
-    <script>
-        if (!localStorage.getItem('adminAuthenticated')) {
-            alert('Требуется авторизация!');
-            window.location.href = 'admin-login.html';
-        }
-    </script>
-
     <div class="admin-container">
-        <div class="admin-header">
-            <div>
-                <h1><i class="fas fa-globe-americas"></i> WorldTravel</h1>
-                <p>Полная админ-панель управления сайтом</p>
-            </div>
-            <button class="btn btn-logout" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Выйти
-            </button>
+        <header class="admin-header">
+            <h1><i class="fas fa-cog"></i> Панель администратора WorldTravel</h1>
+            <nav class="admin-nav">
+                <a href="index.html" class="btn-admin secondary" target="_blank"><i class="fas fa-eye"></i> Посмотреть сайт</a>
+                <button onclick="logout()" class="btn-admin danger"><i class="fas fa-sign-out-alt"></i> Выйти</button>
+            </nav>
+        </header>
+
+        <div class="admin-tabs">
+            <button class="tab-button active" data-tab="countries"><i class="fas fa-globe"></i> Страны</button>
+            <button class="tab-button" data-tab="tours"><i class="fas fa-map-marked-alt"></i> Туры</button>
+            <button class="tab-button" data-tab="contacts"><i class="fas fa-address-book"></i> Контакты</button>
+            <button class="tab-button" data-tab="settings"><i class="fas fa-cogs"></i> Настройки</button>
         </div>
 
-        <!-- Табы -->
-        <div class="tabs">
-            <button class="tab-btn active" onclick="showTab('countries')">🗺️ Страны</button>
-            <button class="tab-btn" onclick="showTab('content')">📝 Контент сайта</button>
-            <button class="tab-btn" onclick="showTab('design')">🎨 Дизайн и блоки</button>
-            <button class="tab-btn" onclick="showTab('settings')">⚙️ Настройки</button>
-        </div>
-
-        <!-- Вкладка Страны -->
-        <div id="countries" class="tab-content active">
-            <div class="content-section">
-                <div class="section-header">
-                    <h2>Управление странами</h2>
-                    <button class="btn btn-success" onclick="openCountryModal()">
-                        <i class="fas fa-plus"></i> Добавить страну
-                    </button>
-                </div>
-                
-                <div class="card-grid" id="countries-list">
-                    <!-- Страны будут загружены здесь -->
-                </div>
-            </div>
-        </div>
-
-        <!-- Вкладка Контент сайта -->
-        <div id="content" class="tab-content">
-            <div class="content-section">
-                <div class="section-header">
-                    <h2>Редактирование контента главной страницы</h2>
-                </div>
-                
-                <form onsubmit="saveContent(event)">
-                    <div class="form-group">
-                        <label>Заголовок главной страницы</label>
-                        <input type="text" id="hero-title" class="form-control" placeholder="Откройте мир с WorldTravel">
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Текст под заголовком</label>
-                        <textarea id="hero-text" class="form-control" rows="3" placeholder="Мы создаем незабываемые путешествия по всему миру..."></textarea>
-                    </div>
-
-                    <div class="form-row">
+        <div class="tab-content">
+            <!-- Вкладка стран -->
+            <div id="countries-tab" class="tab-pane active">
+                <div class="admin-section">
+                    <h3><i class="fas fa-plus-circle"></i> Добавить новую страну</h3>
+                    <form id="add-country-form" class="admin-form">
                         <div class="form-group">
-                            <label>Контактный телефон</label>
-                            <input type="text" id="contact-phone" class="form-control" placeholder="+7 (999) 123-45-67">
+                            <label for="country-name">Название страны *</label>
+                            <input type="text" id="country-name" name="name" required placeholder="Например: Франция">
                         </div>
                         <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" id="contact-email" class="form-control" placeholder="info@worldtravel.com">
+                            <label for="country-description">Описание страны *</label>
+                            <textarea id="country-description" name="description" rows="3" required placeholder="Краткое описание страны для туристов"></textarea>
                         </div>
-                    </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-plus"></i> Добавить страну</button>
+                    </form>
+                </div>
 
-                    <div class="form-group">
-                        <label>Адрес</label>
-                        <input type="text" id="contact-address" class="form-control" placeholder="Москва, ул. Туристическая, 15">
+                <div class="admin-section">
+                    <h3><i class="fas fa-list"></i> Управление странами</h3>
+                    <div class="table-container">
+                        <table id="countries-table" class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Описание</th>
+                                    <th>Кол-во туров</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Данные загружаются через JavaScript -->
+                            </tbody>
+                        </table>
                     </div>
-
-                    <div class="form-group">
-                        <label>Часы работы</label>
-                        <input type="text" id="contact-hours" class="form-control" placeholder="Пн-Пт: 9:00-18:00">
-                    </div>
-
-                    <button type="submit" class="btn btn-success">
-                        <i class="fas fa-save"></i> Сохранить изменения контента
-                    </button>
-                </form>
+                </div>
             </div>
-        </div>
 
-        <!-- Вкладка Дизайн и блоки -->
-        <div id="design" class="tab-content">
-            <div class="content-section">
-                <div class="section-header">
-                    <h2>Настройки дизайна</h2>
+            <!-- Вкладка туров -->
+            <div id="tours-tab" class="tab-pane">
+                <div class="admin-section">
+                    <h3><i class="fas fa-plus-circle"></i> Добавить новый тур</h3>
+                    <form id="add-tour-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="tour-country">Выберите страну *</label>
+                            <select id="tour-country" name="country" required>
+                                <option value="">-- Выберите страну --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tour-name">Название тура *</label>
+                            <input type="text" id="tour-name" name="name" required placeholder="Например: Романтический Париж">
+                        </div>
+                        <div class="form-group">
+                            <label for="tour-price">Цена ($) *</label>
+                            <input type="number" id="tour-price" name="price" min="0" required placeholder="500">
+                        </div>
+                        <div class="form-group">
+                            <label for="tour-duration">Длительность *</label>
+                            <input type="text" id="tour-duration" name="duration" required placeholder="7 дней">
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-plus"></i> Добавить тур</button>
+                    </form>
                 </div>
 
-                <div class="form-group">
-                    <label>Включение/выключение блоков сайта</label>
-                    <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
-                        <label style="display: flex; align-items: center; gap: 1rem;">
-                            <input type="checkbox" id="block-hero" checked> Блок "Герой" (шапка)
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 1rem;">
-                            <input type="checkbox" id="block-destinations" checked> Блок "Направления"
-                        </label>
-                        <label style="display: flex; align-items: center; gap: 1rem;">
-                            <input type="checkbox" id="block-contact" checked> Блок "Контакты"
-                        </label>
+                <div class="admin-section">
+                    <h3><i class="fas fa-list"></i> Все туры</h3>
+                    <div class="table-container">
+                        <table id="tours-table" class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Тур</th>
+                                    <th>Страна</th>
+                                    <th>Цена</th>
+                                    <th>Длительность</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Данные загружаются через JavaScript -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
-
-                <button class="btn btn-success" onclick="saveDesignSettings()">
-                    <i class="fas fa-save"></i> Сохранить настройки дизайна
-                </button>
             </div>
-        </div>
 
-        <!-- Вкладка Настройки -->
-        <div id="settings" class="tab-content">
-            <div class="content-section">
-                <div class="section-header">
-                    <h2>Настройки системы</h2>
+            <!-- Вкладка контактов -->
+            <div id="contacts-tab" class="tab-pane">
+                <div class="admin-section">
+                    <h3><i class="fas fa-address-card"></i> Контактная информация</h3>
+                    <p class="admin-hint">Изменения сохраняются автоматически и сразу отображаются на сайте</p>
+                    <form id="contact-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="contact-phone">Телефон *</label>
+                            <input type="text" id="contact-phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email *</label>
+                            <input type="email" id="contact-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-address">Адрес *</label>
+                            <input type="text" id="contact-address" name="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-hours">Часы работы *</label>
+                            <input type="text" id="contact-hours" name="hours" required placeholder="Пн-Пт: 9:00-18:00">
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-save"></i> Сохранить контакты</button>
+                    </form>
                 </div>
+            </div>
 
-                <div class="form-group">
-                    <label>Название компании</label>
-                    <input type="text" id="company-name" class="form-control" value="WorldTravel">
+            <!-- Вкладка настроек -->
+            <div id="settings-tab" class="tab-pane">
+                <div class="admin-section">
+                    <h3><i class="fas fa-wrench"></i> Настройки сайта</h3>
+                    <p class="admin-hint">Изменения сохраняются автоматически и сразу отображаются на сайте</p>
+                    <form id="settings-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="site-title">Заголовок сайта *</label>
+                            <input type="text" id="site-title" name="siteTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company-name">Название компании *</label>
+                            <input type="text" id="company-name" name="companyName" required>
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-save"></i> Сохранить настройки</button>
+                    </form>
                 </div>
-
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Основной цвет сайта</label>
-                        <input type="color" id="primary-color" class="form-control" value="#2c5aa0">
+                
+                <div class="admin-section">
+                    <h3><i class="fas fa-database"></i> Управление данными</h3>
+                    <div class="admin-actions">
+                        <button onclick="resetToDefault()" class="btn-admin warning">
+                            <i class="fas fa-undo"></i> Сбросить к стандартным данным
+                        </button>
+                        <button onclick="exportData()" class="btn-admin secondary">
+                            <i class="fas fa-download"></i> Экспорт данных
+                        </button>
+                        <button onclick="importData()" class="btn-admin secondary">
+                            <i class="fas fa-upload"></i> Импорт данных
+                        </button>
                     </div>
-                    <div class="form-group">
-                        <label>Вторичный цвет</label>
-                        <input type="color" id="secondary-color" class="form-control" value="#4a7bc8">
-                    </div>
                 </div>
-
-                <button class="btn btn-success" onclick="saveSystemSettings()">
-                    <i class="fas fa-save"></i> Сохранить настройки
-                </button>
             </div>
         </div>
     </div>
 
-    <!-- Кнопка домой -->
-    <button class="btn btn-home" onclick="openMainPage()" title="На главную">
-        <i class="fas fa-home"></i>
-    </button>
-
-    <!-- Country Modal -->
-    <div class="modal" id="countryModal">
-        <div class="modal-content">
-            <div class="section-header">
-                <h3 id="modalTitle">Добавить страну</h3>
-                <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">×</button>
-            </div>
-            <form onsubmit="saveCountry(event)">
-                <div class="form-group">
-                    <label>Название страны *</label>
-                    <input type="text" id="country-name" class="form-control" required>
-                </div>
-                <div class="form-group">
-                    <label>Описание *</label>
-                    <textarea id="country-description" class="form-control" rows="3" required></textarea>
-                </div>
-                <div class="form-group">
-                    <label>Цена от *</label>
-                    <input type="text" id="country-price" class="form-control" placeholder="от $500" required>
-                </div>
-                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                    <button type="button" class="btn" onclick="closeModal()">Отмена</button>
-                    <button type="submit" class="btn btn-success">Сохранить страну</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <script src="data-manager.js?v=2"></script>
+    <script src="data-manager.js?v=3"></script>
+    <script src="admin.js?v=3"></script>
     <script>
-    console.log('🚀 Загрузка полной админки...');
-
-    // Переменные
-    let currentEditingId = null;
-
-    // ==================== ТАБЫ ====================
-    function showTab(tabName) {
-        console.log('📑 Переключение на вкладку:', tabName);
-        
-        // Скрываем все вкладки
-        document.querySelectorAll('.tab-content').forEach(tab => {
-            tab.classList.remove('active');
-        });
-
-        // Убираем активность со всех кнопок
-        document.querySelectorAll('.tab-btn').forEach(btn => {
-            btn.classList.remove('active');
-        });
-
-        // Показываем выбранную вкладку
-        const activeTab = document.getElementById(tabName);
-        if (activeTab) {
-            activeTab.classList.add('active');
-        }
-
-        // Активируем кнопку
-        const activeButton = document.querySelector(`[onclick="showTab('${tabName}')"]`);
-        if (activeButton) {
-            activeButton.classList.add('active');
-        }
-    }
-
-    // ==================== МОДАЛЬНОЕ ОКНО ====================
-    function openCountryModal(countryId = null) {
-        console.log('📝 Открытие модального окна для страны:', countryId);
-        currentEditingId = countryId;
-        const modal = document.getElementById('countryModal');
-        
-        if (countryId) {
-            document.getElementById('modalTitle').textContent = 'Редактировать страну';
-            fillCountryForm(countryId);
-        } else {
-            document.getElementById('modalTitle').textContent = 'Добавить страну';
-            resetCountryForm();
-        }
-        
-        modal.classList.add('active');
-    }
-
-    function closeModal() {
-        document.getElementById('countryModal').classList.remove('active');
-        currentEditingId = null;
-    }
-
-    function fillCountryForm(countryId) {
-        const countries = window.dataManager.getCountries();
-        const country = countries.find(c => c.id === countryId);
-        if (country) {
-            document.getElementById('country-name').value = country.name || '';
-            document.getElementById('country-description').value = country.description || '';
-            document.getElementById('country-price').value = country.price || '';
-        }
-    }
-
-    function resetCountryForm() {
-        document.getElementById('country-name').value = '';
-        document.getElementById('country-description').value = '';
-        document.getElementById('country-price').value = '';
-    }
-
-    // ==================== СТРАНЫ ====================
-    function saveCountry(event) {
-        event.preventDefault();
-        
-        console.log('💾 Сохранение страны...');
-        
-        const name = document.getElementById('country-name').value;
-        const description = document.getElementById('country-description').value;
-        const price = document.getElementById('country-price').value;
-
-        if (!name || !description || !price) {
-            alert('❌ Заполните все обязательные поля!');
-            return;
-        }
-
-        const countryData = {
-            id: currentEditingId || 'country-' + Date.now(),
-            name: name,
-            description: description,
-            price: price,
-            image: "images/travel-placeholder.jpg"
-        };
-
-        console.log('📦 Данные страны:', countryData);
-
-        const countries = window.dataManager.getCountries();
-        
-        if (currentEditingId) {
-            const index = countries.findIndex(c => c.id === currentEditingId);
-            if (index !== -1) {
-                countries[index] = countryData;
-                console.log('✏️ Страна обновлена');
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти из админ-панели?')) {
+                window.location.href = 'index.html';
             }
-        } else {
-            countries.push(countryData);
-            console.log('➕ Новая страна добавлена');
         }
-
-        const success = window.dataManager.updateCountries(countries);
         
-        if (success) {
-            alert(`✅ Страна "${name}" ${currentEditingId ? 'обновлена' : 'добавлена'}!`);
-            closeModal();
-            loadCountries();
-            syncWithMainPage();
-        } else {
-            alert('❌ Ошибка сохранения страны!');
+        function resetToDefault() {
+            if (confirm('ВНИМАНИЕ! Это действие удалит все текущие данные и восстановит стандартные настройки. Продолжить?')) {
+                if (window.dataManager) {
+                    window.dataManager.setDefaultData();
+                    showNotification('Данные сброшены к стандартным!', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }
         }
-    }
-
-    function loadCountries() {
-        const container = document.getElementById('countries-list');
-        const countries = window.dataManager.getCountries();
-
-        console.log('�� Загружено стран:', countries.length);
-
-        if (countries.length === 0) {
-            container.innerHTML = `
-                <div style="text-align: center; padding: 40px; color: #666; grid-column: 1 / -1;">
-                    <div style="font-size: 48px; margin-bottom: 20px;">🌍</div>
-                    <h3>Стран пока нет</h3>
-                    <p>Добавьте первую страну</p>
-                </div>
+        
+        function exportData() {
+            if (window.dataManager) {
+                const data = window.dataManager.getData();
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const url = URL.createObjectURL(dataBlob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'worldtravel-backup.json';
+                link.click();
+                URL.revokeObjectURL(url);
+                showNotification('Данные экспортированы!', 'success');
+            }
+        }
+        
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (window.dataManager) {
+                            localStorage.setItem('worldtravel_data', JSON.stringify(data));
+                            showNotification('Данные успешно импортированы!', 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                    } catch (error) {
+                        showNotification('Ошибка: неверный формат файла', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
             `;
-            return;
-        }
-
-        container.innerHTML = countries.map(country => `
-            <div class="card">
-                <div class="card-header">
-                    <h4 style="margin: 0; color: white;">${country.name}</h4>
-                </div>
-                <div class="card-body">
-                    <p style="color: #666; margin-bottom: 1rem;">${country.description}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #2c5aa0;">${country.price}</strong>
-                    </div>
-                </div>
-                <div class="card-actions">
-                    <button class="btn" onclick="openCountryModal('${country.id}')">
-                        <i class="fas fa-edit"></i> Редактировать
-                    </button>
-                    <button class="btn btn-danger" onclick="deleteCountry('${country.id}')">
-                        <i class="fas fa-trash"></i> Удалить
-                    </button>
-                </div>
-            </div>
-        `).join('');
-    }
-
-    function deleteCountry(countryId) {
-        if (!confirm('❌ Удалить эту страну?')) return;
-        
-        const countries = window.dataManager.getCountries().filter(c => c.id !== countryId);
-        const success = window.dataManager.updateCountries(countries);
-        
-        if (success) {
-            loadCountries();
-            alert('✅ Страна удалена!');
-            syncWithMainPage();
-        } else {
-            alert('❌ Ошибка удаления страны!');
-        }
-    }
-
-    // ==================== КОНТЕНТ ====================
-    function loadContent() {
-        const content = window.dataManager.getContent();
-        document.getElementById('hero-title').value = content.heroTitle || '';
-        document.getElementById('hero-text').value = content.heroText || '';
-        document.getElementById('contact-phone').value = content.contactPhone || '';
-        document.getElementById('contact-email').value = content.contactEmail || '';
-        document.getElementById('contact-address').value = content.contactAddress || '';
-        document.getElementById('contact-hours').value = content.contactHours || '';
-    }
-
-    function saveContent(event) {
-        event.preventDefault();
-        
-        const content = {
-            heroTitle: document.getElementById('hero-title').value,
-            heroText: document.getElementById('hero-text').value,
-            contactPhone: document.getElementById('contact-phone').value,
-            contactEmail: document.getElementById('contact-email').value,
-            contactAddress: document.getElementById('contact-address').value,
-            contactHours: document.getElementById('contact-hours').value
-        };
-
-        const success = window.dataManager.updateContent(content);
-        
-        if (success) {
-            alert('✅ Контент сохранен!');
-            syncWithMainPage();
-        } else {
-            alert('❌ Ошибка сохранения контента!');
-        }
-    }
-
-    // ==================== ДИЗАЙН ====================
-    function loadDesignSettings() {
-        const design = window.dataManager.getDesign();
-        document.getElementById('block-hero').checked = design.blocks?.hero !== false;
-        document.getElementById('block-destinations').checked = design.blocks?.destinations !== false;
-        document.getElementById('block-contact').checked = design.blocks?.contact !== false;
-    }
-
-    function saveDesignSettings() {
-        const design = {
-            blocks: {
-                hero: document.getElementById('block-hero').checked,
-                destinations: document.getElementById('block-destinations').checked,
-                contact: document.getElementById('block-contact').checked
-            }
-        };
-
-        const success = window.dataManager.updateDesign(design);
-        
-        if (success) {
-            alert('✅ Настройки дизайна сохранены!');
-            syncWithMainPage();
-        } else {
-            alert('❌ Ошибка сохранения настроек дизайна!');
-        }
-    }
-
-    // ==================== НАСТРОЙКИ ====================
-    function loadSystemSettings() {
-        const settings = window.dataManager.getSettings();
-        document.getElementById('company-name').value = settings.companyName || 'WorldTravel';
-        document.getElementById('primary-color').value = settings.primaryColor || '#2c5aa0';
-        document.getElementById('secondary-color').value = settings.secondaryColor || '#4a7bc8';
-    }
-
-    function saveSystemSettings() {
-        const settings = {
-            companyName: document.getElementById('company-name').value,
-            primaryColor: document.getElementById('primary-color').value,
-            secondaryColor: document.getElementById('secondary-color').value
-        };
-
-        const success = window.dataManager.updateSettings(settings);
-        
-        if (success) {
-            alert('✅ Системные настройки сохранены!');
-            syncWithMainPage();
-        } else {
-            alert('❌ Ошибка сохранения настроек!');
-        }
-    }
-
-    // ==================== СИНХРОНИЗАЦИЯ ====================
-    function syncWithMainPage() {
-        console.log('🔄 Синхронизация с главной страницей...');
-        
-        // Создаем полные данные для синхронизации
-        const allData = {
-            countries: window.dataManager.getCountries(),
-            content: window.dataManager.getContent(),
-            design: window.dataManager.getDesign(),
-            settings: window.dataManager.getSettings(),
-            lastUpdate: new Date().toISOString()
-        };
-        
-        // Сохраняем в localStorage для главной страницы
-        localStorage.setItem('worldtravel_current_data', JSON.stringify(allData));
-        
-        console.log('✅ Данные синхронизированы:', allData);
-        
-        // Показываем сообщение об успехе
-        setTimeout(() => {
-            alert('📄 Данные сохранены! Главная страница откроется для проверки...');
-            openMainPage();
-        }, 500);
-    }
-
-    function openMainPage() {
-        const mainUrl = window.location.href.replace('admin.html', 'index.html') + '?refresh=' + Date.now();
-        window.open(mainUrl, '_blank');
-        console.log('�� Открыта главная страница:', mainUrl);
-    }
-
-    function logout() {
-        if (confirm('Выйти из админ-панели?')) {
-            localStorage.removeItem('adminAuthenticated');
-            window.location.href = 'admin-login.html';
-        }
-    }
-
-    // ==================== ИНИЦИАЛИЗАЦИЯ ====================
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('📄 DOM загружен, инициализация админки...');
-        
-        // Проверяем dataManager
-        if (typeof window.dataManager === 'undefined') {
-            console.error('❌ dataManager не загружен!');
-            alert('Ошибка: dataManager не загружен');
-            return;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
         }
         
-        console.log('✅ dataManager доступен');
-
-        // Загружаем все данные
-        loadCountries();
-        loadContent();
-        loadDesignSettings();
-        loadSystemSettings();
-        
-        console.log('✅ Админка полностью готова к работе');
-    });
+        // Инициализация вкладок
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Убираем активный класс у всех кнопок и вкладок
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    
+                    // Добавляем активный класс текущей кнопке и вкладке
+                    this.classList.add('active');
+                    document.getElementById(`${tabName}-tab`).classList.add('active');
+                });
+            });
+        });
     </script>
 </body>
 </html>
