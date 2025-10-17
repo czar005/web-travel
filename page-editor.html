@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Визуальный редактор - WorldTravel</title>
+    <title>Редактор страниц - WorldTravel</title>
     <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
@@ -314,6 +314,8 @@
             z-index: 1001;
             display: none;
             box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            width: 500px;
+            max-width: 90vw;
         }
 
         .editor-header-inner {
@@ -337,6 +339,23 @@
             gap: 10px;
             justify-content: flex-end;
         }
+
+        .nav-back {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 0.9rem;
+        }
+
+        .nav-back:hover {
+            background: #545b62;
+        }
     </style>
 </head>
 <body>
@@ -344,7 +363,12 @@
         <!-- Основная область предпросмотра -->
         <div class="editor-preview">
             <div class="editor-header">
-                <h2>Визуальный редактор страницы</h2>
+                <div>
+                    <button class="nav-back" onclick="goBackToAdmin()">
+                        <i class="fas fa-arrow-left"></i> Назад в админку
+                    </button>
+                    <h2 style="margin-top: 10px;">Визуальный редактор страницы</h2>
+                </div>
                 <div class="editor-actions">
                     <button class="btn-admin secondary" onclick="previewChanges()">
                         <i class="fas fa-eye"></i> Предпросмотр
@@ -471,13 +495,13 @@
         </div>
     </div>
 
-    <script src="data-manager.js"></script>
     <script>
         class VisualEditor {
             constructor() {
                 this.blocks = [];
                 this.selectedBlock = null;
                 this.currentInsertPosition = 'start';
+                this.currentBlockType = null;
                 this.init();
             }
 
@@ -488,8 +512,14 @@
             }
 
             loadBlocks() {
-                const saved = localStorage.getItem('page-blocks');
-                this.blocks = saved ? JSON.parse(saved) : this.getDefaultBlocks();
+                // Загружаем из data-manager.js или localStorage
+                if (typeof dataManager !== 'undefined' && dataManager.getData().pages) {
+                    const pageData = dataManager.getData().pages.home;
+                    this.blocks = pageData.blocks || this.getDefaultBlocks();
+                } else {
+                    const saved = localStorage.getItem('page-blocks');
+                    this.blocks = saved ? JSON.parse(saved) : this.getDefaultBlocks();
+                }
             }
 
             getDefaultBlocks() {
@@ -847,7 +877,15 @@
             }
 
             saveToStorage() {
-                localStorage.setItem('page-blocks', JSON.stringify(this.blocks));
+                // Сохраняем в data-manager если доступен, иначе в localStorage
+                if (typeof dataManager !== 'undefined') {
+                    const data = dataManager.getData();
+                    if (!data.pages) data.pages = {};
+                    data.pages.home = { blocks: this.blocks };
+                    dataManager.saveData(data);
+                } else {
+                    localStorage.setItem('page-blocks', JSON.stringify(this.blocks));
+                }
             }
 
             previewChanges() {
@@ -856,12 +894,12 @@
 
             saveChanges() {
                 this.saveToStorage();
-                alert('Изменения сохранены!');
+                alert('Изменения сохранены в системе!');
             }
 
             exitEditor() {
-                if (confirm('Выйти из редактора? Несохраненные изменения будут потеряны.')) {
-                    window.history.back();
+                if (confirm('Выйти из редактора?')) {
+                    window.location.href = 'admin.html';
                 }
             }
         }
@@ -876,6 +914,7 @@
         function previewChanges() { visualEditor.previewChanges(); }
         function saveChanges() { visualEditor.saveChanges(); }
         function exitEditor() { visualEditor.exitEditor(); }
+        function goBackToAdmin() { window.location.href = 'admin.html'; }
     </script>
 </body>
 </html>
