@@ -1,20 +1,17 @@
-// Data Manager for WorldTravel - RELIABLE VERSION
+// Data Manager for WorldTravel - ULTRA RELIABLE VERSION
 console.log('🔄 Загрузка data-manager...');
 
 window.dataManager = {
     // Основная функция получения данных
     getData: function() {
         try {
-            // Пробуем получить из localStorage
+            // Пробуем получить из worldtravel_data
             const saved = localStorage.getItem('worldtravel_data');
             if (saved) {
-                const data = JSON.parse(saved);
-                console.log('📁 Данные загружены из localStorage');
-                return data;
+                return JSON.parse(saved);
             }
             
-            // Если нет в localStorage, создаем новые
-            console.log('🆕 Создание новых данных');
+            // Если нет, создаем новые данные
             return this.getDefaultData();
             
         } catch (error) {
@@ -27,7 +24,7 @@ window.dataManager = {
     saveToLocalStorage: function(data) {
         try {
             localStorage.setItem('worldtravel_data', JSON.stringify(data));
-            console.log('💾 Данные сохранены в localStorage:', data);
+            console.log('💾 Данные сохранены в worldtravel_data');
             return true;
         } catch (error) {
             console.error('❌ Ошибка сохранения:', error);
@@ -74,15 +71,7 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.countries = countries;
-            const success = this.saveToLocalStorage(data);
-            
-            // Дублируем в worldtravel_current_data для главной страницы
-            if (success) {
-                localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
-                console.log('✅ Страны сохранены и синхронизированы');
-            }
-            
-            return success;
+            return this.saveToLocalStorage(data);
         } catch (error) {
             console.error('❌ Ошибка сохранения стран:', error);
             return false;
@@ -100,15 +89,7 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.content = { ...data.content, ...content };
-            const success = this.saveToLocalStorage(data);
-            
-            // Дублируем в worldtravel_current_data для главной страницы
-            if (success) {
-                localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
-                console.log('✅ Контент сохранен и синхронизирован');
-            }
-            
-            return success;
+            return this.saveToLocalStorage(data);
         } catch (error) {
             console.error('❌ Ошибка сохранения контента:', error);
             return false;
@@ -126,15 +107,7 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.design = { ...data.design, ...design };
-            const success = this.saveToLocalStorage(data);
-            
-            // Дублируем в worldtravel_current_data для главной страницы
-            if (success) {
-                localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
-                console.log('✅ Дизайн сохранен и синхронизирован');
-            }
-            
-            return success;
+            return this.saveToLocalStorage(data);
         } catch (error) {
             console.error('❌ Ошибка сохранения дизайна:', error);
             return false;
@@ -152,15 +125,7 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.settings = { ...data.settings, ...settings };
-            const success = this.saveToLocalStorage(data);
-            
-            // Дублируем в worldtravel_current_data для главной страницы
-            if (success) {
-                localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
-                console.log('✅ Настройки сохранены и синхронизированы');
-            }
-            
-            return success;
+            return this.saveToLocalStorage(data);
         } catch (error) {
             console.error('❌ Ошибка сохранения настроек:', error);
             return false;
