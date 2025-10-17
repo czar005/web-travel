@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldTravel - Полная админ-панель</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fb;
+            color: #333;
+        }
+
+        .admin-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .admin-header {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: #f8f9fa;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .tab-btn.active {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #f1f3f4;
+        }
+
+        .btn {
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: #1e3d72;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-logout {
+            background: #dc3545;
+        }
+
+        .btn-home {
+            background: #17a2b8;
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 1000;
+            padding: 15px;
+            border-radius: 50%;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e1e5ee;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+            border: 1px solid #e1e5ee;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, #2c5aa0, #4a7bc8);
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-actions {
+            padding: 1rem 1.5rem;
+            background: #f8f9fa;
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .image-upload {
+            border: 2px dashed #e1e5ee;
+            border-radius: 8px;
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: border-color 0.3s ease;
+        }
+
+        .image-upload:hover {
+            border-color: #2c5aa0;
+        }
+
+        .image-preview {
+            max-width: 200px;
+            max-height: 150px;
+            margin-top: 1rem;
+            border-radius: 8px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10000;
+            border-left: 4px solid #28a745;
+        }
+
+        .notification.error {
+            border-left-color: #dc3545;
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 10000;
+}
+
+.modal.active {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.modal-backdrop {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+}
+
+.modal-content {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 500px;
+    max-height: 90vh;
+    overflow-y: auto;
+    position: relative;
+    z-index: 10001;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+}
+
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <!-- Проверка сессии -->
+    <script>
+        (function checkSession() {
+            console.log('🔐 Проверка административной сессии...');
+            const session = localStorage.getItem('adminSession');
+            
+            if (!session) {
+                console.log('❌ Сессия не найдена. Перенаправление на страницу входа.');
+                alert('Требуется авторизация!');
+                window.location.href = 'admin-login.html';
+                return;
+            }
+            
+            try {
+                const sessionData = JSON.parse(session);
+                console.log('✅ Действующая сессия:', sessionData);
+            } catch (error) {
+                console.error('❌ Ошибка проверки сессии:', error);
+                localStorage.removeItem('adminSession');
+                alert('Ошибка сессии! Пожалуйста, войдите снова.');
+                window.location.href = 'admin-login.html';
+            }
+        })();
+    </script>
+
+    <div class="admin-container">
+        <div class="admin-header">
+            <div>
+                <h1><i class="fas fa-globe-americas"></i> WorldTravel</h1>
+                <p>Полная админ-панель управления сайтом</p>
+            </div>
+            <button class="btn btn-logout" onclick="adminLogout()">
+                <i class="fas fa-sign-out-alt"></i> Выйти
+            </button>
+        </div>
+
+        <!-- Табы -->
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="countries">Страны</button>
+            <button class="tab-btn" data-tab="content">Контент сайта</button>
+            <button class="tab-btn" data-tab="design">Дизайн и блоки</button>
+            <button class="tab-btn" data-tab="settings">Настройки</button>
+        </div>
+
+        <!-- Вкладка Страны -->
+        <div id="countries" class="tab-content active">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Управление странами</h2>
+                    <button class="btn btn-success" onclick="openCountryModal()">
+                        <i class="fas fa-plus"></i> Добавить страну
+                    </button>
+                </div>
+                
+                <div class="card-grid" id="countries-list">
+                    <!-- Страны будут загружены здесь -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Вкладка Контент сайта -->
+        <div id="content" class="tab-content">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Редактирование контента главной страницы</h2>
+                </div>
+                
+                <form id="contentForm">
+                    <div class="form-group">
+                        <label>Заголовок главной страницы</label>
+                        <input type="text" id="hero-title" class="form-control" placeholder="Откройте мир с WorldTravel">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>Текст под заголовком</label>
+                        <textarea id="hero-text" class="form-control" rows="3" placeholder="Мы создаем незабываемые путешествия по всему миру..."></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Контактный телефон</label>
+                            <input type="text" id="contact-phone" class="form-control" placeholder="+7 (999) 123-45-67">
+                        </div>
+                        <div class="form-group">
+                            <label>Email</label>
+                            <input type="email" id="contact-email" class="form-control" placeholder="info@worldtravel.com">
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Адрес</label>
+                        <input type="text" id="contact-address" class="form-control" placeholder="Москва, ул. Туристическая, 15">
+                    </div>
+
+                    <div class="form-group">
+                        <label>Часы работы</label>
+                        <input type="text" id="contact-hours" class="form-control" placeholder="Пн-Пт: 9:00-18:00">
+                    </div>
+
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-save"></i> Сохранить изменения контента
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Вкладка Дизайн и блоки -->
+        <div id="design" class="tab-content">
+    <div class="content-section">
+        <div class="section-header">
+            <h2>Визуальный редактор страниц</h2>
+            <button class="btn btn-success" onclick="openPageEditor('index.html')">
+                <i class="fas fa-edit"></i> Открыть редактор главной страницы
+            </button>
+        </div>
+
+        <div class="form-group">
+            <label>Редактировать страницы:</label>
+            <div style="display: flex; gap: 1rem; flex-wrap: wrap; margin-top: 1rem;">
+                <button class="btn" onclick="openPageEditor('index.html')">
+                    <i class="fas fa-home"></i> Главная страница
+                </button>
+                <button class="btn" onclick="openPageEditor('about.html')" style="background: #17a2b8;">
+                    <i class="fas fa-info-circle"></i> Страница "О нас"
+                </button>
+                <button class="btn" onclick="openPageEditor('services.html')" style="background: #6f42c1;">
+                    <i class="fas fa-concierge-bell"></i> Страница "Услуги"
+                </button>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Логотип сайта</label>
+            <div class="image-upload" onclick="document.getElementById('logo-upload').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #666; margin-bottom: 1rem;"></i>
+                <p>Нажмите для загрузки логотипа</p>
+                <img id="logo-preview" class="image-preview" style="display: none;">
+                <input type="file" id="logo-upload" accept="image/*" style="display: none;" onchange="previewLogo(event)">
+                <div id="logo-actions" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Фон шапки сайта</label>
+            <div class="image-upload" onclick="document.getElementById('header-upload').click()">
+                <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: #666; margin-bottom: 1rem;"></i>
+                <p>Нажмите для загрузки фона шапки</p>
+                <img id="header-preview" class="image-preview" style="display: none;">
+                <input type="file" id="header-upload" accept="image/*" style="display: none;" onchange="previewHeader(event)">
+                <div id="header-actions" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <label>Включение/выключение блоков сайта</label>
+            <div style="display: flex; flex-direction: column; gap: 1rem; margin-top: 1rem;">
+                <label style="display: flex; align-items: center; gap: 1rem;">
+                    <input type="checkbox" id="block-hero" checked> Блок "Герой" (шапка)
+                </label>
+                <label style="display: flex; align-items: center; gap: 1rem;">
+                    <input type="checkbox" id="block-about" checked> Блок "О нас"
+                </label>
+                <label style="display: flex; align-items: center; gap: 1rem;">
+                    <input type="checkbox" id="block-services" checked> Блок "Услуги"
+                </label>
+                <label style="display: flex; align-items: center; gap: 1rem;">
+                    <input type="checkbox" id="block-destinations" checked> Блок "Направления"
+                </label>
+                <label style="display: flex; align-items: center; gap: 1rem;">
+                    <input type="checkbox" id="block-contact" checked> Блок "Контакты"
+                </label>
+            </div>
+        </div>
+
+        <button class="btn btn-success" onclick="saveDesignSettings()">
+            <i class="fas fa-save"></i> Сохранить настройки дизайна
+        </button>
+    </div>
+</div>
+
+        <!-- Вкладка Настройки -->
+        <div id="settings" class="tab-content">
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Настройки системы</h2>
+                </div>
+
+                <div class="form-group">
+                    <label>Название компании</label>
+                    <input type="text" id="company-name" class="form-control" value="WorldTravel">
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Основной цвет сайта</label>
+                        <input type="color" id="primary-color" class="form-control" value="#2c5aa0">
+                    </div>
+                    <div class="form-group">
+                        <label>Вторичный цвет</label>
+                        <input type="color" id="secondary-color" class="form-control" value="#4a7bc8">
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Язык сайта</label>
+                    <select id="site-language" class="form-control">
+                        <option value="ru">Русский</option>
+                        <option value="en">English</option>
+                    </select>
+                </div>
+
+                <button class="btn btn-success" onclick="saveSystemSettings()">
+                    <i class="fas fa-save"></i> Сохранить настройки
+                </button>
+            </div>
+
+            <div class="content-section">
+                <div class="section-header">
+                    <h2>Управление данными</h2>
+                </div>
+
+                <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                    <button class="btn" onclick="exportData()">
+                        <i class="fas fa-download"></i> Экспорт данных
+                    </button>
+                    <button class="btn btn-danger" onclick="clearAllData()">
+                        <i class="fas fa-trash"></i> Очистить все данные
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Кнопка домой -->
+    <button class="btn btn-home" onclick="window.open('/', '_blank')" title="На главную">
+        <i class="fas fa-home"></i>
+    </button>
+
+    <!-- Elementor-like Editor -->
+    <div class="elementor-editor" id="elementorEditor">
+        <div class="elementor-sidebar">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 style="color: white; margin: 0;">Редактор страницы</h3>
+                <button onclick="closeElementorEditor()" style="background: none; border: none; color: white; font-size: 1.2rem; cursor: pointer;">×</button>
+            </div>
+            
+            <div class="elementor-controls">
+                <h4 style="color: white; margin-bottom: 15px;">Добавить блок</h4>
+                <div class="elementor-widget" draggable="true" data-type="hero">
+                    <i class="fas fa-star"></i> Блок Героя
+                </div>
+                <div class="elementor-widget" draggable="true" data-type="text">
+                    <i class="fas fa-text-width"></i> Текстовый блок
+                </div>
+                <div class="elementor-widget" draggable="true" data-type="image">
+                    <i class="fas fa-image"></i> Блок с изображением
+                </div>
+                <div class="elementor-widget" draggable="true" data-type="services">
+                    <i class="fas fa-concierge-bell"></i> Блок услуг
+                </div>
+                <div class="elementor-widget" draggable="true" data-type="countries">
+                    <i class="fas fa-globe"></i> Блок стран
+                </div>
+                <div class="elementor-widget" draggable="true" data-type="contact">
+                    <i class="fas fa-envelope"></i> Контактный блок
+                </div>
+            </div>
+
+            <div class="elementor-controls" id="widgetSettings" style="display: none;">
+                <h4 style="color: white; margin-bottom: 15px;">Настройки блока</h4>
+                <div id="widgetSettingsContent">
+                    <!-- Настройки будут загружаться здесь -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="elementor-preview" id="elementorPreview">
+            <div style="background: white; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+                <h3>Предпросмотр страницы</h3>
+                <p>Перетащите блоки из левой панели для создания страницы</p>
+            </div>
+            <div id="pageBuilder">
+                <!-- Здесь будут создаваться блоки -->
+            </div>
+            <div class="elementor-add-section" onclick="addNewSection()">
+                <i class="fas fa-plus" style="font-size: 2rem; margin-bottom: 10px;"></i>
+                <p>Добавить секцию</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Country Modal -->
+
+<div class="modal" id="countryModal">
+    <div class="modal-backdrop" onclick="closeModal()"></div>
+    <div class="modal-content">
+        <div class="section-header">
+            <h3 id="modalTitle">Добавить страну</h3>
+            <button onclick="closeModal()" style="background: none; border: none; font-size: 1.5rem; cursor: pointer; color: #666;">×</button>
+        </div>
+        <form id="countryForm">
+            <div class="form-group">
+                <label>Название страны *</label>
+                <input type="text" id="country-name" class="form-control" required>
+            </div>
+            <div class="form-group">
+                <label>Описание *</label>
+                <textarea id="country-description" class="form-control" rows="3" required></textarea>
+            </div>
+            <div class="form-group">
+                <label>Цена от *</label>
+                <input type="text" id="country-price" class="form-control" placeholder="от $500" required>
+            </div>
+            <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                <button type="button" class="btn" onclick="closeModal()">Отмена</button>
+                <button type="submit" class="btn btn-success">Сохранить страну</button>
+            </div>
+        </form>
+    </div>
+</div>
+   <script src="data-manager.js"></script>
+<script>
+    class FullAdmin {
+        constructor() {
+            this.dataManager = window.dataManager;
+            this.currentEditingId = null;
+            this.init();
+        }
+
+        init() {
+            console.log('🚀 Админка инициализируется...');
+            this.setupEventListeners();
+            this.renderCountries();
+            this.loadContent();
+            this.loadDesignSettings();
+            this.loadSystemSettings();
+            console.log('✅ Админка загружена');
+        }
+
+        setupEventListeners() {
+            // Форма страны
+            document.getElementById('countryForm').onsubmit = (e) => {
+                e.preventDefault();
+                this.saveCountry();
+            };
+
+            // Форма контента
+            document.getElementById('contentForm').onsubmit = (e) => {
+                e.preventDefault();
+                this.saveContent();
+            };
+
+            // Табы
+            document.querySelectorAll('.tab-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const tabName = btn.getAttribute('data-tab');
+                    this.showTab(tabName);
+                });
+            });
+        }
+
+        showTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+
+            document.getElementById(tabName).classList.add('active');
+            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        }
+
+        renderCountries() {
+            const container = document.getElementById('countries-list');
+            const countries = this.dataManager.getCountries();
+
+            if (countries.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 3rem; color: #666; grid-column: 1 / -1;">
+                        <i class="fas fa-globe-americas" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                        <h3>Стран пока нет</h3>
+                        <p>Добавьте первую страну</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = countries.map(country => `
+                <div class="card">
+                    <div class="card-header">
+                        <h4 style="margin: 0; color: white;">${country.name}</h4>
+                    </div>
+                    <div class="card-body">
+                        <p style="color: #666; margin-bottom: 1rem;">${country.description || ''}</p>
+                        <div style="display: flex; justify-content: space-between; align-items: center;">
+                            <strong style="color: #2c5aa0;">${country.price}</strong>
+                        </div>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn" onclick="admin.editCountry('${country.id}')">
+                            <i class="fas fa-edit"></i> Редактировать
+                        </button>
+                        <button class="btn btn-danger" onclick="admin.deleteCountry('${country.id}')">
+                            <i class="fas fa-trash"></i> Удалить
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        loadContent() {
+            const content = this.dataManager.getContent();
+            document.getElementById('hero-title').value = content.heroTitle || '';
+            document.getElementById('hero-text').value = content.heroText || '';
+            document.getElementById('contact-phone').value = content.contactPhone || '';
+            document.getElementById('contact-email').value = content.contactEmail || '';
+            document.getElementById('contact-address').value = content.contactAddress || '';
+            document.getElementById('contact-hours').value = content.contactHours || '';
+        }
+
+        loadDesignSettings() {
+            const design = this.dataManager.getDesign();
+            document.getElementById('block-hero').checked = design.blocks?.hero !== false;
+            document.getElementById('block-about').checked = design.blocks?.about !== false;
+            document.getElementById('block-services').checked = design.blocks?.services !== false;
+            document.getElementById('block-destinations').checked = design.blocks?.destinations !== false;
+            document.getElementById('block-contact').checked = design.blocks?.contact !== false;
+            this.updateImagePreviews();
+        }
+
+        updateImagePreviews() {
+            const design = this.dataManager.getDesign();
+            
+            if (design.logo) {
+                document.getElementById('logo-preview').src = design.logo;
+                document.getElementById('logo-preview').style.display = 'block';
+                document.getElementById('logo-actions').innerHTML = `
+                    <button class="btn btn-danger" onclick="admin.removeLogo()">
+                        <i class="fas fa-trash"></i> Удалить логотип
+                    </button>
+                `;
+            }
+            
+            if (design.headerBackground) {
+                document.getElementById('header-preview').src = design.headerBackground;
+                document.getElementById('header-preview').style.display = 'block';
+                document.getElementById('header-actions').innerHTML = `
+                    <button class="btn btn-danger" onclick="admin.removeHeaderBackground()">
+                        <i class="fas fa-trash"></i> Удалить фон
+                    </button>
+                `;
+            }
+        }
+
+        loadSystemSettings() {
+            const settings = this.dataManager.getSettings();
+            document.getElementById('company-name').value = settings.companyName || 'WorldTravel';
+            document.getElementById('primary-color').value = settings.primaryColor || '#2c5aa0';
+            document.getElementById('secondary-color').value = settings.secondaryColor || '#4a7bc8';
+            document.getElementById('site-language').value = settings.language || 'ru';
+        }
+
+        saveContent() {
+            const content = {
+                heroTitle: document.getElementById('hero-title').value,
+                heroText: document.getElementById('hero-text').value,
+                contactPhone: document.getElementById('contact-phone').value,
+                contactEmail: document.getElementById('contact-email').value,
+                contactAddress: document.getElementById('contact-address').value,
+                contactHours: document.getElementById('contact-hours').value
+            };
+
+            if (this.dataManager.updateContent(content)) {
+                this.showNotification('✅ Контент сохранен! Главная страница обновится автоматически.');
+                setTimeout(() => window.open('/', '_blank'), 1000);
+            } else {
+                this.showNotification('❌ Ошибка сохранения контента', 'error');
+            }
+        }
+
+        saveDesignSettings() {
+            const design = {
+                blocks: {
+                    hero: document.getElementById('block-hero').checked,
+                    about: document.getElementById('block-about').checked,
+                    services: document.getElementById('block-services').checked,
+                    destinations: document.getElementById('block-destinations').checked,
+                    contact: document.getElementById('block-contact').checked
+                }
+            };
+
+            if (this.dataManager.updateDesign(design)) {
+                this.showNotification('✅ Настройки дизайна сохранены! Главная страница обновится автоматически.');
+                setTimeout(() => window.open('/', '_blank'), 1000);
+            } else {
+                this.showNotification('❌ Ошибка сохранения настроек дизайна', 'error');
+            }
+        }
+
+        saveSystemSettings() {
+            const settings = {
+                companyName: document.getElementById('company-name').value,
+                primaryColor: document.getElementById('primary-color').value,
+                secondaryColor: document.getElementById('secondary-color').value,
+                language: document.getElementById('site-language').value
+            };
+
+            if (this.dataManager.updateSettings(settings)) {
+                this.showNotification('✅ Системные настройки сохранены!');
+            } else {
+                this.showNotification('❌ Ошибка сохранения настроек', 'error');
+            }
+        }
+
+        // Методы для стран
+        openCountryModal(countryId = null) {
+            this.currentEditingId = countryId;
+            const modal = document.getElementById('countryModal');
+            const title = document.getElementById('modalTitle');
+
+            if (countryId) {
+                title.textContent = 'Редактировать страну';
+                this.fillCountryForm(countryId);
+            } else {
+                title.textContent = 'Добавить страну';
+                this.resetCountryForm();
+            }
+            modal.classList.add('active');
+    document.body.style.overflow = 'hidden'; 
+            
+        }
+closeModal() {
+    const modal = document.getElementById('countryModal');
+    if (modal) {
+        modal.classList.remove('active');
+        document.body.style.overflow = ''; // Разблокируем скролл
+    }
+    this.currentEditingId = null;
+}
+
+        fillCountryForm(countryId) {
+            const countries = this.dataManager.getCountries();
+            const country = countries.find(c => c.id === countryId);
+            if (country) {
+                document.getElementById('country-name').value = country.name;
+                document.getElementById('country-description').value = country.description || '';
+                document.getElementById('country-price').value = country.price || '';
+            }
+        }
+
+        resetCountryForm() {
+            document.getElementById('countryForm').reset();
+        }
+
+        saveCountry() {
+            const name = document.getElementById('country-name').value;
+            const description = document.getElementById('country-description').value;
+            const price = document.getElementById('country-price').value;
+
+            if (!name || !description || !price) {
+                this.showNotification('Заполните все поля', 'error');
+                return;
+            }
+
+            const countryData = {
+                id: this.currentEditingId || this.generateId(name),
+                name: name,
+                description: description,
+                price: price,
+                shortDescription: description.substring(0, 100) + '...'
+            };
+
+            const countries = this.dataManager.getCountries();
+            
+            if (this.currentEditingId) {
+                const index = countries.findIndex(c => c.id === this.currentEditingId);
+                if (index !== -1) {
+                    countries[index] = { ...countries[index], ...countryData };
+                }
+                this.showNotification('✅ Страна обновлена!');
+            } else {
+                countries.push(countryData);
+                this.showNotification('✅ Страна добавлена!');
+            }
+
+            if (this.dataManager.updateCountries(countries)) {
+                this.closeModal();
+                this.renderCountries();
+                setTimeout(() => window.open('/', '_blank'), 1000);
+            } else {
+                this.showNotification('❌ Ошибка сохранения страны', 'error');
+            }
+        }
+
+        editCountry(countryId) {
+            this.openCountryModal(countryId);
+        }
+
+        deleteCountry(countryId) {
+            if (confirm('Удалить страну?')) {
+                const countries = this.dataManager.getCountries().filter(c => c.id !== countryId);
+                if (this.dataManager.updateCountries(countries)) {
+                    this.renderCountries();
+                    this.showNotification('✅ Страна удалена!');
+                    setTimeout(() => window.open('/', '_blank'), 1000);
+                }
+            }
+        }
+
+        removeLogo() {
+            const design = this.dataManager.getDesign();
+            delete design.logo;
+            if (this.dataManager.updateDesign(design)) {
+                this.updateImagePreviews();
+                this.showNotification('✅ Логотип удален!');
+            }
+        }
+
+        removeHeaderBackground() {
+            const design = this.dataManager.getDesign();
+            delete design.headerBackground;
+            if (this.dataManager.updateDesign(design)) {
+                this.updateImagePreviews();
+                this.showNotification('✅ Фон шапки удален!');
+            }
+        }
+
+       closeModal() {
+    const modal = document.getElementById('countryModal');
+    if (modal) {
+        modal.style.display = 'none';
+        // Также скрываем фон оверлея
+        modal.style.background = 'transparent';
+    }
+    this.currentEditingId = null;
+}
+
+        showNotification(message, type = 'success') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation' : 'check'}-circle"></i>
+                <span>${message}</span>
+                <button onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer;">×</button>
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 5000);
+        }
+
+        generateId(name) {
+            return name.toLowerCase().replace(/[^a-z0-9а-яё]/g, '-') + '-' + Date.now();
+        }
+    }
+
+    // Функции для загрузки изображений
+    function previewLogo(event) {
+        const file = event.target.files[0];
+        if (file && file.size <= 2 * 1024 * 1024) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const design = window.dataManager.getDesign();
+                design.logo = e.target.result;
+                window.dataManager.updateDesign(design);
+                admin.updateImagePreviews();
+                admin.showNotification('✅ Логотип загружен!');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert('Файл слишком большой! Максимальный размер: 2MB');
+        }
+    }
+
+    function previewHeader(event) {
+        const file = event.target.files[0];
+        if (file && file.size <= 5 * 1024 * 1024) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const design = window.dataManager.getDesign();
+                design.headerBackground = e.target.result;
+                window.dataManager.updateDesign(design);
+                admin.updateImagePreviews();
+                admin.showNotification('✅ Фон шапки загружен!');
+            };
+            reader.readAsDataURL(file);
+        } else {
+            alert('Файл слишком большой! Максимальный размер: 5MB');
+        }
+    }
+
+    // Редактор страниц
+   function openPageEditor(pageUrl) {
+    // Открываем главную страницу в режиме редактирования
+    const baseUrl = window.location.origin;
+    const editUrl = `${baseUrl}/index.html?edit=true`;
+    
+    console.log('🔗 Открываем редактор:', editUrl);
+    
+    const editorWindow = window.open(editUrl, 'editor', 'width=1400,height=800,scrollbars=yes,resizable=yes');
+    
+    if (editorWindow) {
+        admin.showNotification('✅ Редактор открывается...');
+    } else {
+        admin.showNotification('❌ Не удалось открыть редактор. Разрешите всплывающие окна.', 'error');
+    }
+}
+    // Глобальные функции
+    function openCountryModal(countryId = null) {
+        admin.openCountryModal(countryId);
+    }
+
+    function closeModal() {
+        admin.closeModal();
+    }
+
+    function adminLogout() {
+        if (confirm('Выйти из админ-панели?')) {
+            localStorage.removeItem('adminSession');
+            window.location.href = 'admin-login.html';
+        }
+    }
+
+    function exportData() {
+        const data = window.dataManager.data;
+        const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `worldtravel-backup-${new Date().toISOString().split('T')[0]}.json`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        admin.showNotification('✅ Данные экспортированы!');
+    }
+
+    function clearAllData() {
+        if (confirm('ВНИМАНИЕ! Это удалит ВСЕ данные. Продолжить?')) {
+            localStorage.removeItem('worldtravel_data');
+            sessionStorage.removeItem('worldtravel_data');
+            admin.showNotification('✅ Все данные очищены!');
+            setTimeout(() => location.reload(), 1000);
+        }
+    }
+
+    function saveDesignSettings() {
+        admin.saveDesignSettings();
+    }
+
+    function saveSystemSettings() {
+        admin.saveSystemSettings();
+    }
+
+    // Инициализация
+    let admin;
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('📄 DOM загружен, инициализация админки...');
+        admin = new FullAdmin();
+        window.admin = admin;
+    });
+</script>
+</body>
+</html>

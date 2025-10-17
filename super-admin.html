@@ -1,0 +1,1473 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldTravel - Полная админ-панель</title>
+    <style>
+        :root {
+            --primary: #2c5aa0;
+            --primary-dark: #1e3d72;
+            --secondary: #4a7bc8;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left-color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5ee;
+        }
+
+        .data-table th {
+            background: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5ee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-actions {
+            padding: 1rem 1.5rem;
+            background: var(--light);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* Tour Card */
+        .tour-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--success);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .tour-country {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-globe-americas"></i> WorldTravel</h1>
+                <p>Админ-панель</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Дашборд</span>
+                </div>
+                <div class="nav-item" data-tab="countries">
+                    <i class="fas fa-globe"></i>
+                    <span>Управление странами</span>
+                </div>
+                <div class="nav-item" data-tab="tours">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Управление турами</span>
+                </div>
+                <div class="nav-item" data-tab="content">
+                    <i class="fas fa-edit"></i>
+                    <span>Редактирование контента</span>
+                </div>
+                <div class="nav-item" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки системы</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <h2 id="page-title">Дашборд</h2>
+        <button class="btn" onclick="window.open('/', '_blank')" 
+                style="background: #17a2b8; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            <i class="fas fa-home"></i> На главную
+        </button>
+    </div>
+    <div class="user-info">
+        <span>Администратор</span>
+        <button class="btn btn-danger" onclick="admin.logout()">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </div>
+</header>
+            <div class="content-area">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <!-- Welcome Message -->
+                    <div class="content-section" style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left: 4px solid var(--success);">
+                        <h3><i class="fas fa-check-circle"></i> Добро пожаловать в админ-панель!</h3>
+                        <p>Система успешно загружена. Сессия активна.</p>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-globe" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                            <h3 id="stats-countries">0</h3>
+                            <p>Стран</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-map-marked-alt" style="font-size: 2rem; color: var(--success); margin-bottom: 1rem;"></i>
+                            <h3 id="stats-tours">0</h3>
+                            <p>Туров</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-calendar-check" style="font-size: 2rem; color: var(--warning); margin-bottom: 1rem;"></i>
+                            <h3>1,247</h3>
+                            <p>Бронирований</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users" style="font-size: 2rem; color: var(--danger); margin-bottom: 1rem;"></i>
+                            <h3>543</h3>
+                            <p>Пользователей</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Быстрые действия</h3>
+                        </div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="admin.openCountryModal()">
+                                <i class="fas fa-plus"></i> Добавить страну
+                            </button>
+                            <button class="btn" onclick="admin.openTourModal()">
+                                <i class="fas fa-plus-circle"></i> Создать тур
+                            </button>
+                            <button class="btn" onclick="admin.exportData()">
+                                <i class="fas fa-download"></i> Экспорт данных
+                            </button>
+                            <button class="btn btn-warning" onclick="admin.addSampleData()">
+                                <i class="fas fa-magic"></i> Тестовые данные
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Последняя активность</h3>
+                        </div>
+                        <div id="recent-activity">
+                            <!-- Activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Countries Tab -->
+                <div id="countries" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Управление странами</h3>
+                            <button class="btn btn-success" onclick="admin.openCountryModal()">
+                                <i class="fas fa-plus"></i> Добавить страну
+                            </button>
+                        </div>
+                        
+                        <div class="card-grid" id="countries-list">
+                            <!-- Countries will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tours Tab -->
+                <div id="tours" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Управление турами</h3>
+                            <button class="btn btn-success" onclick="admin.openTourModal()">
+                                <i class="fas fa-plus"></i> Создать тур
+                            </button>
+                        </div>
+                        
+                        <div id="tours-list">
+                            <!-- Tours will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Tab -->
+                <div id="content" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Редактирование контента</h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Заголовок главной страницы</label>
+                            <input type="text" id="hero-title" class="form-control" value="Откройте мир с WorldTravel">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Текст под заголовком</label>
+                            <textarea id="hero-text" class="form-control" rows="3">Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.</textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Контактный телефон</label>
+                                <input type="text" id="contact-phone" class="form-control" value="+7 (999) 123-45-67">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="contact-email" class="form-control" value="info@worldtravel.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Адрес</label>
+                            <input type="text" id="contact-address" class="form-control" value="Москва, ул. Туристическая, 15">
+                        </div>
+                        
+                        <button class="btn btn-success" onclick="admin.saveContent()">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Настройки системы</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Название компании</label>
+                            <input type="text" id="company-name" class="form-control" value="WorldTravel">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Валюта по умолчанию</label>
+                            <select id="default-currency" class="form-control">
+                                <option value="$">Доллар ($)</option>
+                                <option value="€">Евро (€)</option>
+                                <option value="₽">Рубль (₽)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Язык интерфейса</label>
+                            <select id="interface-language" class="form-control">
+                                <option value="ru">Русский</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-success" onclick="admin.saveSettings()">
+                            <i class="fas fa-save"></i> Сохранить настройки
+                        </button>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Управление данными</h3>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn" onclick="admin.exportData()">
+                                <i class="fas fa-download"></i> Экспорт данных
+                            </button>
+                            <button class="btn btn-warning" onclick="admin.importData()">
+                                <i class="fas fa-upload"></i> Импорт данных
+                            </button>
+                            <button class="btn btn-danger" onclick="admin.clearData()">
+                                <i class="fas fa-trash"></i> Очистить все данные
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Country Modal -->
+    <div class="modal" id="countryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="countryModalTitle">Добавить страну</h3>
+                <button class="modal-close" onclick="admin.closeModal('countryModal')">&times;</button>
+            </div>
+            <form id="countryForm">
+                <div class="form-group">
+                    <label>Название страны *</label>
+                    <input type="text" id="country-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Краткое описание *</label>
+                    <textarea id="country-short-description" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Полное описание</label>
+                    <textarea id="country-description" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Цена от *</label>
+                        <input type="text" id="country-price" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Столица</label>
+                        <input type="text" id="country-capital" class="form-control">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Язык</label>
+                        <input type="text" id="country-language" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Валюта</label>
+                        <input type="text" id="country-currency" class="form-control">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="admin.closeModal('countryModal')">Отмена</button>
+                    <button type="submit" class="btn btn-success">Сохранить страну</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tour Modal -->
+    <div class="modal" id="tourModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tourModalTitle">Создать тур</h3>
+                <button class="modal-close" onclick="admin.closeModal('tourModal')">&times;</button>
+            </div>
+            <form id="tourForm">
+                <div class="form-group">
+                    <label>Название тура *</label>
+                    <input type="text" id="tour-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Страна *</label>
+                    <select id="tour-country" class="form-control" required>
+                        <option value="">Выберите страну</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Длительность *</label>
+                        <input type="text" id="tour-duration" class="form-control" placeholder="7 дней" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Цена *</label>
+                        <input type="text" id="tour-price" class="form-control" placeholder="$500" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание тура</label>
+                    <textarea id="tour-description" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="admin.closeModal('tourModal')">Отмена</button>
+                    <button type="submit" class="btn btn-success">Создать тур</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Полная админ-панель
+        class SuperAdmin {
+            constructor() {
+                this.countries = [];
+                this.tours = [];
+                this.settings = {};
+                this.currentEditingId = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.renderDashboard();
+                console.log('🚀 Супер-админка загружена!');
+            }
+
+            loadData() {
+                try {
+                    const data = sessionStorage.getItem('worldtravel_data') || 
+                                localStorage.getItem('worldtravel_data');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        this.countries = parsed.countries || [];
+                        this.tours = parsed.tours || [];
+                        this.settings = parsed.settings || {};
+                        console.log('📁 Загружено:', this.countries.length, 'стран,', this.tours.length, 'туров');
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки:', error);
+                    this.countries = [];
+                    this.tours = [];
+                }
+            }
+
+            saveData() {
+                const data = {
+                    countries: this.countries,
+                    tours: this.tours,
+                    settings: this.settings,
+                    content: this.getContentData(),
+                    lastUpdate: new Date().toISOString()
+                };
+
+                sessionStorage.setItem('worldtravel_data', JSON.stringify(data));
+                localStorage.setItem('worldtravel_data', JSON.stringify(data));
+
+                this.updateStats();
+                this.showNotification('✅ Данные сохранены!', 'success');
+                console.log('💾 Данные сохранены');
+            }
+
+            setupEventListeners() {
+                // Навигация
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const tab = e.currentTarget.getAttribute('data-tab');
+                        this.showTab(tab);
+                    });
+                });
+
+                // Формы
+                document.getElementById('countryForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveCountry();
+                });
+
+                document.getElementById('tourForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveTour();
+                });
+            }
+
+            showTab(tabName) {
+                // Скрыть все вкладки
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Убрать активный класс у всех пунктов меню
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Показать выбранную вкладку
+                const tab = document.getElementById(tabName);
+                if (tab) {
+                    tab.classList.add('active');
+                }
+
+                // Активировать пункт меню
+                const navItem = document.querySelector(`[data-tab="${tabName}"]`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+
+                // Обновить заголовок
+                document.getElementById('page-title').textContent = 
+                    navItem.querySelector('span').textContent;
+
+                // Загрузить данные для вкладки
+                this.loadTabData(tabName);
+            }
+
+            loadTabData(tabName) {
+                switch (tabName) {
+                    case 'dashboard':
+                        this.renderDashboard();
+                        break;
+                    case 'countries':
+                        this.renderCountries();
+                        break;
+                    case 'tours':
+                        this.renderTours();
+                        break;
+                    case 'content':
+                        this.loadContent();
+                        break;
+                    case 'settings':
+                        this.loadSettings();
+                        break;
+                }
+            }
+
+            renderDashboard() {
+                this.updateStats();
+                this.renderRecentActivity();
+            }
+
+            updateStats() {
+                document.getElementById('stats-countries').textContent = this.countries.length;
+                document.getElementById('stats-tours').textContent = this.tours.length;
+            }
+
+            renderRecentActivity() {
+                const container = document.getElementById('recent-activity');
+                const activities = [
+                    { action: 'Добавлена страна', item: 'Италия', time: '2 минуты назад' },
+                    { action: 'Создан тур', item: 'Римские каникулы', time: '5 минут назад' },
+                    { action: 'Обновлен контент', item: 'Главная страница', time: '10 минут назад' }
+                ];
+
+                container.innerHTML = activities.map(activity => `
+                    <div class="tour-card">
+                        <div class="tour-header">
+                            <div>
+                                <strong>${activity.action}</strong>
+                                <div style="color: #666; margin-top: 0.25rem;">${activity.item}</div>
+                            </div>
+                            <span style="color: #999; font-size: 0.9rem;">${activity.time}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderCountries() {
+                const container = document.getElementById('countries-list');
+                
+                if (this.countries.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #666; grid-column: 1 / -1;">
+                            <i class="fas fa-globe-americas" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                            <h3>Стран пока нет</h3>
+                            <p>Добавьте первую страну используя кнопку выше</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.countries.map(country => `
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="margin: 0; color: white;">${country.name}</h4>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: #666; margin-bottom: 1rem;">${country.shortDescription || country.description || ''}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: var(--primary);">${country.price}</strong>
+                                <span style="font-size: 0.9rem; color: #999;">${country.tours ? country.tours.length : 0} туров</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn" onclick="admin.editCountry('${country.id}')">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </button>
+                            <button class="btn btn-danger" onclick="admin.deleteCountry('${country.id}')">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderTours() {
+                const container = document.getElementById('tours-list');
+                
+                if (this.tours.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #666;">
+                            <i class="fas fa-map-marked-alt" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                            <h3>Туров пока нет</h3>
+                            <p>Создайте первый тур используя кнопку выше</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.tours.map(tour => `
+                    <div class="tour-card">
+                        <div class="tour-header">
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0;">${tour.name}</h4>
+                                <span class="tour-country">${tour.country}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; color: var(--primary);">${tour.price}</div>
+                                <div style="color: #666; font-size: 0.9rem;">${tour.duration}</div>
+                            </div>
+                        </div>
+                        <p style="color: #666; margin: 0;">${tour.description || ''}</p>
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button class="btn" onclick="admin.editTour('${tour.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="admin.deleteTour('${tour.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            openCountryModal(countryId = null) {
+                this.currentEditingId = countryId;
+                const modal = document.getElementById('countryModal');
+                const title = document.getElementById('countryModalTitle');
+
+                if (countryId) {
+                    title.textContent = 'Редактировать страну';
+                    this.fillCountryForm(countryId);
+                } else {
+                    title.textContent = 'Добавить страну';
+                    this.resetCountryForm();
+                }
+
+                this.openModal('countryModal');
+            }
+
+            fillCountryForm(countryId) {
+                const country = this.countries.find(c => c.id === countryId);
+                if (country) {
+                    document.getElementById('country-name').value = country.name;
+                    document.getElementById('country-short-description').value = country.shortDescription || '';
+                    document.getElementById('country-description').value = country.description || '';
+                    document.getElementById('country-price').value = country.price || '';
+                    document.getElementById('country-capital').value = country.capital || '';
+                    document.getElementById('country-language').value = country.language || '';
+                    document.getElementById('country-currency').value = country.currency || '';
+                }
+            }
+
+            resetCountryForm() {
+                document.getElementById('countryForm').reset();
+            }
+
+            saveCountry() {
+                const name = document.getElementById('country-name').value;
+                const shortDescription = document.getElementById('country-short-description').value;
+                const description = document.getElementById('country-description').value;
+                const price = document.getElementById('country-price').value;
+                const capital = document.getElementById('country-capital').value;
+                const language = document.getElementById('country-language').value;
+                const currency = document.getElementById('country-currency').value;
+
+                if (!name || !shortDescription || !price) {
+                    this.showNotification('❌ Заполните обязательные поля', 'error');
+                    return;
+                }
+
+                const countryData = {
+                    id: this.currentEditingId || this.generateId(name),
+                    name: name,
+                    shortDescription: shortDescription,
+                    description: description,
+                    price: price,
+                    capital: capital,
+                    language: language,
+                    currency: currency,
+                    images: [],
+                    tours: []
+                };
+
+                if (this.currentEditingId) {
+                    // Редактирование
+                    const index = this.countries.findIndex(c => c.id === this.currentEditingId);
+                    if (index !== -1) {
+                        this.countries[index] = { ...this.countries[index], ...countryData };
+                    }
+                    this.showNotification('✅ Страна обновлена!', 'success');
+                } else {
+                    // Добавление
+                    this.countries.push(countryData);
+                    this.showNotification('✅ Страна добавлена!', 'success');
+                }
+
+                this.saveData();
+                this.closeModal('countryModal');
+                this.renderCountries();
+            }
+
+                        openTourModal(tourId = null) {
+                this.currentEditingId = tourId;
+                const modal = document.getElementById('tourModal');
+                const title = document.getElementById('tourModalTitle');
+
+                // Заполняем выпадающий список стран
+                this.populateCountrySelect();
+
+                if (tourId) {
+                    title.textContent = 'Редактировать тур';
+                    this.fillTourForm(tourId);
+                } else {
+                    title.textContent = 'Создать тур';
+                    this.resetTourForm();
+                }
+
+                this.openModal('tourModal');
+            }
+
+            populateCountrySelect() {
+                const select = document.getElementById('tour-country');
+                select.innerHTML = '<option value="">Выберите страну</option>';
+                
+                this.countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.name;
+                    option.textContent = country.name;
+                    select.appendChild(option);
+                });
+            }
+
+            fillTourForm(tourId) {
+                const tour = this.tours.find(t => t.id === tourId);
+                if (tour) {
+                    document.getElementById('tour-name').value = tour.name;
+                    document.getElementById('tour-country').value = tour.country;
+                    document.getElementById('tour-duration').value = tour.duration;
+                    document.getElementById('tour-price').value = tour.price;
+                    document.getElementById('tour-description').value = tour.description || '';
+                }
+            }
+
+            resetTourForm() {
+                document.getElementById('tourForm').reset();
+            }
+
+            saveTour() {
+                const name = document.getElementById('tour-name').value;
+                const country = document.getElementById('tour-country').value;
+                const duration = document.getElementById('tour-duration').value;
+                const price = document.getElementById('tour-price').value;
+                const description = document.getElementById('tour-description').value;
+
+                if (!name || !country || !duration || !price) {
+                    this.showNotification('❌ Заполните обязательные поля', 'error');
+                    return;
+                }
+
+                const tourData = {
+                    id: this.currentEditingId || this.generateId(name),
+                    name: name,
+                    country: country,
+                    duration: duration,
+                    price: price,
+                    description: description,
+                    createdAt: new Date().toISOString()
+                };
+
+                if (this.currentEditingId) {
+                    // Редактирование
+                    const index = this.tours.findIndex(t => t.id === this.currentEditingId);
+                    if (index !== -1) {
+                        this.tours[index] = { ...this.tours[index], ...tourData };
+                    }
+                    this.showNotification('✅ Тур обновлен!', 'success');
+                } else {
+                    // Добавление
+                    this.tours.push(tourData);
+                    this.showNotification('✅ Тур создан!', 'success');
+                }
+
+                this.saveData();
+                this.closeModal('tourModal');
+                this.renderTours();
+            }
+
+            editCountry(countryId) {
+                this.openCountryModal(countryId);
+            }
+
+            editTour(tourId) {
+                this.openTourModal(tourId);
+            }
+
+            deleteCountry(countryId) {
+                if (confirm('Удалить страну? Все связанные туры также будут удалены.')) {
+                    // Удаляем туры этой страны
+                    this.tours = this.tours.filter(t => {
+                        const country = this.countries.find(c => c.id === countryId);
+                        return !country || t.country !== country.name;
+                    });
+
+                    // Удаляем страну
+                    this.countries = this.countries.filter(c => c.id !== countryId);
+                    
+                    this.saveData();
+                    this.renderCountries();
+                    this.renderTours();
+                    this.showNotification('✅ Страна и связанные туры удалены!', 'success');
+                }
+            }
+
+            deleteTour(tourId) {
+                if (confirm('Удалить тур?')) {
+                    this.tours = this.tours.filter(t => t.id !== tourId);
+                    this.saveData();
+                    this.renderTours();
+                    this.showNotification('✅ Тур удален!', 'success');
+                }
+            }
+
+            loadContent() {
+                const data = this.getContentData();
+                document.getElementById('hero-title').value = data.heroTitle;
+                document.getElementById('hero-text').value = data.heroText;
+                document.getElementById('contact-phone').value = data.contactPhone;
+                document.getElementById('contact-email').value = data.contactEmail;
+                document.getElementById('contact-address').value = data.contactAddress;
+            }
+
+            getContentData() {
+                const data = sessionStorage.getItem('worldtravel_data') || 
+                            localStorage.getItem('worldtravel_data');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    return parsed.content || this.getDefaultContent();
+                }
+                return this.getDefaultContent();
+            }
+
+            getDefaultContent() {
+                return {
+                    heroTitle: 'Откройте мир с WorldTravel',
+                    heroText: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                    contactPhone: '+7 (999) 123-45-67',
+                    contactEmail: 'info@worldtravel.com',
+                    contactAddress: 'Москва, ул. Туристическая, 15'
+                };
+            }
+
+            saveContent() {
+                const content = {
+                    heroTitle: document.getElementById('hero-title').value,
+                    heroText: document.getElementById('hero-text').value,
+                    contactPhone: document.getElementById('contact-phone').value,
+                    contactEmail: document.getElementById('contact-email').value,
+                    contactAddress: document.getElementById('contact-address').value
+                };
+
+                this.updateContentData(content);
+                this.showNotification('✅ Контент сохранен!', 'success');
+            }
+
+            updateContentData(content) {
+                const data = sessionStorage.getItem('worldtravel_data') || 
+                            localStorage.getItem('worldtravel_data');
+                
+                let parsed = { countries: [], tours: [], settings: {}, content: {} };
+                if (data) {
+                    parsed = JSON.parse(data);
+                }
+
+                parsed.content = content;
+                parsed.lastUpdate = new Date().toISOString();
+
+                sessionStorage.setItem('worldtravel_data', JSON.stringify(parsed));
+                localStorage.setItem('worldtravel_data', JSON.stringify(parsed));
+            }
+
+            loadSettings() {
+                document.getElementById('company-name').value = this.settings.companyName || 'WorldTravel';
+                document.getElementById('default-currency').value = this.settings.defaultCurrency || '$';
+                document.getElementById('interface-language').value = this.settings.interfaceLanguage || 'ru';
+            }
+
+            saveSettings() {
+                this.settings = {
+                    companyName: document.getElementById('company-name').value,
+                    defaultCurrency: document.getElementById('default-currency').value,
+                    interfaceLanguage: document.getElementById('interface-language').value
+                };
+
+                this.saveData();
+                this.showNotification('✅ Настройки сохранены!', 'success');
+            }
+
+            exportData() {
+                const data = {
+                    countries: this.countries,
+                    tours: this.tours,
+                    settings: this.settings,
+                    content: this.getContentData(),
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `worldtravel-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.showNotification('✅ Данные экспортированы!', 'success');
+            }
+
+            importData() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            try {
+                                const data = JSON.parse(event.target.result);
+                                
+                                if (confirm('Заменить текущие данные импортированными?')) {
+                                    this.countries = data.countries || [];
+                                    this.tours = data.tours || [];
+                                    this.settings = data.settings || {};
+                                    
+                                    if (data.content) {
+                                        this.updateContentData(data.content);
+                                    }
+                                    
+                                    this.saveData();
+                                    this.showNotification('✅ Данные импортированы!', 'success');
+                                    this.renderDashboard();
+                                    this.renderCountries();
+                                    this.renderTours();
+                                }
+                            } catch (error) {
+                                this.showNotification('❌ Ошибка импорта: неверный формат файла', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                
+                input.click();
+            }
+
+            clearData() {
+                if (confirm('ВНИМАНИЕ! Это удалит ВСЕ данные (страны, туры, настройки). Продолжить?')) {
+                    this.countries = [];
+                    this.tours = [];
+                    this.settings = {};
+                    
+                    sessionStorage.removeItem('worldtravel_data');
+                    localStorage.removeItem('worldtravel_data');
+                    
+                    this.showNotification('✅ Все данные очищены!', 'success');
+                    this.renderDashboard();
+                    this.renderCountries();
+                    this.renderTours();
+                }
+            }
+
+            addSampleData() {
+                const sampleCountries = [
+                    {
+                        id: 'france',
+                        name: 'Франция',
+                        shortDescription: 'Романтическая Франция с её богатой историей и изысканной кухней.',
+                        description: 'Франция - страна искусства, моды и гастрономии. Посетите Эйфелеву башню, Лувр и провансальские поля лаванды.',
+                        price: 'от €800',
+                        capital: 'Париж',
+                        language: 'Французский',
+                        currency: 'Евро (€)',
+                        images: [],
+                        tours: []
+                    },
+                    {
+                        id: 'italy',
+                        name: 'Италия',
+                        shortDescription: 'Страна искусства, древней истории и самой вкусной кухни в мире.',
+                        description: 'Италия предлагает путешественникам богатое культурное наследие, от Древнего Рима до эпохи Возрождения.',
+                        price: 'от €750',
+                        capital: 'Рим',
+                        language: 'Итальянский',
+                        currency: 'Евро (€)',
+                        images: [],
+                        tours: []
+                    }
+                ];
+
+                const sampleTours = [
+                    {
+                        id: 'paris-weekend',
+                        name: 'Парижские выходные',
+                        country: 'Франция',
+                        duration: '3 дня',
+                        price: '€450',
+                        description: 'Экспресс-тур по самым знаковым местам Парижа',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'rome-classic',
+                        name: 'Классический Рим',
+                        country: 'Италия',
+                        duration: '5 дней',
+                        price: '€600',
+                        description: 'Знакомство с главными достопримечательностями Вечного города',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+
+                this.countries = [...this.countries, ...sampleCountries];
+                this.tours = [...this.tours, ...sampleTours];
+                this.saveData();
+                
+                this.showNotification('✅ Тестовые данные добавлены!', 'success');
+                this.renderDashboard();
+                this.renderCountries();
+                this.renderTours();
+            }
+
+            openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('active');
+                }
+            }
+
+            closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+                this.currentEditingId = null;
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                    <span>${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Анимация появления
+                setTimeout(() => notification.classList.add('show'), 100);
+
+                // Автоматическое скрытие
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+
+            generateId(name) {
+                return name.toLowerCase()
+                    .replace(/[^a-z0-9а-яё]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '') + '-' + Date.now();
+            }
+
+            logout() {
+                if (confirm('Выйти из админ-панели?')) {
+                    localStorage.removeItem('adminSession');
+                    sessionStorage.removeItem('adminSession');
+                    window.location.href = 'admin-login.html';
+                }
+            }
+        }
+
+        // Инициализация админ-панели
+        let admin;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверка сессии
+            const session = localStorage.getItem('adminSession') || sessionStorage.getItem('adminSession');
+            if (!session) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            admin = new SuperAdmin();
+            window.admin = admin;
+
+            // Защита от копирования в админке
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            document.addEventListener('copy', (e) => e.preventDefault());
+            document.addEventListener('cut', (e) => e.preventDefault());
+        });
+    </script>
+</body>
+</html>
