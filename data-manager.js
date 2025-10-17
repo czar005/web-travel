@@ -249,3 +249,19 @@ window.dataManager.updateSettings = function(settings) {
         return false;
     }
 };
+// Базовые функции для работы с данными
+window.dataManager.getCountries = function() {
+    const data = this.getData();
+    return data.countries || [];
+};
+
+window.dataManager.updateCountries = function(countries) {
+    try {
+        const data = this.getData();
+        data.countries = countries;
+        return this.saveToLocalStorage(data);
+    } catch (error) {
+        console.error('Error updating countries:', error);
+        return false;
+    }
+};
