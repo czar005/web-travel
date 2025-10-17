@@ -404,6 +404,16 @@
             color: #856404;
             font-size: 0.9rem;
         }
+
+        .save-status {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            color: #155724;
+        }
     </style>
 </head>
 <body>
@@ -422,7 +432,7 @@
                         <i class="fas fa-eye"></i> Предпросмотр
                     </button>
                     <button class="btn-admin" onclick="saveChanges()">
-                        <i class="fas fa-save"></i> Сохранить
+                        <i class="fas fa-save"></i> Сохранить на сайте
                     </button>
                 </div>
             </div>
@@ -430,7 +440,10 @@
             <!-- Информация о странице -->
             <div class="page-info">
                 <h3>Редактирование главной страницы (index.html)</h3>
-                <p>Здесь вы можете редактировать блоки вашей главной страницы. Изменения сохраняются в систему и сразу отображаются на сайте.</p>
+                <p>Изменения вступят в силу сразу после сохранения. Для проверки откройте главную страницу.</p>
+                <div id="save-status" class="save-status" style="display: none;">
+                    <i class="fas fa-check-circle"></i> <span id="status-message">Изменения сохранены</span>
+                </div>
             </div>
 
             <div class="preview-container" id="page-preview">
@@ -553,7 +566,7 @@
                 this.selectedBlock = null;
                 this.currentInsertPosition = 'start';
                 this.currentBlockType = null;
-                this.currentPage = 'index'; // Только главная страница
+                this.currentPage = 'index';
                 this.init();
             }
 
@@ -563,20 +576,17 @@
             }
 
             setupEventListeners() {
-                // Обработчики для выбора типа блока
                 document.querySelectorAll('.block-type').forEach(type => {
                     type.addEventListener('click', () => {
                         document.querySelectorAll('.block-type').forEach(t => t.style.borderColor = '#e9ecef');
                         type.style.borderColor = '#2c5aa0';
                         this.currentBlockType = type.dataset.type;
                         
-                        // Показываем/скрываем поле для изображения
                         const imageGroup = document.getElementById('image-url-group');
                         imageGroup.style.display = this.currentBlockType === 'image' ? 'block' : 'none';
                     });
                 });
 
-                // Обработчики для выбора позиции
                 document.querySelectorAll('.position-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
@@ -589,17 +599,16 @@
             loadPage() {
                 this.blocks = [];
                 
-                // Загружаем данные главной страницы из data-manager
                 if (typeof dataManager !== 'undefined') {
                     const data = dataManager.getData();
                     if (data.pages && data.pages.index) {
                         this.blocks = data.pages.index.blocks || [];
                     } else {
-                        // Если страницы нет в данных, создаем блоки на основе текущей структуры
                         this.blocks = this.getCurrentPageBlocks();
+                        // Сохраняем начальную структуру
+                        this.saveToStorage();
                     }
                 } else {
-                    // Fallback на localStorage
                     const saved = localStorage.getItem('page-index-blocks');
                     this.blocks = saved ? JSON.parse(saved) : this.getCurrentPageBlocks();
                 }
@@ -609,7 +618,6 @@
             }
 
             getCurrentPageBlocks() {
-                // Создаем блоки на основе структуры вашей главной страницы
                 return [
                     {
                         id: 1,
@@ -669,7 +677,6 @@
 
                 container.innerHTML = '';
                 
-                // Добавляем информацию о реальном контенте
                 const realContentInfo = document.createElement('div');
                 realContentInfo.className = 'real-content-preview';
                 realContentInfo.innerHTML = `
@@ -817,7 +824,6 @@
             selectBlock(block) {
                 this.selectedBlock = block;
                 
-                // Подсветка выбранного блока
                 document.querySelectorAll('.page-block').forEach(b => {
                     b.classList.remove('selected');
                 });
@@ -919,11 +925,12 @@
                     block.title = title;
                     block.content = content;
                     if (image !== undefined) block.image = image;
+                    
+                    // Сразу сохраняем изменения
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    this.showNotification('Изменения блока сохранены!', 'success');
                 }
-
-                this.saveToStorage();
-                this.renderBlocks();
-                this.showNotification('Изменения сохранены!', 'success');
             }
 
             updateFeature(blockId, featureIndex, field, value) {
@@ -954,7 +961,6 @@
                     this.saveToStorage();
                     this.renderBlocks();
                     
-                    // Очищаем сайдбар
                     const sidebarContent = document.getElementById('sidebar-content');
                     sidebarContent.innerHTML = `
                         <div class="empty-state">
@@ -974,13 +980,11 @@
                 document.getElementById('block-selector-overlay').style.display = 'block';
                 document.getElementById('block-selector').style.display = 'block';
                 
-                // Сброс формы
                 document.getElementById('new-block-title').value = '';
                 document.getElementById('new-block-description').value = '';
                 document.getElementById('new-block-image').value = '';
                 document.getElementById('image-url-group').style.display = 'none';
                 
-                // Сброс выбора типа
                 document.querySelectorAll('.block-type').forEach(t => t.style.borderColor = '#e9ecef');
                 this.currentBlockType = null;
             }
@@ -1016,7 +1020,6 @@
                     ];
                 }
 
-                // Добавляем блок в выбранную позицию
                 switch (this.currentInsertPosition) {
                     case 'start':
                         this.blocks.unshift(newBlock);
@@ -1049,14 +1052,39 @@
             }
 
             saveToStorage() {
-                // Сохраняем в data-manager если доступен, иначе в localStorage
                 if (typeof dataManager !== 'undefined') {
                     const data = dataManager.getData();
                     if (!data.pages) data.pages = {};
-                    data.pages.index = { blocks: this.blocks };
+                    data.pages.index = { 
+                        blocks: this.blocks,
+                        lastUpdated: new Date().toISOString()
+                    };
                     dataManager.saveData(data);
+                    
+                    // Также сохраняем в localStorage для надежности
+                    localStorage.setItem('page-index-blocks', JSON.stringify(this.blocks));
+                    localStorage.setItem('worldtravel_page_editor_data', JSON.stringify({
+                        blocks: this.blocks,
+                        timestamp: new Date().toISOString()
+                    }));
                 } else {
                     localStorage.setItem('page-index-blocks', JSON.stringify(this.blocks));
+                }
+                
+                this.showSaveStatus('Изменения сохранены в системе данных');
+            }
+
+            showSaveStatus(message) {
+                const statusElement = document.getElementById('save-status');
+                const messageElement = document.getElementById('status-message');
+                
+                if (statusElement && messageElement) {
+                    messageElement.textContent = message;
+                    statusElement.style.display = 'block';
+                    
+                    setTimeout(() => {
+                        statusElement.style.display = 'none';
+                    }, 5000);
                 }
             }
 
@@ -1081,7 +1109,8 @@
 
             saveChanges() {
                 this.saveToStorage();
-                this.showNotification('Все изменения сохранены в системе!', 'success');
+                this.showNotification('Все изменения применены к сайту!', 'success');
+                this.showSaveStatus('Изменения применены к главной странице');
             }
         }
 
