@@ -18,7 +18,7 @@ function initializeSite() {
     loadCountriesData();
     updateContactInfo();
     updateSiteSettings();
-    updateFooterContacts(); // Добавляем обновление футера
+    updateFooterContacts();
     setupEventListeners();
     initializeFilters();
 }
@@ -71,7 +71,7 @@ function handleDataUpdate(data) {
         }
         updateContactInfo();
         updateSiteSettings();
-        updateFooterContacts(); // Обновляем футер при изменении данных
+        updateFooterContacts();
     }
 }
 
@@ -136,9 +136,6 @@ function displayCountries(countriesArray) {
                                     <span class="tour-name">${tour.name}</span>
                                     <span class="tour-price">$${tour.price}</span>
                                     <span class="tour-duration">${tour.duration}</span>
-                                    <button class="btn-small" onclick="addToCart(${tour.id}, '${country.name.replace(/'/g, "\\'")}', '${tour.name.replace(/'/g, "\\'")}', ${tour.price})">
-                                        <i class="fas fa-cart-plus"></i> В корзину
-                                    </button>
                                 </div>
                             `).join('')}
                             ${country.tours.length > 3 ? `
@@ -264,27 +261,7 @@ function updateSiteSettings() {
     }
 }
 
-// Функции корзины
-function addToCart(tourId, countryName, tourName, price) {
-    const existingItem = cart.find(item => item.tourId === tourId);
-    
-    if (existingItem) {
-        existingItem.quantity += 1;
-    } else {
-        cart.push({
-            tourId: tourId,
-            countryName: countryName,
-            tourName: tourName,
-            price: price,
-            quantity: 1
-        });
-    }
-    
-    localStorage.setItem('cart', JSON.stringify(cart));
-    updateCartCount();
-    showNotification(`Тур "${tourName}" добавлен в корзину! 🎉`, 'success');
-}
-
+// Функции корзины (оставляем для других частей сайта)
 function updateCartCount() {
     const cartCount = document.getElementById('cart-count');
     if (cartCount) {
