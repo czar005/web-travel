@@ -3,184 +3,118 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>WorldTravel - Туристическая компания</title>
+    <title>WorldTravel - Путешествия по миру</title>
     <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary-color: #2c5aa0;
+            --secondary-color: #4a7bc8;
+        }
+        
+        .contact-info {
+            background: #f8f9fa;
+            padding: 40px 20px;
+            margin-top: 40px;
+        }
+        
+        .contact-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 30px;
+        }
+        
+        .contact-item {
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .contact-item i {
+            font-size: 2rem;
+            color: var(--primary-color);
+            margin-bottom: 15px;
+        }
+        
+        .contact-item h3 {
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .contact-item p {
+            color: #666;
+            margin: 5px 0;
+        }
+        
+        .phone, .email, .address, .hours {
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+    </style>
 </head>
 <body>
-    <!-- Header -->
-    <header class="header">
-        <nav class="nav">
-            <div class="logo">
-                <h2><i class="fas fa-globe-americas"></i> WorldTravel</h2>
-            </div>
-            <ul class="nav-links">
-                <li><a href="#home">Главная</a></li>
-                <li><a href="#about">О нас</a></li>
-                <li><a href="#services">Услуги</a></li>
-                <li><a href="#destinations">Направления</a></li>
-                <li><a href="#contact">Контакты</a></li>
-                <li style="display: none;">
-                    <a href="admin-login.html" class="admin-link"><i class="fas fa-cog"></i> Админка</a>
-                </li>
-            </ul>
-            <div class="hamburger">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </nav>
-    </header>
-
     <!-- Hero Section -->
-    <section id="home" class="hero">
+    <section class="hero">
         <div class="hero-content">
-            <h1 class="animate-fade-in">Откройте мир с WorldTravel</h1>
-            <p class="animate-fade-in-delay">Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.</p>
-            <button class="cta-button animate-bounce">Начать путешествие</button>
-        </div>
-        <div class="hero-image">
-            <div class="floating-element element-1"><i class="fas fa-plane"></i></div>
-            <div class="floating-element element-2"><i class="fas fa-map-marked-alt"></i></div>
-            <div class="floating-element element-3"><i class="fas fa-passport"></i></div>
-            <div class="image-placeholder pulse-animation">Изображение путешествия</div>
+            <h1>Откройте мир с WorldTravel</h1>
+            <p>Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин – ваше приключение начинается здесь.</p>
+            <button class="cta-button">Начать путешествие</button>
         </div>
     </section>
 
-    <!-- About Section -->
-    <section id="about" class="about">
+    <!-- Countries Section -->
+    <section class="destinations">
         <div class="container">
-            <h2 class="section-title">О нашей компании</h2>
-            <div class="about-content">
-                <div class="about-text">
-                    <p>WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.</p>
-                    <div class="stats">
-                        <div class="stat animate-counter" data-target="5000">
-                            <h3>0</h3>
-                            <p>Довольных клиентов</p>
-                        </div>
-                        <div class="stat animate-counter" data-target="50">
-                            <h3>0</h3>
-                            <p>Стран мира</p>
-                        </div>
-                        <div class="stat">
-                            <h3>10 лет</h3>
-                            <p>Опыта работы</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="about-image">
-                    <div class="image-placeholder rotate-animation">Команда WorldTravel</div>
-                </div>
+            <h2>Популярные направления</h2>
+            <div class="countries-grid" id="countries-grid">
+                <!-- Страны будут загружены здесь -->
             </div>
         </div>
     </section>
 
-    <!-- Services Section -->
-    <section id="services" class="services">
-        <div class="container">
-            <h2 class="section-title">Наши услуги</h2>
-            <div class="services-grid">
-                <div class="service-card slide-in-left">
-                    <div class="service-icon"><i class="fas fa-plane"></i></div>
-                    <h3>Авиабилеты</h3>
-                    <p>Подбор и бронирование лучших авиаперелетов по выгодным ценам</p>
-                </div>
-                <div class="service-card slide-in-bottom">
-                    <div class="service-icon"><i class="fas fa-hotel"></i></div>
-                    <h3>Отели</h3>
-                    <p>Бронирование отелей любого уровня комфорта по всему миру</p>
-                </div>
-                <div class="service-card slide-in-right">
-                    <div class="service-icon"><i class="fas fa-map-marked-alt"></i></div>
-                    <h3>Туры</h3>
-                    <p>Индивидуальные и групповые туры с профессиональными гидами</p>
-                </div>
-                <div class="service-card slide-in-top">
-                    <div class="service-icon"><i class="fas fa-shield-alt"></i></div>
-                    <h3>Страхование</h3>
-                    <p>Полное страховое сопровождение вашего путешествия</p>
-                </div>
+    <!-- Contact Information -->
+    <section class="contact-info">
+        <div class="contact-container">
+            <div class="contact-item">
+                <i class="fas fa-phone"></i>
+                <h3>Телефон</h3>
+                <p class="phone">+7 (999) 123-45-67</p>
+                <a href="tel:+79991234567" class="contact-phone">Позвонить</a>
+            </div>
+            
+            <div class="contact-item">
+                <i class="fas fa-envelope"></i>
+                <h3>Email</h3>
+                <p class="email">info@worldtravel.com</p>
+                <a href="mailto:info@worldtravel.com" class="contact-email">Написать</a>
+            </div>
+            
+            <div class="contact-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <h3>Адрес</h3>
+                <p class="address">Москва, ул. Туристическая, 15</p>
+            </div>
+            
+            <div class="contact-item">
+                <i class="fas fa-clock"></i>
+                <h3>Часы работы</h3>
+                <p class="hours">Пн-Пт: 9:00-18:00</p>
             </div>
         </div>
     </section>
 
-    <!-- Destinations Section -->
-    <section id="destinations" class="destinations">
-        <div class="container">
-            <h2 class="section-title">Популярные направления</h2>
-            <div class="destinations-grid">
-                <!-- Страны будут загружаться через JavaScript -->
-            </div>
-        </div>
-    </section>
-
-    <!-- Contact Section -->
-    <section id="contact" class="contact">
-        <div class="container">
-            <h2 class="section-title">Свяжитесь с нами</h2>
-            <div class="contact-content">
-                <div class="contact-info">
-                    <h3>Наши контакты</h3>
-                    <div class="contact-item">
-                        <strong><i class="fas fa-phone"></i> Телефон:</strong>
-                        <p>+7 (999) 123-45-67</p>
-                    </div>
-                    <div class="contact-item">
-                        <strong><i class="fas fa-envelope"></i> Email:</strong>
-                        <p>info@worldtravel.com</p>
-                    </div>
-                    <div class="contact-item">
-                        <strong><i class="fas fa-map-marker-alt"></i> Адрес:</strong>
-                        <p>Москва, ул. Туристическая, 15</p>
-                    </div>
-                    <div class="contact-item">
-                        <strong><i class="fas fa-clock"></i> Часы работы:</strong>
-                        <p>Пн-Пт: 9:00-18:00</p>
-                    </div>
-                </div>
-                <form class="contact-form">
-                    <input type="text" placeholder="Ваше имя" required>
-                    <input type="email" placeholder="Ваш email" required>
-                    <input type="tel" placeholder="Ваш телефон">
-                    <textarea placeholder="Ваше сообщение" rows="5" required></textarea>
-                    <button type="submit">Отправить сообщение</button>
-                </form>
-            </div>
-        </div>
-    </section>
-
-    <!-- Footer -->
-    <footer class="footer">
-        <div class="container">
-            <div class="footer-content">
-                <div class="footer-section">
-                    <h3><i class="fas fa-globe-americas"></i> WorldTravel</h3>
-                    <p>Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.</p>
-                </div>
-                <div class="footer-section">
-                    <h4>Быстрые ссылки</h4>
-                    <ul>
-                        <li><a href="#home">Главная</a></li>
-                        <li><a href="#about">О нас</a></li>
-                        <li><a href="#services">Услуги</a></li>
-                        <li><a href="#destinations">Направления</a></li>
-                    </ul>
-                </div>
-                <div class="footer-section">
-                    <h4>Контакты</h4>
-                    <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
-                    <p><i class="fas fa-envelope"></i> info@worldtravel.com</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2024 WorldTravel. Все права защищены.</p>
-            </div>
-        </div>
-    </footer>
-    
-    <script src="data-manager.js"></script>
+    <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="script.js"></script>
+    
+    <script>
+    // Добавляем обработчик для кнопки "Начать путешествие"
+    document.querySelector('.cta-button')?.addEventListener('click', function() {
+        const countriesGrid = document.getElementById('countries-grid');
+        if (countriesGrid) {
+            countriesGrid.scrollIntoView({ behavior: 'smooth' });
+        }
+    });
+    </script>
 </body>
 </html>

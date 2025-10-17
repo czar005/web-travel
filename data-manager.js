@@ -8,10 +8,13 @@ window.dataManager = {
             // Пробуем получить из worldtravel_data
             const saved = localStorage.getItem('worldtravel_data');
             if (saved) {
-                return JSON.parse(saved);
+                const data = JSON.parse(saved);
+                console.log('✅ Данные загружены из worldtravel_data');
+                return data;
             }
             
             // Если нет, создаем новые данные
+            console.log('🆕 Создание новых данных по умолчанию');
             return this.getDefaultData();
             
         } catch (error) {
@@ -38,7 +41,7 @@ window.dataManager = {
             countries: [],
             content: {
                 heroTitle: "Откройте мир с WorldTravel",
-                heroText: "Мы создаем незабываемые путешествия по всему миру",
+                heroText: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин – ваше приключение начинается здесь.",
                 contactPhone: "+7 (999) 123-45-67",
                 contactEmail: "info@worldtravel.com",
                 contactAddress: "Москва, ул. Туристическая, 15",
@@ -71,7 +74,14 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.countries = countries;
-            return this.saveToLocalStorage(data);
+            const success = this.saveToLocalStorage(data);
+            
+            // Синхронизируем с worldtravel_current_data
+            if (success) {
+                this.syncWithCurrentData();
+            }
+            
+            return success;
         } catch (error) {
             console.error('❌ Ошибка сохранения стран:', error);
             return false;
@@ -89,7 +99,14 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.content = { ...data.content, ...content };
-            return this.saveToLocalStorage(data);
+            const success = this.saveToLocalStorage(data);
+            
+            // Синхронизируем с worldtravel_current_data
+            if (success) {
+                this.syncWithCurrentData();
+            }
+            
+            return success;
         } catch (error) {
             console.error('❌ Ошибка сохранения контента:', error);
             return false;
@@ -107,7 +124,14 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.design = { ...data.design, ...design };
-            return this.saveToLocalStorage(data);
+            const success = this.saveToLocalStorage(data);
+            
+            // Синхронизируем с worldtravel_current_data
+            if (success) {
+                this.syncWithCurrentData();
+            }
+            
+            return success;
         } catch (error) {
             console.error('❌ Ошибка сохранения дизайна:', error);
             return false;
@@ -125,9 +149,29 @@ window.dataManager = {
         try {
             const data = this.getData();
             data.settings = { ...data.settings, ...settings };
-            return this.saveToLocalStorage(data);
+            const success = this.saveToLocalStorage(data);
+            
+            // Синхронизируем с worldtravel_current_data
+            if (success) {
+                this.syncWithCurrentData();
+            }
+            
+            return success;
         } catch (error) {
             console.error('❌ Ошибка сохранения настроек:', error);
+            return false;
+        }
+    },
+
+    // Синхронизация с worldtravel_current_data
+    syncWithCurrentData: function() {
+        try {
+            const data = this.getData();
+            localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
+            console.log('🔄 Данные синхронизированы с worldtravel_current_data');
+            return true;
+        } catch (error) {
+            console.error('❌ Ошибка синхронизации:', error);
             return false;
         }
     }
