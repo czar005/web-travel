@@ -140,6 +140,31 @@ class DataManager {
         return this.saveData();
     }
 }
+// data-manager.js - ДОБАВИТЬ в конец файла:
 
+// Работа с LocalStorage
+window.dataManager = {
+    // Сохранить данные в LocalStorage
+    saveToLocalStorage: function(data) {
+        localStorage.setItem('travelData', JSON.stringify(data));
+        console.log('Данные сохранены в LocalStorage');
+    },
+
+    // Загрузить данные из LocalStorage
+    loadFromLocalStorage: function() {
+        const saved = localStorage.getItem('travelData');
+        return saved ? JSON.parse(saved) : null;
+    },
+
+    // Получить данные (сначала из LocalStorage, потом из файла)
+    getData: function() {
+        const localData = this.loadFromLocalStorage();
+        if (localData) {
+            return localData;
+        }
+        // Если в LocalStorage нет данных, используем стандартные
+        return this.loadData();
+    }
+};
 // Создаем глобальный экземпляр
 window.dataManager = new DataManager();

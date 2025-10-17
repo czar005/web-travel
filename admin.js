@@ -1,6 +1,11 @@
 // admin.js - УПРОЩЕННАЯ РАБОЧАЯ ВЕРСИЯ
 console.log('🚀 Админка загружена');
+function saveTravelData(data) {
+    localStorage.setItem('travelData', JSON.stringify(data));
+    alert('Изменения сохранены! Обновите основную страницу.');
+}
 
+// Вызывайте эту функцию при сохранении в админке
 class SimpleAdmin {
     constructor() {
         this.countries = [];
@@ -227,7 +232,107 @@ class SimpleAdmin {
         }
     }
 }
+// admin.js - ДОБАВИТЬ в конец:
 
+// Инициализация админки
+document.addEventListener('DOMContentLoaded', function() {
+    initializeAdmin();
+});
+
+function initializeAdmin() {
+    loadCountriesForAdmin();
+    setupEventListeners();
+}
+
+function setupEventListeners() {
+    // Кнопка сохранения
+    const saveBtn = document.querySelector('.btn-save');
+    if (saveBtn) {
+        saveBtn.addEventListener('click', saveAdminChanges);
+    }
+    
+    // Кнопка добавления страны
+    const addCountryBtn = document.querySelector('.btn-add-country');
+    if (addCountryBtn) {
+        addCountryBtn.addEventListener('click', showAddCountryForm);
+    }
+}
+
+// Загрузить страны для админки
+async function loadCountriesForAdmin() {
+    const data = await loadData();
+    displayCountriesInAdmin(data.countries);
+}
+
+// Показать страны в админке
+function displayCountriesInAdmin(countries) {
+    const container = document.getElementById('countries-list');
+    if (!container) return;
+    
+    container.innerHTML = countries.map(country => `
+        <div class="country-item" data-id="${country.id}">
+            <h4>${country.name}</h4>
+            <p>${country.description}</p>
+            <button onclick="editCountry(${country.id})">Редактировать</button>
+            <button onclick="deleteCountry(${country.id})">Удалить</button>
+        </div>
+    `).join('');
+}
+
+// Сохранить изменения из админки
+async function saveAdminChanges() {
+    const currentData = await loadData();
+    
+    // Здесь будет логика сохранения изменений из форм
+    // Пока просто сохраняем текущие данные в LocalStorage
+    
+    if (window.dataManager) {
+        window.dataManager.saveToLocalStorage(currentData);
+        alert('Данные сохранены! Обновите основную страницу.');
+    } else {
+        alert('Ошибка: Менеджер данных не загружен');
+    }
+}
+
+// Добавить новую страну
+function showAddCountryForm() {
+    const name = prompt('Введите название страны:');
+    const description = prompt('Введите описание:');
+    
+    if (name && description) {
+        addNewCountry(name, description);
+    }
+}
+
+async function addNewCountry(name, description) {
+    const data = await loadData();
+    const newId = Math.max(...data.countries.map(c => c.id), 0) + 1;
+    
+    data.countries.push({
+        id: newId,
+        name: name,
+        description: description,
+        image: "images/travel-placeholder.jpg"
+    });
+    
+    if (window.dataManager) {
+        window.dataManager.saveToLocalStorage(data);
+        loadCountriesForAdmin(); // Обновляем список
+        alert('Страна добавлена!');
+    }
+}
+
+// Удалить страну
+function deleteCountry(id) {
+    if (confirm('Удалить эту страну?')) {
+        // Логика удаления будет в следующем шаге
+        alert('Функция удаления будет добавлена');
+    }
+}
+
+function editCountry(id) {
+    alert('Функция редактирования будет добавлена');
+}
 // Инициализация
 let simpleAdmin;
 document.addEventListener('DOMContentLoaded', () => {

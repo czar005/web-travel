@@ -16,30 +16,57 @@ document.addEventListener('DOMContentLoaded', function() {
         enableEditMode();
     }
 });
+// Загрузка данных из LocalStorage или использование стандартных
+function loadTravelData() {
+    const savedData = localStorage.getItem('travelData');
+    if (savedData) {
+        return JSON.parse(savedData);
+    }
+    // Если данных нет, используйте стандартные из data/content.json
+    return defaultData;
+}
 
+// Используйте эти данные для отображения контента
+const travelData = loadTravelData();
 function initializePage() {
     loadData();
     startAutoSync();
 }
 
-function loadData() {
-    console.log('🔍 Загрузка данных...');
-    
-    const data = window.dataManager.data;
-    countriesData = data.countries || [];
-    editorData = data.editorData || {};
-    
-    console.log('✅ Загружено:', {
-        countries: countriesData.length,
-        content: Object.keys(data.content || {}).length,
-        editor: Object.keys(editorData).length
-    });
-    
-    // Применяем все настройки
-    applyContentChanges(data.content || {});
-    applyDesignSettings(data.design || {});
-    applyEditorData(editorData);
-    renderCountries();
+// script.js - ЗАМЕНИТЬ функцию loadData:
+
+async function loadData() {
+    try {
+        // Сначала пробуем загрузить из LocalStorage
+        const localData = window.dataManager ? window.dataManager.getData() : null;
+        
+        if (localData && localData.countries && localData.countries.length > 0) {
+            console.log('Данные загружены из LocalStorage');
+            return localData;
+        }
+        
+        // Если в LocalStorage нет данных, загружаем из файла
+        const response = await fetch('./data/content.json');
+        if (!response.ok) throw new Error('Файл не найден');
+        
+        const data = await response.json();
+        console.log('Данные загружены из content.json');
+        return data;
+    } catch (error) {
+        console.error('Ошибка загрузки данных:', error);
+        // Возвращаем заглушку
+        return {
+            countries: [
+                {
+                    id: 1,
+                    name: "Пример страны",
+                    description: "Описание появится после настройки админки",
+                    image: "images/travel-placeholder.jpg"
+                }
+            ],
+            cities: []
+        };
+    }
 }
 
 // Применение данных редактора
