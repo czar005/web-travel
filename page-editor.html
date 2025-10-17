@@ -356,6 +356,28 @@
         .nav-back:hover {
             background: #545b62;
         }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: white;
+        }
+        .notification.success { background: #28a745; }
+        .notification.error { background: #dc3545; }
+        .notification.warning { background: #ffc107; color: #000; }
+        .notification.info { background: #007bff; }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
     </style>
 </head>
 <body>
@@ -752,6 +774,7 @@
 
                 this.saveToStorage();
                 this.renderBlocks();
+                this.showNotification('Изменения сохранены!', 'success');
             }
 
             updateFeature(blockId, featureIndex, field, value) {
@@ -796,6 +819,7 @@
                     document.getElementById('sidebar-subtitle').textContent = 'Кликните на блок для редактирования';
                     
                     this.selectedBlock = null;
+                    this.showNotification('Блок удален', 'success');
                 }
             }
 
@@ -825,7 +849,7 @@
                 const image = document.getElementById('new-block-image').value;
 
                 if (!this.currentBlockType) {
-                    alert('Пожалуйста, выберите тип блока');
+                    this.showNotification('Пожалуйста, выберите тип блока', 'warning');
                     return;
                 }
 
@@ -874,6 +898,7 @@
                 this.saveToStorage();
                 this.renderBlocks();
                 this.hideBlockSelector();
+                this.showNotification('Блок добавлен!', 'success');
             }
 
             saveToStorage() {
@@ -888,13 +913,28 @@
                 }
             }
 
+            showNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    ${message}
+                `;
+                document.body.appendChild(notification);
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 3000);
+            }
+
             previewChanges() {
-                alert('Функция предпросмотра в разработке');
+                this.showNotification('Функция предпросмотра в разработке', 'info');
             }
 
             saveChanges() {
                 this.saveToStorage();
-                alert('Изменения сохранены в системе!');
+                this.showNotification('Все изменения сохранены в системе!', 'success');
             }
 
             exitEditor() {
