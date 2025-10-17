@@ -1,8 +1,23 @@
 {
-  "countries": [],
+  "countries": [
+    {
+      "id": "country-1",
+      "name": "Франция",
+      "description": "Страна искусства, моды и изысканной кухни",
+      "price": "от $500",
+      "image": "images/france.jpg"
+    },
+    {
+      "id": "country-2", 
+      "name": "Италия",
+      "description": "Страна древней истории, искусства и кулинарных традиций",
+      "price": "от $450",
+      "image": "images/italy.jpg"
+    }
+  ],
   "content": {
     "heroTitle": "Откройте мир с WorldTravel",
-    "heroText": "Мы создаем незабываемые путешествия по всему миру",
+    "heroText": "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин – ваше приключение начинается здесь.",
     "contactPhone": "+7 (999) 123-45-67",
     "contactEmail": "info@worldtravel.com",
     "contactAddress": "Москва, ул. Туристическая, 15",
@@ -11,8 +26,6 @@
   "design": {
     "blocks": {
       "hero": true,
-      "about": true,
-      "services": true,
       "destinations": true,
       "contact": true
     }
