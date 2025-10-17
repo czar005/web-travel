@@ -280,7 +280,8 @@
                     showMessage('✅ Успешный вход! Перенаправление...', 'success');
                     // Сохраняем статус авторизации
                     localStorage.setItem('adminAuthenticated', 'true');
-                    localStorage.setItem('adminUsername', currentUsername);
+localStorage.setItem('adminUsername', currentUsername);
+localStorage.setItem('authTime', Date.now().toString());
                     
                     // Перенаправляем в админ-панель через 2 секунды
                     setTimeout(() => {

@@ -396,7 +396,41 @@
             </form>
         </div>
     </div>
+    <script>
+// Проверка авторизации при загрузке админ-панели
+document.addEventListener('DOMContentLoaded', function() {
+    const isAuthenticated = localStorage.getItem('adminAuthenticated');
+    const authTime = localStorage.getItem('authTime');
+    const currentTime = Date.now();
+    
+    // Проверяем есть ли авторизация и не истекла ли она (24 часа)
+    if (!isAuthenticated || !authTime || (currentTime - parseInt(authTime)) > 24 * 60 * 60 * 1000) {
+        // Если нет авторизации или истекла - на страницу входа
+        localStorage.removeItem('adminAuthenticated');
+        localStorage.removeItem('authTime');
+        localStorage.removeItem('adminUsername');
+        window.location.href = 'admin-login.html';
+        return;
+    }
+    
+    // Показываем имя пользователя если есть
+    const username = localStorage.getItem('adminUsername');
+    if (username) {
+        const userElement = document.querySelector('.admin-welcome');
+        if (userElement) {
+            userElement.textContent = `Добро пожаловать, ${username}`;
+        }
+    }
+});
 
+// Функция выхода
+function logout() {
+    localStorage.removeItem('adminAuthenticated');
+    localStorage.removeItem('authTime');
+    localStorage.removeItem('adminUsername');
+    window.location.href = 'admin-login.html';
+}
+</script>
     <script>
         class AdminPanel {
             constructor() {
