@@ -18,6 +18,7 @@ function initializeSite() {
     loadCountriesData();
     updateContactInfo();
     updateSiteSettings();
+    updateFooterContacts(); // Добавляем обновление футера
     setupEventListeners();
     initializeFilters();
 }
@@ -36,22 +37,12 @@ function setupEventListeners() {
 
 function initializeFilters() {
     const searchInput = document.querySelector('.search-input');
-    const filterButtons = document.querySelectorAll('.filter-btn');
     
     if (searchInput) {
         searchInput.addEventListener('input', function(e) {
             filterCountries(e.target.value);
         });
     }
-    
-    filterButtons.forEach(btn => {
-        btn.addEventListener('click', function() {
-            filterButtons.forEach(b => b.classList.remove('active'));
-            this.classList.add('active');
-            const filter = this.getAttribute('data-filter');
-            applyFilter(filter);
-        });
-    });
 }
 
 function filterCountries(searchTerm) {
@@ -71,35 +62,6 @@ function filterCountries(searchTerm) {
     displayCountries(filtered);
 }
 
-function applyFilter(filter) {
-    let filtered = [...currentCountries];
-    
-    switch(filter) {
-        case 'popular':
-            filtered = filtered.sort((a, b) => (b.tours?.length || 0) - (a.tours?.length || 0));
-            break;
-        case 'cheap':
-            filtered = filtered.filter(country => 
-                country.tours && country.tours.some(tour => tour.price < 600)
-            ).sort((a, b) => {
-                const aMinPrice = Math.min(...a.tours.map(t => t.price));
-                const bMinPrice = Math.min(...b.tours.map(t => t.price));
-                return aMinPrice - bMinPrice;
-            });
-            break;
-        case 'exotic':
-            const exoticCountries = ['Тайланд', 'Бали', 'Мальдивы', 'Доминикана', 'Куба'];
-            filtered = filtered.filter(country => 
-                exoticCountries.some(name => country.name.toLowerCase().includes(name.toLowerCase()))
-            );
-            break;
-        default:
-            filtered = currentCountries;
-    }
-    
-    displayCountries(filtered);
-}
-
 function handleDataUpdate(data) {
     console.log('Data update received:', data);
     if (data) {
@@ -109,6 +71,7 @@ function handleDataUpdate(data) {
         }
         updateContactInfo();
         updateSiteSettings();
+        updateFooterContacts(); // Обновляем футер при изменении данных
     }
 }
 
@@ -143,7 +106,13 @@ function displayCountries(countriesArray) {
     console.log('Displaying countries:', countriesArray);
     
     if (countriesArray && countriesArray.length > 0) {
-        grid.innerHTML = countriesArray.map((country, index) => `
+        grid.innerHTML = countriesArray.map((country, index) => {
+            // Находим минимальную цену среди туров
+            const minPrice = country.tours && country.tours.length > 0 
+                ? Math.min(...country.tours.map(tour => tour.price))
+                : null;
+            
+            return `
             <div class="country-card" data-country-id="${country.id}" style="animation-delay: ${index * 0.1}s">
                 <div class="country-image">
                     <img src="${country.image || 'images/travel-placeholder.svg'}" 
@@ -152,7 +121,7 @@ function displayCountries(countriesArray) {
                     <div class="country-overlay">
                         <div>
                             <h3 class="country-name">${country.name}</h3>
-                            <div class="tour-count">${country.tours ? country.tours.length : 0} туров</div>
+                            ${minPrice ? `<div class="tour-count">от $${minPrice}</div>` : ''}
                         </div>
                     </div>
                 </div>
@@ -181,7 +150,7 @@ function displayCountries(countriesArray) {
                     ` : `
                         <div class="no-tours-message">
                             <p style="color: #999; font-style: italic; text-align: center;">
-                                <i class="fas fa-info-circle"></i> Туры скоро появятся
+                                <i class="fas fa-clock"></i> Туры в разработке
                             </p>
                         </div>
                     `}
@@ -191,7 +160,7 @@ function displayCountries(countriesArray) {
                     </button>
                 </div>
             </div>
-        `).join('');
+        `}).join('');
         
         if (loadingMsg) loadingMsg.style.display = 'none';
         if (errorMsg) errorMsg.style.display = 'none';
@@ -252,6 +221,26 @@ function updateContactInfo() {
             }
         }
     });
+}
+
+// Обновление контактов в футере
+function updateFooterContacts() {
+    if (!window.dataManager) return;
+    
+    const contacts = window.dataManager.getContacts();
+    const footerSection = document.querySelector('.footer-section:last-child');
+    
+    if (footerSection) {
+        const phoneElement = footerSection.querySelector('p:nth-child(2)');
+        const emailElement = footerSection.querySelector('p:nth-child(3)');
+        
+        if (phoneElement) {
+            phoneElement.innerHTML = `<i class="fas fa-phone"></i> ${contacts.phone || '+7 (999) 123-45-67'}`;
+        }
+        if (emailElement) {
+            emailElement.innerHTML = `<i class="fas fa-envelope"></i> ${contacts.email || 'info@worldtravel.com'}`;
+        }
+    }
 }
 
 // Обновление настроек сайта
