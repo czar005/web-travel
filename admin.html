@@ -346,7 +346,7 @@
             <div class="content-section">
                 <div class="section-header">
                     <h2>Управление странами</h2>
-                    <button class="btn btn-success" onclick="openCountryModal()">
+                    <button class="btn btn-success" onclick="admin.openCountryModal()">
                         <i class="fas fa-plus"></i> Добавить страну
                     </button>
                 </div>
@@ -819,25 +819,6 @@
         }
 
         // Методы для стран
-    openCountryModal(countryId = null) {
-        console.log('📝 Открытие модального окна для страны:', countryId);
-        this.currentEditingId = countryId;
-        const modal = document.getElementById('countryModal');
-        const title = document.getElementById('modalTitle');
-
-        if (!modal) {
-            console.error('❌ Модальное окно не найдено!');
-            this.showNotification('Ошибка: модальное окно не найдено', 'error');
-            return;
-        }
-
-        if (countryId) {
-            title.textContent = 'Редактировать страну';
-            this.fillCountryForm(countryId);
-        } else {
-            title.textContent = 'Добавить страну';
-            this.resetCountryForm();
-        }
         
         modal.classList.add('active');
         console.log('✅ Модальное окно открыто');
@@ -859,24 +840,60 @@
             document.getElementById('countryForm').reset();
         }
 
-    saveCountry() {
+        saveCountry() {
+        console.log('💾 Сохранение страны...');
+        
+        const name = document.getElementById('country-name').value;
+        const description = document.getElementById('country-description').value;
+        const price = document.getElementById('country-price').value;
 
-    syncWithMainPage() {
-        console.log('🔄 Синхронизация с главной страницей...');
-        
-        const allData = {
-            countries: this.dataManager.getCountries(),
-            content: this.dataManager.getContent(),
-            design: this.dataManager.getDesign(),
-            settings: thisManager.getSettings()
+        if (!name || !description || !price) {
+            this.showNotification('❌ Заполните все обязательные поля', 'error');
+            return;
+        }
+
+        const countryData = {
+            id: this.currentEditingId || this.generateId(),
+            name: name,
+            description: description,
+            price: price,
+            shortDescription: description.substring(0, 100) + '...',
+            image: "images/travel-placeholder.jpg"
         };
-        
-        localStorage.setItem('worldtravel_current_data', JSON.stringify(allData));
-        console.log('✅ Данные синхронизированы с главной страницей');
-        
-        setTimeout(() => {
-            window.open('index.html', '_blank');
-        }, 1000);
+
+        console.log('📦 Данные страны:', countryData);
+
+        try {
+            const countries = this.dataManager.getCountries();
+            console.log('📊 Текущие страны:', countries);
+            
+            if (this.currentEditingId) {
+                const index = countries.findIndex(c => c.id === this.currentEditingId);
+                if (index !== -1) {
+                    countries[index] = { ...countries[index], ...countryData };
+                    console.log('✏️ Страна обновлена, индекс:', index);
+                }
+            } else {
+                countries.push(countryData);
+                console.log('➕ Новая страна добавлена');
+            }
+
+            const success = this.dataManager.updateCountries(countries);
+            console.log('💾 Результат сохранения:', success);
+            
+            if (success) {
+                this.showNotification(`✅ Страна "${name}" ${this.currentEditingId ? 'обновлена' : 'добавлена'}!`);
+                this.closeModal();
+                this.renderCountries();
+                this.syncWithMainPage();
+            } else {
+                this.showNotification('❌ Ошибка сохранения страны', 'error');
+            }
+            
+        } catch (error) {
+            console.error('❌ Ошибка при сохранении страны:', error);
+            this.showNotification('❌ Ошибка при сохранении страны', 'error');
+        }
     }
         console.log('💾 Сохранение страны...');
 
@@ -2077,6 +2094,36 @@
         console.log('📄 DOM загружен, инициализация админки...');
         admin = new FullAdmin();
         window.admin = admin;
+// Глобальные функции для кнопок
+function openCountryModal(countryId = null) {
+    if (window.admin) {
+        window.admin.openCountryModal(countryId);
+    } else {
+        console.error('Admin not initialized');
+        setTimeout(() => openCountryModal(countryId), 100);
+    }
+}
+
+function closeModal() {
+    if (window.admin) {
+        window.admin.closeModal();
+    }
+}
+// Глобальные функции для обратной совместимости
+function openCountryModal(countryId = null) {
+    if (window.admin && typeof window.admin.openCountryModal === 'function') {
+        window.admin.openCountryModal(countryId);
+    } else {
+        console.error('❌ Admin not initialized');
+        alert('Админка не загружена. Обновите страницу.');
+    }
+}
+
+function closeModal() {
+    if (window.admin && typeof window.admin.closeModal === 'function') {
+        window.admin.closeModal();
+    }
+}
     });
 </script>
 </body>
