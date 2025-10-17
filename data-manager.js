@@ -125,6 +125,18 @@ class DataManager {
                                 { icon: 'map-marked-alt', title: 'Туры', description: 'Индивидуальные и групповые туры с профессиональными гидами' },
                                 { icon: 'shield-alt', title: 'Страхование', description: 'Полное страховое сопровождение вашего путешествия' }
                             ]
+                        },
+                        {
+                            id: 'destinations',
+                            type: 'destinations',
+                            title: 'Популярные направления',
+                            subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'
+                        },
+                        {
+                            id: 'contact',
+                            type: 'contact',
+                            title: 'Свяжитесь с нами',
+                            subtitle: 'Мы всегда рады помочь вам с организацией путешествия'
                         }
                     ]
                 }
@@ -200,6 +212,7 @@ class DataManager {
         if (!data.pages[pageId]) data.pages[pageId] = { id: pageId, blocks: [] };
         
         data.pages[pageId].blocks = blocks;
+        console.log('Saving blocks for page', pageId, blocks);
         return this.setData(data);
     }
 

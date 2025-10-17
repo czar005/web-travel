@@ -11,19 +11,26 @@ class PageEditor {
         this.loadPageData();
         this.setupEventListeners();
         this.renderPageStructure();
+        this.updatePageTitle();
     }
 
     loadPageData() {
         if (!window.dataManager) {
             console.error('Data manager not available');
+            this.showError('Менеджер данных не доступен');
             return;
         }
 
+        console.log('Loading page data for:', this.currentPage);
         const page = window.dataManager.getPage(this.currentPage);
+        console.log('Loaded page:', page);
+
         if (page && page.blocks) {
-            this.currentBlocks = [...page.blocks];
+            this.currentBlocks = JSON.parse(JSON.stringify(page.blocks)); // Deep copy
+            console.log('Loaded blocks:', this.currentBlocks);
         } else {
             this.currentBlocks = [];
+            console.log('No blocks found, using empty array');
         }
     }
 
@@ -35,6 +42,7 @@ class PageEditor {
                 this.currentPage = e.target.value;
                 this.loadPageData();
                 this.renderPageStructure();
+                this.updatePageTitle();
                 this.updatePreview();
             });
         }
@@ -58,23 +66,25 @@ class PageEditor {
         });
 
         // Настройка зоны сброса
-        pageStructure.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            e.dataTransfer.dropEffect = 'copy';
-            pageStructure.classList.add('drag-over');
-        });
+        if (pageStructure) {
+            pageStructure.addEventListener('dragover', (e) => {
+                e.preventDefault();
+                e.dataTransfer.dropEffect = 'copy';
+                pageStructure.classList.add('drag-over');
+            });
 
-        pageStructure.addEventListener('dragleave', () => {
-            pageStructure.classList.remove('drag-over');
-        });
+            pageStructure.addEventListener('dragleave', () => {
+                pageStructure.classList.remove('drag-over');
+            });
 
-        pageStructure.addEventListener('drop', (e) => {
-            e.preventDefault();
-            pageStructure.classList.remove('drag-over');
-            
-            const blockType = e.dataTransfer.getData('text/plain');
-            this.addBlock(blockType);
-        });
+            pageStructure.addEventListener('drop', (e) => {
+                e.preventDefault();
+                pageStructure.classList.remove('drag-over');
+                
+                const blockType = e.dataTransfer.getData('text/plain');
+                this.addBlock(blockType);
+            });
+        }
     }
 
     addBlock(blockType) {
@@ -84,12 +94,15 @@ class PageEditor {
             ...this.getDefaultBlockData(blockType)
         };
 
+        console.log('Adding new block:', newBlock);
         this.currentBlocks.push(newBlock);
         this.renderPageStructure();
         this.updatePreview();
         
-        // Показываем редактор для нового блока
-        this.editBlock(newBlock.id);
+        // Автоматически открываем редактор для нового блока
+        setTimeout(() => {
+            this.editBlock(newBlock.id);
+        }, 100);
     }
 
     getDefaultBlockData(blockType) {
@@ -125,7 +138,7 @@ class PageEditor {
             }
         };
 
-        return defaults[blockType] || {};
+        return JSON.parse(JSON.stringify(defaults[blockType] || {}));
     }
 
     removeBlock(blockId) {
@@ -133,13 +146,18 @@ class PageEditor {
             this.currentBlocks = this.currentBlocks.filter(block => block.id !== blockId);
             this.renderPageStructure();
             this.updatePreview();
+            this.showNotification('Блок удален', 'success');
         }
     }
 
     editBlock(blockId) {
         const block = this.currentBlocks.find(b => b.id === blockId);
-        if (!block) return;
+        if (!block) {
+            console.error('Block not found:', blockId);
+            return;
+        }
 
+        console.log('Editing block:', block);
         this.editingBlock = block;
         this.openBlockEditor(block);
     }
@@ -150,19 +168,27 @@ class PageEditor {
         const title = document.getElementById('block-editor-title');
         const content = document.getElementById('block-editor-content');
 
+        if (!editor || !overlay || !title || !content) {
+            console.error('Editor elements not found');
+            return;
+        }
+
         title.textContent = `Редактирование: ${this.getBlockTypeName(block.type)}`;
         content.innerHTML = this.getBlockEditorForm(block);
 
         editor.classList.add('active');
         overlay.classList.add('active');
+
+        // Заполняем форму текущими данными блока
+        this.populateBlockForm(block);
     }
 
     closeBlockEditor() {
         const editor = document.getElementById('block-editor');
         const overlay = document.getElementById('editor-overlay');
         
-        editor.classList.remove('active');
-        overlay.classList.remove('active');
+        if (editor) editor.classList.remove('active');
+        if (overlay) overlay.classList.remove('active');
         this.editingBlock = null;
     }
 
@@ -179,172 +205,272 @@ class PageEditor {
 
     getBlockEditorForm(block) {
         const forms = {
-            hero: this.getHeroEditorForm(block),
-            about: this.getAboutEditorForm(block),
-            services: this.getServicesEditorForm(block),
-            destinations: this.getDestinationsEditorForm(block),
-            contact: this.getContactEditorForm(block)
+            hero: this.getHeroEditorForm(),
+            about: this.getAboutEditorForm(),
+            services: this.getServicesEditorForm(),
+            destinations: this.getDestinationsEditorForm(),
+            contact: this.getContactEditorForm()
         };
 
         return forms[block.type] || '<p>Редактор для этого типа блока не реализован</p>';
     }
 
-    getHeroEditorForm(block) {
+    getHeroEditorForm() {
         return `
             <div class="form-group">
                 <label>Заголовок</label>
-                <input type="text" value="${block.title || ''}" id="hero-title" class="form-control">
+                <input type="text" id="hero-title" class="form-control" placeholder="Введите заголовок">
             </div>
             <div class="form-group">
                 <label>Подзаголовок</label>
-                <textarea id="hero-subtitle" class="form-control" rows="3">${block.subtitle || ''}</textarea>
+                <textarea id="hero-subtitle" class="form-control" rows="3" placeholder="Введите описание"></textarea>
             </div>
             <div class="form-group">
                 <label>Текст кнопки</label>
-                <input type="text" value="${block.buttonText || ''}" id="hero-buttonText" class="form-control">
+                <input type="text" id="hero-buttonText" class="form-control" placeholder="Текст на кнопке">
             </div>
         `;
     }
 
-    getAboutEditorForm(block) {
+    getAboutEditorForm() {
         return `
             <div class="form-group">
                 <label>Заголовок</label>
-                <input type="text" value="${block.title || ''}" id="about-title" class="form-control">
+                <input type="text" id="about-title" class="form-control" placeholder="Заголовок секции">
             </div>
             <div class="form-group">
                 <label>Текст</label>
-                <textarea id="about-content" class="form-control" rows="5">${block.content || ''}</textarea>
+                <textarea id="about-content" class="form-control" rows="5" placeholder="Описание компании"></textarea>
             </div>
             <div class="form-group">
                 <label>Статистика</label>
                 <div id="about-stats">
-                    ${(block.stats || []).map((stat, index) => `
-                        <div class="stat-item" style="display: flex; gap: 10px; margin-bottom: 10px;">
-                            <input type="text" value="${stat.value}" placeholder="Значение" class="form-control" data-index="${index}" data-field="value">
-                            <input type="text" value="${stat.label}" placeholder="Подпись" class="form-control" data-index="${index}" data-field="label">
-                            <button type="button" class="btn-small danger" onclick="pageEditor.removeStat(${index})">×</button>
-                        </div>
-                    `).join('')}
+                    <!-- Статистика будет добавляться динамически -->
                 </div>
-                <button type="button" class="btn-small" onclick="pageEditor.addStat()">+ Добавить статистику</button>
+                <button type="button" class="btn-small" onclick="pageEditor.addStat()" style="margin-top: 10px;">
+                    <i class="fas fa-plus"></i> Добавить статистику
+                </button>
             </div>
         `;
     }
 
-    getServicesEditorForm(block) {
+    getServicesEditorForm() {
         return `
             <div class="form-group">
                 <label>Заголовок</label>
-                <input type="text" value="${block.title || ''}" id="services-title" class="form-control">
+                <input type="text" id="services-title" class="form-control" placeholder="Заголовок секции услуг">
             </div>
             <div class="form-group">
                 <label>Услуги</label>
                 <div id="services-list">
-                    ${(block.services || []).map((service, index) => `
-                        <div class="service-item" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
-                            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                                <input type="text" value="${service.icon}" placeholder="Иконка (fa-...)" class="form-control" data-index="${index}" data-field="icon">
-                                <input type="text" value="${service.title}" placeholder="Название услуги" class="form-control" data-index="${index}" data-field="title">
-                            </div>
-                            <textarea class="form-control" placeholder="Описание услуги" data-index="${index}" data-field="description" rows="2">${service.description || ''}</textarea>
-                            <button type="button" class="btn-small danger" onclick="pageEditor.removeService(${index})" style="margin-top: 10px;">Удалить</button>
-                        </div>
-                    `).join('')}
+                    <!-- Услуги будут добавляться динамически -->
                 </div>
-                <button type="button" class="btn-small" onclick="pageEditor.addService()">+ Добавить услугу</button>
+                <button type="button" class="btn-small" onclick="pageEditor.addService()" style="margin-top: 10px;">
+                    <i class="fas fa-plus"></i> Добавить услугу
+                </button>
             </div>
         `;
     }
 
-    getDestinationsEditorForm(block) {
+    getDestinationsEditorForm() {
         return `
             <div class="form-group">
                 <label>Заголовок</label>
-                <input type="text" value="${block.title || ''}" id="destinations-title" class="form-control">
+                <input type="text" id="destinations-title" class="form-control" placeholder="Заголовок секции направлений">
             </div>
             <div class="form-group">
                 <label>Подзаголовок</label>
-                <textarea id="destinations-subtitle" class="form-control" rows="3">${block.subtitle || ''}</textarea>
+                <textarea id="destinations-subtitle" class="form-control" rows="3" placeholder="Описание направлений"></textarea>
             </div>
         `;
     }
 
-    getContactEditorForm(block) {
+    getContactEditorForm() {
         return `
             <div class="form-group">
                 <label>Заголовок</label>
-                <input type="text" value="${block.title || ''}" id="contact-title" class="form-control">
+                <input type="text" id="contact-title" class="form-control" placeholder="Заголовок секции контактов">
             </div>
             <div class="form-group">
                 <label>Подзаголовок</label>
-                <textarea id="contact-subtitle" class="form-control" rows="3">${block.subtitle || ''}</textarea>
+                <textarea id="contact-subtitle" class="form-control" rows="3" placeholder="Описание контактов"></textarea>
             </div>
         `;
+    }
+
+    populateBlockForm(block) {
+        if (!block) return;
+
+        console.log('Populating form for block:', block);
+
+        switch(block.type) {
+            case 'hero':
+                document.getElementById('hero-title').value = block.title || '';
+                document.getElementById('hero-subtitle').value = block.subtitle || '';
+                document.getElementById('hero-buttonText').value = block.buttonText || '';
+                break;
+                
+            case 'about':
+                document.getElementById('about-title').value = block.title || '';
+                document.getElementById('about-content').value = block.content || '';
+                this.renderStats(block.stats || []);
+                break;
+                
+            case 'services':
+                document.getElementById('services-title').value = block.title || '';
+                this.renderServices(block.services || []);
+                break;
+                
+            case 'destinations':
+                document.getElementById('destinations-title').value = block.title || '';
+                document.getElementById('destinations-subtitle').value = block.subtitle || '';
+                break;
+                
+            case 'contact':
+                document.getElementById('contact-title').value = block.title || '';
+                document.getElementById('contact-subtitle').value = block.subtitle || '';
+                break;
+        }
+    }
+
+    renderStats(stats) {
+        const container = document.getElementById('about-stats');
+        if (!container) return;
+
+        container.innerHTML = stats.map((stat, index) => `
+            <div class="stat-item" style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                <input type="text" value="${stat.value}" placeholder="Значение" class="form-control stat-value" data-index="${index}">
+                <input type="text" value="${stat.label}" placeholder="Подпись" class="form-control stat-label" data-index="${index}">
+                <button type="button" class="btn-small danger" onclick="pageEditor.removeStat(${index})" title="Удалить">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+        `).join('');
+    }
+
+    renderServices(services) {
+        const container = document.getElementById('services-list');
+        if (!container) return;
+
+        container.innerHTML = services.map((service, index) => `
+            <div class="service-item" style="border: 1px solid #ddd; padding: 15px; margin-bottom: 10px; border-radius: 5px;">
+                <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                    <input type="text" value="${service.icon}" placeholder="Иконка (fa-...)" class="form-control service-icon" data-index="${index}">
+                    <input type="text" value="${service.title}" placeholder="Название услуги" class="form-control service-title" data-index="${index}">
+                </div>
+                <textarea class="form-control service-description" placeholder="Описание услуги" data-index="${index}" rows="2">${service.description || ''}</textarea>
+                <button type="button" class="btn-small danger" onclick="pageEditor.removeService(${index})" style="margin-top: 10px;">
+                    <i class="fas fa-trash"></i> Удалить
+                </button>
+            </div>
+        `).join('');
     }
 
     addStat() {
-        const stats = this.editingBlock.stats || [];
-        stats.push({ value: '', label: '' });
-        this.editingBlock.stats = stats;
-        this.openBlockEditor(this.editingBlock);
+        if (!this.editingBlock) return;
+        
+        if (!this.editingBlock.stats) {
+            this.editingBlock.stats = [];
+        }
+        
+        this.editingBlock.stats.push({ value: '', label: '' });
+        this.renderStats(this.editingBlock.stats);
     }
 
     removeStat(index) {
+        if (!this.editingBlock || !this.editingBlock.stats) return;
+        
         this.editingBlock.stats.splice(index, 1);
-        this.openBlockEditor(this.editingBlock);
+        this.renderStats(this.editingBlock.stats);
     }
 
     addService() {
-        const services = this.editingBlock.services || [];
-        services.push({ icon: 'cog', title: '', description: '' });
-        this.editingBlock.services = services;
-        this.openBlockEditor(this.editingBlock);
+        if (!this.editingBlock) return;
+        
+        if (!this.editingBlock.services) {
+            this.editingBlock.services = [];
+        }
+        
+        this.editingBlock.services.push({ icon: 'cog', title: '', description: '' });
+        this.renderServices(this.editingBlock.services);
     }
 
     removeService(index) {
+        if (!this.editingBlock || !this.editingBlock.services) return;
+        
         this.editingBlock.services.splice(index, 1);
-        this.openBlockEditor(this.editingBlock);
+        this.renderServices(this.editingBlock.services);
     }
 
     saveBlockChanges() {
-        if (!this.editingBlock) return;
-
-        const blockType = this.editingBlock.type;
-        
-        // Сохраняем изменения в зависимости от типа блока
-        switch(blockType) {
-            case 'hero':
-                this.editingBlock.title = document.getElementById('hero-title').value;
-                this.editingBlock.subtitle = document.getElementById('hero-subtitle').value;
-                this.editingBlock.buttonText = document.getElementById('hero-buttonText').value;
-                break;
-            case 'about':
-                this.editingBlock.title = document.getElementById('about-title').value;
-                this.editingBlock.content = document.getElementById('about-content').value;
-                // Статистика уже обновлена через методы addStat/removeStat
-                break;
-            case 'services':
-                this.editingBlock.title = document.getElementById('services-title').value;
-                // Услуги уже обновлены через методы addService/removeService
-                break;
-            case 'destinations':
-                this.editingBlock.title = document.getElementById('destinations-title').value;
-                this.editingBlock.subtitle = document.getElementById('destinations-subtitle').value;
-                break;
-            case 'contact':
-                this.editingBlock.title = document.getElementById('contact-title').value;
-                this.editingBlock.subtitle = document.getElementById('contact-subtitle').value;
-                break;
+        if (!this.editingBlock) {
+            this.showError('Нет активного блока для сохранения');
+            return;
         }
 
-        this.renderPageStructure();
-        this.updatePreview();
-        this.closeBlockEditor();
+        console.log('Saving block changes:', this.editingBlock);
+
+        try {
+            const blockType = this.editingBlock.type;
+            
+            // Сохраняем изменения в зависимости от типа блока
+            switch(blockType) {
+                case 'hero':
+                    this.editingBlock.title = document.getElementById('hero-title').value;
+                    this.editingBlock.subtitle = document.getElementById('hero-subtitle').value;
+                    this.editingBlock.buttonText = document.getElementById('hero-buttonText').value;
+                    break;
+                    
+                case 'about':
+                    this.editingBlock.title = document.getElementById('about-title').value;
+                    this.editingBlock.content = document.getElementById('about-content').value;
+                    // Статистика уже обновлена через методы addStat/removeStat
+                    break;
+                    
+                case 'services':
+                    this.editingBlock.title = document.getElementById('services-title').value;
+                    // Обновляем услуги из формы
+                    this.updateServicesFromForm();
+                    break;
+                    
+                case 'destinations':
+                    this.editingBlock.title = document.getElementById('destinations-title').value;
+                    this.editingBlock.subtitle = document.getElementById('destinations-subtitle').value;
+                    break;
+                    
+                case 'contact':
+                    this.editingBlock.title = document.getElementById('contact-title').value;
+                    this.editingBlock.subtitle = document.getElementById('contact-subtitle').value;
+                    break;
+            }
+
+            this.renderPageStructure();
+            this.updatePreview();
+            this.closeBlockEditor();
+            this.showNotification('Изменения сохранены', 'success');
+            
+        } catch (error) {
+            console.error('Error saving block changes:', error);
+            this.showError('Ошибка при сохранении изменений');
+        }
+    }
+
+    updateServicesFromForm() {
+        if (!this.editingBlock.services) return;
+        
+        const serviceElements = document.querySelectorAll('.service-item');
+        serviceElements.forEach((element, index) => {
+            if (this.editingBlock.services[index]) {
+                this.editingBlock.services[index].icon = element.querySelector('.service-icon').value;
+                this.editingBlock.services[index].title = element.querySelector('.service-title').value;
+                this.editingBlock.services[index].description = element.querySelector('.service-description').value;
+            }
+        });
     }
 
     renderPageStructure() {
         const container = document.getElementById('page-structure');
+        if (!container) return;
         
         if (this.currentBlocks.length === 0) {
             container.innerHTML = `
@@ -360,10 +486,10 @@ class PageEditor {
         container.innerHTML = this.currentBlocks.map(block => `
             <div class="page-block" data-block-id="${block.id}">
                 <div class="block-actions">
-                    <button class="block-btn edit" onclick="pageEditor.editBlock('${block.id}')">
+                    <button class="block-btn edit" onclick="pageEditor.editBlock('${block.id}')" title="Редактировать">
                         <i class="fas fa-edit"></i>
                     </button>
-                    <button class="block-btn delete" onclick="pageEditor.removeBlock('${block.id}')">
+                    <button class="block-btn delete" onclick="pageEditor.removeBlock('${block.id}')" title="Удалить">
                         <i class="fas fa-trash"></i>
                     </button>
                 </div>
@@ -393,23 +519,45 @@ class PageEditor {
 
     updatePreview() {
         const preview = document.getElementById('page-preview');
-        // Обновляем iframe для показа изменений
-        preview.src = preview.src.split('?')[0] + '?preview=true&t=' + Date.now();
+        if (preview) {
+            // Обновляем iframe для показа изменений
+            preview.src = preview.src.split('?')[0] + '?preview=true&t=' + Date.now();
+        }
+    }
+
+    updatePageTitle() {
+        const titleElement = document.getElementById('current-page-title');
+        if (titleElement) {
+            titleElement.textContent = `Редактор: ${this.getPageName(this.currentPage)}`;
+        }
+    }
+
+    getPageName(pageId) {
+        const names = {
+            home: 'Главная страница'
+        };
+        return names[pageId] || 'Страница';
     }
 
     saveChanges() {
         if (!window.dataManager) {
-            alert('Ошибка: менеджер данных не доступен');
+            this.showError('Менеджер данных не доступен');
             return;
         }
 
+        console.log('Saving all changes for page:', this.currentPage, this.currentBlocks);
+
         const success = window.dataManager.updatePageBlocks(this.currentPage, this.currentBlocks);
         if (success) {
-            alert('Изменения сохранены! Страница будет обновлена.');
-            // Переходим на страницу с изменениями
-            window.location.href = this.getPageUrl(this.currentPage);
+            this.showNotification('Все изменения сохранены!', 'success');
+            
+            // Ждем немного перед переходом
+            setTimeout(() => {
+                window.location.href = this.getPageUrl(this.currentPage);
+            }, 1500);
+            
         } else {
-            alert('Ошибка при сохранении изменений');
+            this.showError('Ошибка при сохранении изменений');
         }
     }
 
@@ -419,12 +567,48 @@ class PageEditor {
         };
         return urls[pageId] || 'index.html';
     }
+
+    showNotification(message, type = 'info') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            ${message}
+        `;
+        notification.style.cssText = `
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${type === 'error' ? '#dc3545' : type === 'success' ? '#28a745' : '#007bff'};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            max-width: 300px;
+        `;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+            if (notification.parentElement) {
+                notification.remove();
+            }
+        }, 3000);
+    }
+
+    showError(message) {
+        this.showNotification(message, 'error');
+    }
 }
 
 // Глобальные функции
 function previewChanges() {
     const preview = document.getElementById('page-preview');
-    preview.contentWindow.location.reload();
+    if (preview) {
+        preview.contentWindow.location.reload();
+    }
 }
 
 function saveChanges() {
