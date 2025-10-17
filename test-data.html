@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Data Manager</title>
+</head>
+<body>
+    <h1>Testing Data Manager Methods</h1>
+    <div id="output"></div>
+    
+    <script src="data-manager.js?v=2"></script>
+    <script>
+        function testMethods() {
+            const output = document.getElementById('output');
+            const tests = [
+                { name: 'getData', method: () => window.dataManager.getData() },
+                { name: 'getContent', method: () => window.dataManager.getContent() },
+                { name: 'getDesign', method: () => window.dataManager.getDesign() },
+                { name: 'getCountries', method: () => window.dataManager.getCountries() },
+                { name: 'getContacts', method: () => window.dataManager.getContacts() },
+                { name: 'getSettings', method: () => window.dataManager.getSettings() }
+            ];
+            
+            let results = '<h2>Test Results:</h2><ul>';
+            
+            tests.forEach(test => {
+                try {
+                    const result = test.method();
+                    results += `<li>✅ ${test.name}: ${typeof result}</li>`;
+                } catch (error) {
+                    results += `<li>❌ ${test.name}: ${error.message}</li>`;
+                }
+            });
+            
+            results += '</ul>';
+            output.innerHTML = results;
+        }
+        
+        // Запускаем тест при загрузке
+        document.addEventListener('DOMContentLoaded', testMethods);
+    </script>
+</body>
+</html>
