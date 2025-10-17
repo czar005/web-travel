@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorldTravel - Туристическая компания</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="style.css?v=2">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -126,6 +126,7 @@
                 <button class="filter-btn" data-filter="cheap">Бюджетные</button>
                 <button class="filter-btn" data-filter="exotic">Экзотика</button>
             </div>
+
             <div class="loading-message" id="destinations-loading">
                 <i class="fas fa-spinner fa-spin"></i> Загружаем направления...
             </div>
@@ -202,9 +203,9 @@
         </div>
     </footer>
 
-    <script src="data-manager.js?v=2"></script>
-    <script src="script.js"></script>
+    <script src="data-manager.js"></script>
     <script src="fix-sync.js"></script>
+    <script src="script.js?v=2"></script>
     <script>
     function scrollToDestinations() {
         document.getElementById('destinations').scrollIntoView({ 
