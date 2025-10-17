@@ -619,228 +619,167 @@
 </div>
    <script src="data-manager.js"></script>
 <script>
-    class FullAdmin {
-        constructor() {
-            this.dataManager = window.dataManager;
-            this.currentEditingId = null;
-            this.init();
-        }
+    
+// Безопасные глобальные функции
+function openCountryModal(countryId = null) {
+    console.log('🔧 Вызов openCountryModal, admin:', window.admin);
+    if (window.admin && typeof window.admin.openCountryModal === 'function') {
+        window.admin.openCountryModal(countryId);
+    } else {
+        console.error('❌ Admin not initialized, retrying...');
+        setTimeout(() => {
+            if (window.admin) {
+                window.admin.openCountryModal(countryId);
+            } else {
+                alert('Админка не загружена. Обновите страницу.');
+            }
+        }, 100);
+    }
+}
 
-        init() {
-            console.log('🚀 Админка инициализируется...');
-            this.setupEventListeners();
-            this.renderCountries();
-            this.loadContent();
-            this.loadDesignSettings();
-            this.loadSystemSettings();
-            console.log('✅ Админка загружена');
-        }
+function closeModal() {
+    if (window.admin && typeof window.admin.closeModal === 'function') {
+        window.admin.closeModal();
+    }
+}
 
-        setupEventListeners() {
-            // Форма страны
-            document.getElementById('countryForm').onsubmit = (e) => {
+function adminLogout() {
+    if (window.admin && typeof window.admin.logout === 'function') {
+        window.admin.logout();
+    } else {
+        localStorage.removeItem('adminAuthenticated');
+        window.location.href = 'admin-login.html';
+    }
+}
+class FullAdmin {
+    constructor() {
+        console.log('🔧 Конструктор FullAdmin');
+        this.dataManager = window.dataManager;
+        this.currentEditingId = null;
+        this.init();
+    }
+
+    init() {
+        console.log('🚀 Инициализация админки...');
+        this.setupEventListeners();
+        this.renderCountries();
+        this.loadContent();
+        this.loadDesignSettings();
+        this.loadSystemSettings();
+        console.log('✅ Админка инициализирована');
+    }
+
+    setupEventListeners() {
+        // Форма страны
+        const countryForm = document.getElementById('countryForm');
+        if (countryForm) {
+            countryForm.onsubmit = (e) => {
                 e.preventDefault();
                 this.saveCountry();
             };
+        }
+    }
 
-            // Форма контента
-            document.getElementById('contentForm').onsubmit = (e) => {
-                e.preventDefault();
-                this.saveContent();
-            };
+    showTab(tabName) {
+        document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
 
-            // Табы
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.addEventListener('click', () => {
-                    const tabName = btn.getAttribute('data-tab');
-                    this.showTab(tabName);
-                });
-            });
+        document.getElementById(tabName).classList.add('active');
+        document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+    }
+
+    renderCountries() {
+        const container = document.getElementById('countries-list');
+        if (!container) {
+            console.error('❌ countries-list не найден');
+            return;
         }
 
-        showTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
-            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        const countries = this.dataManager.getCountries();
+        console.log('📊 Стран для отображения:', countries.length);
 
-            document.getElementById(tabName).classList.add('active');
-            document.querySelector(`[data-tab="${tabName}"]`).classList.add('active');
+        if (countries.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 3rem; color: #666; grid-column: 1 / -1;">
+                    <i class="fas fa-globe-americas" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                    <h3>Стран пока нет</h3>
+                    <p>Добавьте первую страну</p>
+                </div>
+            `;
+            return;
         }
 
-        renderCountries() {
-            const container = document.getElementById('countries-list');
-            const countries = this.dataManager.getCountries();
-
-            if (countries.length === 0) {
-                container.innerHTML = `
-                    <div style="text-align: center; padding: 3rem; color: #666; grid-column: 1 / -1;">
-                        <i class="fas fa-globe-americas" style="font-size: 4rem; margin-bottom: 1rem;"></i>
-                        <h3>Стран пока нет</h3>
-                        <p>Добавьте первую страну</p>
-                    </div>
-                `;
-                return;
-            }
-
-            container.innerHTML = countries.map(country => `
-                <div class="card">
-                    <div class="card-header">
-                        <h4 style="margin: 0; color: white;">${country.name}</h4>
-                    </div>
-                    <div class="card-body">
-                        <p style="color: #666; margin-bottom: 1rem;">${country.description || ''}</p>
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <strong style="color: #2c5aa0;">${country.price}</strong>
-                        </div>
-                    </div>
-                    <div class="card-actions">
-                        <button class="btn" onclick="admin.editCountry('${country.id}')">
-                            <i class="fas fa-edit"></i> Редактировать
-                        </button>
-                        <button class="btn btn-danger" onclick="admin.deleteCountry('${country.id}')">
-                            <i class="fas fa-trash"></i> Удалить
-                        </button>
+        container.innerHTML = countries.map(country => `
+            <div class="card">
+                <div class="card-header">
+                    <h4 style="margin: 0; color: white;">${country.name}</h4>
+                </div>
+                <div class="card-body">
+                    <p style="color: #666; margin-bottom: 1rem;">${country.description || ''}</p>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <strong style="color: #2c5aa0;">${country.price}</strong>
                     </div>
                 </div>
-            `).join('');
-        }
-
-        loadContent() {
-            const content = this.dataManager.getContent();
-            document.getElementById('hero-title').value = content.heroTitle || '';
-            document.getElementById('hero-text').value = content.heroText || '';
-            document.getElementById('contact-phone').value = content.contactPhone || '';
-            document.getElementById('contact-email').value = content.contactEmail || '';
-            document.getElementById('contact-address').value = content.contactAddress || '';
-            document.getElementById('contact-hours').value = content.contactHours || '';
-        }
-
-        loadDesignSettings() {
-            const design = this.dataManager.getDesign();
-            document.getElementById('block-hero').checked = design.blocks?.hero !== false;
-            document.getElementById('block-about').checked = design.blocks?.about !== false;
-            document.getElementById('block-services').checked = design.blocks?.services !== false;
-            document.getElementById('block-destinations').checked = design.blocks?.destinations !== false;
-            document.getElementById('block-contact').checked = design.blocks?.contact !== false;
-            this.updateImagePreviews();
-        }
-
-        updateImagePreviews() {
-            const design = this.dataManager.getDesign();
-            
-            if (design.logo) {
-                document.getElementById('logo-preview').src = design.logo;
-                document.getElementById('logo-preview').style.display = 'block';
-                document.getElementById('logo-actions').innerHTML = `
-                    <button class="btn btn-danger" onclick="admin.removeLogo()">
-                        <i class="fas fa-trash"></i> Удалить логотип
+                <div class="card-actions">
+                    <button class="btn" onclick="openCountryModal('${country.id}')">
+                        <i class="fas fa-edit"></i> Редактировать
                     </button>
-                `;
-            }
-            
-            if (design.headerBackground) {
-                document.getElementById('header-preview').src = design.headerBackground;
-                document.getElementById('header-preview').style.display = 'block';
-                document.getElementById('header-actions').innerHTML = `
-                    <button class="btn btn-danger" onclick="admin.removeHeaderBackground()">
-                        <i class="fas fa-trash"></i> Удалить фон
+                    <button class="btn btn-danger" onclick="admin.deleteCountry('${country.id}')">
+                        <i class="fas fa-trash"></i> Удалить
                     </button>
-                `;
-            }
+                </div>
+            </div>
+        `).join('');
+    }
+
+    openCountryModal(countryId = null) {
+        console.log('📝 Открытие модального окна для страны:', countryId);
+        this.currentEditingId = countryId;
+        const modal = document.getElementById('countryModal');
+        const title = document.getElementById('modalTitle');
+
+        if (!modal) {
+            console.error('❌ Модальное окно не найдено!');
+            this.showNotification('Ошибка: модальное окно не найдено', 'error');
+            return;
         }
 
-        loadSystemSettings() {
-            const settings = this.dataManager.getSettings();
-            document.getElementById('company-name').value = settings.companyName || 'WorldTravel';
-            document.getElementById('primary-color').value = settings.primaryColor || '#2c5aa0';
-            document.getElementById('secondary-color').value = settings.secondaryColor || '#4a7bc8';
-            document.getElementById('site-language').value = settings.language || 'ru';
+        if (countryId) {
+            title.textContent = 'Редактировать страну';
+            this.fillCountryForm(countryId);
+        } else {
+            title.textContent = 'Добавить страну';
+            this.resetCountryForm();
         }
-
-        saveContent() {
-            if (this.dataManager.updateContent(content)) {
-    // СИНХРОНИЗИРУЕМ С ГЛАВНОЙ СТРАНИЦЕЙ
-    this.dataManager.syncWithMainPage();
-    this.showNotification('✅ Контент сохранен! Главная страница обновлена.');
-}
-            const content = {
-                heroTitle: document.getElementById('hero-title').value,
-                heroText: document.getElementById('hero-text').value,
-                contactPhone: document.getElementById('contact-phone').value,
-                contactEmail: document.getElementById('contact-email').value,
-                contactAddress: document.getElementById('contact-address').value,
-                contactHours: document.getElementById('contact-hours').value
-            };
-
-            if (this.dataManager.updateContent(content)) {
-                this.showNotification('✅ Контент сохранен! Главная страница обновится автоматически.');
-                setTimeout(() => window.open('/', '_blank'), 1000);
-            } else {
-                this.showNotification('❌ Ошибка сохранения контента', 'error');
-            }
-        }
-
-        saveDesignSettings() {
-            if (this.dataManager.updateDesign(design)) {
-    // СИНХРОНИЗИРУЕМ С ГЛАВНОЙ СТРАНИЦЕЙ
-    this.dataManager.syncWithMainPage();
-    this.showNotification('✅ Настройки дизайна сохранены! Главная страница обновлена.');
-}
-            const design = {
-                blocks: {
-                    hero: document.getElementById('block-hero').checked,
-                    about: document.getElementById('block-about').checked,
-                    services: document.getElementById('block-services').checked,
-                    destinations: document.getElementById('block-destinations').checked,
-                    contact: document.getElementById('block-contact').checked
-                }
-            };
-
-            if (this.dataManager.updateDesign(design)) {
-                this.showNotification('✅ Настройки дизайна сохранены! Главная страница обновится автоматически.');
-                setTimeout(() => window.open('/', '_blank'), 1000);
-            } else {
-                this.showNotification('❌ Ошибка сохранения настроек дизайна', 'error');
-            }
-        }
-
-        saveSystemSettings() {
-            const settings = {
-                companyName: document.getElementById('company-name').value,
-                primaryColor: document.getElementById('primary-color').value,
-                secondaryColor: document.getElementById('secondary-color').value,
-                language: document.getElementById('site-language').value
-            };
-
-            if (this.dataManager.updateSettings(settings)) {
-                this.showNotification('✅ Системные настройки сохранены!');
-            } else {
-                this.showNotification('❌ Ошибка сохранения настроек', 'error');
-            }
-        }
-
-        // Методы для стран
         
         modal.classList.add('active');
         console.log('✅ Модальное окно открыто');
     }
-    this.currentEditingId = null;
-}
 
-        fillCountryForm(countryId) {
-            const countries = this.dataManager.getCountries();
-            const country = countries.find(c => c.id === countryId);
-            if (country) {
-                document.getElementById('country-name').value = country.name;
-                document.getElementById('country-description').value = country.description || '';
-                document.getElementById('country-price').value = country.price || '';
-            }
+    closeModal() {
+        const modal = document.getElementById('countryModal');
+        if (modal) {
+            modal.classList.remove('active');
         }
+        this.currentEditingId = null;
+        console.log('✅ Модальное окно закрыто');
+    }
 
-        resetCountryForm() {
-            document.getElementById('countryForm').reset();
+    fillCountryForm(countryId) {
+        const countries = this.dataManager.getCountries();
+        const country = countries.find(c => c.id === countryId);
+        if (country) {
+            document.getElementById('country-name').value = country.name;
+            document.getElementById('country-description').value = country.description || '';
+            document.getElementById('country-price').value = country.price || '';
         }
+    }
 
-        saveCountry() {
+    resetCountryForm() {
+        document.getElementById('countryForm').reset();
+    }
+
+    saveCountry() {
         console.log('💾 Сохранение страны...');
         
         const name = document.getElementById('country-name').value;
@@ -865,12 +804,75 @@
 
         try {
             const countries = this.dataManager.getCountries();
-            console.log('📊 Текущие страны:', countries);
             
             if (this.currentEditingId) {
                 const index = countries.findIndex(c => c.id === this.currentEditingId);
                 if (index !== -1) {
                     countries[index] = { ...countries[index], ...countryData };
+                }
+            } else {
+                countries.push(countryData);
+            }
+
+            const success = this.dataManager.updateCountries(countries);
+            
+            if (success) {
+                this.showNotification(`✅ Страна "${name}" ${this.currentEditingId ? 'обновлена' : 'добавлена'}!`);
+                this.closeModal();
+                this.renderCountries();
+            } else {
+                this.showNotification('❌ Ошибка сохранения страны', 'error');
+            }
+            
+        } catch (error) {
+            console.error('❌ Ошибка при сохранении страны:', error);
+            this.showNotification('❌ Ошибка при сохранении страны', 'error');
+        }
+    }
+
+    deleteCountry(countryId) {
+        if (confirm('Удалить эту страну?')) {
+            const countries = this.dataManager.getCountries().filter(c => c.id !== countryId);
+            if (this.dataManager.updateCountries(countries)) {
+                this.renderCountries();
+                this.showNotification('✅ Страна удалена!');
+            }
+        }
+    }
+
+    loadContent() {
+        // Загрузка контента
+    }
+
+    loadDesignSettings() {
+        // Загрузка настроек дизайна
+    }
+
+    loadSystemSettings() {
+        // Загрузка системных настроек
+    }
+
+    showNotification(message, type = 'success') {
+        const notification = document.createElement('div');
+        notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+        notification.innerHTML = `
+            <i class="fas fa-${type === 'error' ? 'exclamation' : 'check'}-circle"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.remove()" style="background: none; border: none; cursor: pointer;">×</button>
+        `;
+        document.body.appendChild(notification);
+        setTimeout(() => notification.remove(), 5000);
+    }
+
+    generateId() {
+        return 'country-' + Date.now();
+    }
+
+    logout() {
+        localStorage.removeItem('adminAuthenticated');
+        window.location.href = 'admin-login.html';
+    }
+};
                     console.log('✏️ Страна обновлена, индекс:', index);
                 }
             } else {
@@ -2075,7 +2077,11 @@
     }
 
     // Инициализация
-    let admin;
+    // Инициализация
+let admin;
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('📄 DOM загружен, инициализация админки...');
+    
     // ОТЛАДОЧНЫЙ КОД
     console.log('🔧 Инициализация админки...');
     console.log('dataManager доступен:', typeof window.dataManager !== 'undefined');
@@ -2083,48 +2089,15 @@
         console.log('dataManager функции:', Object.keys(window.dataManager));
         console.log('Текущие данные:', window.dataManager.getData());
     }
-    // ОТЛАДОЧНЫЙ КОД
-    console.log('🔧 Инициализация админки...');
-    console.log('dataManager доступен:', typeof window.dataManager !== 'undefined');
-    if (window.dataManager) {
-        console.log('dataManager функции:', Object.keys(window.dataManager));
-        console.log('Текущие данные:', window.dataManager.getData());
-    }
-    document.addEventListener('DOMContentLoaded', () => {
-        console.log('📄 DOM загружен, инициализация админки...');
+    
+    try {
         admin = new FullAdmin();
         window.admin = admin;
-// Глобальные функции для кнопок
-function openCountryModal(countryId = null) {
-    if (window.admin) {
-        window.admin.openCountryModal(countryId);
-    } else {
-        console.error('Admin not initialized');
-        setTimeout(() => openCountryModal(countryId), 100);
+        console.log('✅ Админка инициализирована');
+    } catch (error) {
+        console.error('❌ Ошибка инициализации админки:', error);
     }
-}
-
-function closeModal() {
-    if (window.admin) {
-        window.admin.closeModal();
-    }
-}
-// Глобальные функции для обратной совместимости
-function openCountryModal(countryId = null) {
-    if (window.admin && typeof window.admin.openCountryModal === 'function') {
-        window.admin.openCountryModal(countryId);
-    } else {
-        console.error('❌ Admin not initialized');
-        alert('Админка не загружена. Обновите страницу.');
-    }
-}
-
-function closeModal() {
-    if (window.admin && typeof window.admin.closeModal === 'function') {
-        window.admin.closeModal();
-    }
-}
-    });
+});
 </script>
 </body>
 </html>
