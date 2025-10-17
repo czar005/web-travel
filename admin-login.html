@@ -263,7 +263,7 @@
             }
         }
 
-       function verifyCode() {
+ function verifyCode() {
     const inputs = document.querySelectorAll('.code-inputs input');
     const enteredCode = Array.from(inputs).map(input => input.value).join('');
     
@@ -274,24 +274,24 @@
 
     setLoadingState(true);
 
-    // Имитация загрузки для лучшего UX
     setTimeout(() => {
         if (enteredCode === currentAuthCode) {
             showMessage('✅ Успешный вход! Перенаправление...', 'success');
             
-            // СОХРАНЯЕМ ДАННЫЕ ПРАВИЛЬНО
+            // СОХРАНЯЕМ ДАННЫЕ С ОТЛАДКОЙ
             localStorage.setItem('adminAuthenticated', 'true');
             localStorage.setItem('adminUsername', currentUsername);
             localStorage.setItem('authTime', Date.now().toString());
             
-            console.log('Auth data saved:', {
-                authenticated: localStorage.getItem('adminAuthenticated'),
-                username: localStorage.getItem('adminUsername'),
-                time: localStorage.getItem('authTime')
-            });
+            // ОТЛАДКА: проверяем что сохранилось
+            console.log('🔐 AUTH DATA SAVED:');
+            console.log('adminAuthenticated:', localStorage.getItem('adminAuthenticated'));
+            console.log('adminUsername:', localStorage.getItem('adminUsername'));
+            console.log('authTime:', localStorage.getItem('authTime'));
             
-            // Перенаправляем в админ-панель через 2 секунды
+            // Перенаправляем через 2 секунды
             setTimeout(() => {
+                console.log('🔄 Redirecting to admin.html...');
                 window.location.href = 'admin.html';
             }, 2000);
         } else {
@@ -301,7 +301,7 @@
         setLoadingState(false);
     }, 1000);
 }
-        function goBackToLogin() {
+       function goBackToLogin() {
             document.getElementById('codeSection').classList.add('hidden');
             document.getElementById('loginSection').classList.remove('hidden');
             showMessage('', '');
