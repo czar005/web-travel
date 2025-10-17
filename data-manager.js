@@ -185,3 +185,67 @@ window.dataManager = {
 };
 // Создаем глобальный экземпляр
 window.dataManager = new DataManager();
+// Базовые функции для работы с данными
+window.dataManager.getCountries = function() {
+    const data = this.getData();
+    return data.countries || [];
+};
+
+window.dataManager.updateCountries = function(countries) {
+    try {
+        const data = this.getData();
+        data.countries = countries;
+        return this.saveToLocalStorage(data);
+    } catch (error) {
+        console.error('Error updating countries:', error);
+        return false;
+    }
+};
+
+window.dataManager.getContent = function() {
+    const data = this.getData();
+    return data.content || {};
+};
+
+window.dataManager.updateContent = function(content) {
+    try {
+        const data = this.getData();
+        data.content = { ...data.content, ...content };
+        return this.saveToLocalStorage(data);
+    } catch (error) {
+        console.error('Error updating content:', error);
+        return false;
+    }
+};
+
+window.dataManager.getDesign = function() {
+    const data = this.getData();
+    return data.design || {};
+};
+
+window.dataManager.updateDesign = function(design) {
+    try {
+        const data = this.getData();
+        data.design = { ...data.design, ...design };
+        return this.saveToLocalStorage(data);
+    } catch (error) {
+        console.error('Error updating design:', error);
+        return false;
+    }
+};
+
+window.dataManager.getSettings = function() {
+    const data = this.getData();
+    return data.settings || {};
+};
+
+window.dataManager.updateSettings = function(settings) {
+    try {
+        const data = this.getData();
+        data.settings = { ...data.settings, ...settings };
+        return this.saveToLocalStorage(data);
+    } catch (error) {
+        console.error('Error updating settings:', error);
+        return false;
+    }
+};
