@@ -38,6 +38,20 @@
             align-items: center;
         }
 
+        .page-selector {
+            background: #f8f9fa;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .page-select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 1rem;
+        }
+
         .preview-container {
             padding: 20px;
             min-height: 100%;
@@ -378,6 +392,14 @@
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
         }
+
+        .page-info {
+            background: #e3f2fd;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin-bottom: 1rem;
+            border-left: 4px solid #2c5aa0;
+        }
     </style>
 </head>
 <body>
@@ -389,7 +411,7 @@
                     <button class="nav-back" onclick="goBackToAdmin()">
                         <i class="fas fa-arrow-left"></i> Назад в админку
                     </button>
-                    <h2 style="margin-top: 10px;">Визуальный редактор страницы</h2>
+                    <h2 style="margin-top: 10px;">Визуальный редактор страниц</h2>
                 </div>
                 <div class="editor-actions">
                     <button class="btn-admin secondary" onclick="previewChanges()">
@@ -398,14 +420,28 @@
                     <button class="btn-admin" onclick="saveChanges()">
                         <i class="fas fa-save"></i> Сохранить
                     </button>
-                    <button class="btn-admin secondary" onclick="exitEditor()">
-                        <i class="fas fa-times"></i> Выйти
-                    </button>
                 </div>
             </div>
 
+            <!-- Выбор страницы -->
+            <div class="page-selector">
+                <label for="page-select"><strong>Выберите страницу для редактирования:</strong></label>
+                <select id="page-select" class="page-select" onchange="visualEditor.loadPage(this.value)">
+                    <option value="">-- Выберите страницу --</option>
+                    <option value="index">Главная страница</option>
+                    <option value="about">О компании</option>
+                    <option value="tours">Туры</option>
+                    <option value="services">Услуги</option>
+                    <option value="contacts">Контакты</option>
+                </select>
+            </div>
+
             <div class="preview-container" id="page-preview">
-                <!-- Блоки будут отображаться здесь -->
+                <div class="empty-state">
+                    <i class="fas fa-file-alt"></i>
+                    <p>Выберите страницу для редактирования</p>
+                    <small>Выберите страницу из списка выше чтобы начать работу</small>
+                </div>
             </div>
         </div>
 
@@ -414,15 +450,15 @@
             <div class="sidebar-header">
                 <h3 id="sidebar-title">Выберите блок</h3>
                 <p id="sidebar-subtitle" style="color: #666; margin-top: 0.5rem; font-size: 0.9rem;">
-                    Кликните на блок для редактирования
+                    Выберите страницу для начала работы
                 </p>
             </div>
 
             <div class="sidebar-content" id="sidebar-content">
                 <div class="empty-state">
                     <i class="fas fa-mouse-pointer"></i>
-                    <p>Выберите блок на странице</p>
-                    <small>Кликните на любой блок чтобы начать редактирование</small>
+                    <p>Выберите страницу и блок</p>
+                    <small>Сначала выберите страницу, затем кликните на блок для редактирования</small>
                 </div>
             </div>
 
@@ -524,42 +560,13 @@
                 this.selectedBlock = null;
                 this.currentInsertPosition = 'start';
                 this.currentBlockType = null;
+                this.currentPage = '';
                 this.init();
             }
 
             init() {
-                this.loadBlocks();
                 this.setupEventListeners();
-                this.renderBlocks();
-            }
-
-            loadBlocks() {
-                // Загружаем из data-manager.js или localStorage
-                if (typeof dataManager !== 'undefined' && dataManager.getData().pages) {
-                    const pageData = dataManager.getData().pages.home;
-                    this.blocks = pageData.blocks || this.getDefaultBlocks();
-                } else {
-                    const saved = localStorage.getItem('page-blocks');
-                    this.blocks = saved ? JSON.parse(saved) : this.getDefaultBlocks();
-                }
-            }
-
-            getDefaultBlocks() {
-                return [
-                    {
-                        id: 1,
-                        type: 'hero',
-                        title: 'Добро пожаловать в WorldTravel',
-                        content: 'Откройте для себя лучшие направления мира с нами',
-                        image: ''
-                    },
-                    {
-                        id: 2,
-                        type: 'about',
-                        title: 'О нашей компании',
-                        content: 'Мы предоставляем уникальные туристические experience по всему миру.'
-                    }
-                ];
+                // Не загружаем страницу автоматически - ждем выбора пользователя
             }
 
             setupEventListeners() {
@@ -586,9 +593,161 @@
                 });
             }
 
+            loadPage(pageId) {
+                if (!pageId) {
+                    this.showEmptyState();
+                    return;
+                }
+
+                this.currentPage = pageId;
+                this.blocks = [];
+                
+                // Загружаем данные страницы из data-manager
+                if (typeof dataManager !== 'undefined') {
+                    const data = dataManager.getData();
+                    if (data.pages && data.pages[pageId]) {
+                        this.blocks = data.pages[pageId].blocks || [];
+                    } else {
+                        // Если страницы нет в данных, создаем пустую
+                        this.blocks = this.getDefaultBlocksForPage(pageId);
+                    }
+                } else {
+                    // Fallback на localStorage
+                    const saved = localStorage.getItem(`page-${pageId}-blocks`);
+                    this.blocks = saved ? JSON.parse(saved) : this.getDefaultBlocksForPage(pageId);
+                }
+
+                this.renderBlocks();
+                this.updatePageInfo();
+            }
+
+            getDefaultBlocksForPage(pageId) {
+                const defaults = {
+                    'index': [
+                        {
+                            id: 1,
+                            type: 'hero',
+                            title: 'Добро пожаловать в WorldTravel',
+                            content: 'Откройте для себя лучшие направления мира с нами',
+                            image: ''
+                        },
+                        {
+                            id: 2,
+                            type: 'about',
+                            title: 'О нашей компании',
+                            content: 'Мы предоставляем уникальные туристические experience по всему миру.'
+                        }
+                    ],
+                    'about': [
+                        {
+                            id: 1,
+                            type: 'hero',
+                            title: 'О компании WorldTravel',
+                            content: 'Ваш надежный партнер в мире путешествий',
+                            image: ''
+                        },
+                        {
+                            id: 2,
+                            type: 'text',
+                            title: 'Наша история',
+                            content: 'Мы работаем на рынке туристических услуг более 10 лет.'
+                        }
+                    ],
+                    'tours': [
+                        {
+                            id: 1,
+                            type: 'hero',
+                            title: 'Наши туры',
+                            content: 'Лучшие предложения для вашего отдыха',
+                            image: ''
+                        }
+                    ],
+                    'services': [
+                        {
+                            id: 1,
+                            type: 'hero',
+                            title: 'Наши услуги',
+                            content: 'Полный спектр туристических услуг',
+                            image: ''
+                        }
+                    ],
+                    'contacts': [
+                        {
+                            id: 1,
+                            type: 'hero',
+                            title: 'Контакты',
+                            content: 'Свяжитесь с нами любым удобным способом',
+                            image: ''
+                        }
+                    ]
+                };
+                
+                return defaults[pageId] || [];
+            }
+
+            getPageName(pageId) {
+                const names = {
+                    'index': 'Главная страница',
+                    'about': 'О компании',
+                    'tours': 'Туры',
+                    'services': 'Услуги',
+                    'contacts': 'Контакты'
+                };
+                return names[pageId] || pageId;
+            }
+
+            updatePageInfo() {
+                const sidebarTitle = document.getElementById('sidebar-title');
+                const sidebarSubtitle = document.getElementById('sidebar-subtitle');
+                
+                sidebarTitle.textContent = this.getPageName(this.currentPage);
+                sidebarSubtitle.textContent = `Редактирование блоков (${this.blocks.length} блоков)`;
+            }
+
+            showEmptyState() {
+                const container = document.getElementById('page-preview');
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-file-alt"></i>
+                        <p>Выберите страницу для редактирования</p>
+                        <small>Выберите страницу из списка выше чтобы начать работу</small>
+                    </div>
+                `;
+                
+                const sidebarContent = document.getElementById('sidebar-content');
+                sidebarContent.innerHTML = `
+                    <div class="empty-state">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Выберите страницу и блок</p>
+                        <small>Сначала выберите страницу, затем кликните на блок для редактирования</small>
+                    </div>
+                `;
+            }
+
             renderBlocks() {
                 const container = document.getElementById('page-preview');
+                
+                if (this.blocks.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-plus-circle"></i>
+                            <p>На этой странице пока нет блоков</p>
+                            <small>Нажмите "Добавить блок" чтобы создать первый блок</small>
+                        </div>
+                    `;
+                    return;
+                }
+
                 container.innerHTML = '';
+                
+                // Добавляем информацию о странице
+                const pageInfo = document.createElement('div');
+                pageInfo.className = 'page-info';
+                pageInfo.innerHTML = `
+                    <strong>Редактирование: ${this.getPageName(this.currentPage)}</strong>
+                    <div style="font-size: 0.9rem; margin-top: 5px;">Количество блоков: ${this.blocks.length}</div>
+                `;
+                container.appendChild(pageInfo);
 
                 this.blocks.forEach(block => {
                     const blockElement = this.createBlockElement(block);
@@ -666,6 +825,11 @@
             }
 
             selectBlock(block) {
+                if (!this.currentPage) {
+                    this.showNotification('Сначала выберите страницу', 'warning');
+                    return;
+                }
+
                 this.selectedBlock = block;
                 
                 // Подсветка выбранного блока
@@ -683,7 +847,7 @@
                 const sidebarSubtitle = document.getElementById('sidebar-subtitle');
 
                 sidebarTitle.textContent = `Редактирование: ${this.getBlockTypeName(block.type)}`;
-                sidebarSubtitle.textContent = 'Измените содержимое блока';
+                sidebarSubtitle.textContent = `Страница: ${this.getPageName(this.currentPage)}`;
 
                 sidebarContent.innerHTML = this.getEditorForm(block);
             }
@@ -759,7 +923,7 @@
             }
 
             saveBlockChanges() {
-                if (!this.selectedBlock) return;
+                if (!this.selectedBlock || !this.currentPage) return;
 
                 const title = document.getElementById('edit-title')?.value;
                 const content = document.getElementById('edit-content')?.value;
@@ -798,7 +962,7 @@
             }
 
             deleteBlock() {
-                if (!this.selectedBlock) return;
+                if (!this.selectedBlock || !this.currentPage) return;
                 
                 if (confirm('Удалить этот блок?')) {
                     this.blocks = this.blocks.filter(b => b.id !== this.selectedBlock.id);
@@ -815,15 +979,18 @@
                         </div>
                     `;
                     
-                    document.getElementById('sidebar-title').textContent = 'Выберите блок';
-                    document.getElementById('sidebar-subtitle').textContent = 'Кликните на блок для редактирования';
-                    
+                    this.updatePageInfo();
                     this.selectedBlock = null;
                     this.showNotification('Блок удален', 'success');
                 }
             }
 
             showBlockSelector() {
+                if (!this.currentPage) {
+                    this.showNotification('Сначала выберите страницу', 'warning');
+                    return;
+                }
+
                 document.getElementById('block-selector-overlay').style.display = 'block';
                 document.getElementById('block-selector').style.display = 'block';
                 
@@ -844,6 +1011,11 @@
             }
 
             addNewBlock() {
+                if (!this.currentPage) {
+                    this.showNotification('Сначала выберите страницу', 'warning');
+                    return;
+                }
+
                 const title = document.getElementById('new-block-title').value || 'Новый блок';
                 const content = document.getElementById('new-block-description').value || 'Описание блока';
                 const image = document.getElementById('new-block-image').value;
@@ -902,14 +1074,16 @@
             }
 
             saveToStorage() {
+                if (!this.currentPage) return;
+
                 // Сохраняем в data-manager если доступен, иначе в localStorage
                 if (typeof dataManager !== 'undefined') {
                     const data = dataManager.getData();
                     if (!data.pages) data.pages = {};
-                    data.pages.home = { blocks: this.blocks };
+                    data.pages[this.currentPage] = { blocks: this.blocks };
                     dataManager.saveData(data);
                 } else {
-                    localStorage.setItem('page-blocks', JSON.stringify(this.blocks));
+                    localStorage.setItem(`page-${this.currentPage}-blocks`, JSON.stringify(this.blocks));
                 }
             }
 
@@ -929,18 +1103,20 @@
             }
 
             previewChanges() {
+                if (!this.currentPage) {
+                    this.showNotification('Сначала выберите страницу', 'warning');
+                    return;
+                }
                 this.showNotification('Функция предпросмотра в разработке', 'info');
             }
 
             saveChanges() {
+                if (!this.currentPage) {
+                    this.showNotification('Сначала выберите страницу', 'warning');
+                    return;
+                }
                 this.saveToStorage();
                 this.showNotification('Все изменения сохранены в системе!', 'success');
-            }
-
-            exitEditor() {
-                if (confirm('Выйти из редактора?')) {
-                    window.location.href = 'admin.html';
-                }
             }
         }
 
@@ -953,7 +1129,6 @@
         function addNewBlock() { visualEditor.addNewBlock(); }
         function previewChanges() { visualEditor.previewChanges(); }
         function saveChanges() { visualEditor.saveChanges(); }
-        function exitEditor() { visualEditor.exitEditor(); }
         function goBackToAdmin() { window.location.href = 'admin.html'; }
     </script>
 </body>
