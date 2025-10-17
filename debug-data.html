@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Debug Data</title>
+</head>
+<body>
+    <h1>Debug Data Manager</h1>
+    <div id="output"></div>
+    
+    <script src="data-manager.js"></script>
+    <script>
+        function debugData() {
+            const output = document.getElementById('output');
+            const data = window.dataManager.getData();
+            
+            output.innerHTML = `
+                <h2>Current Data:</h2>
+                <pre>${JSON.stringify(data, null, 2)}</pre>
+                
+                <h2>Pages:</h2>
+                <pre>${JSON.stringify(data?.pages, null, 2)}</pre>
+                
+                <h2>Home Page Blocks:</h2>
+                <pre>${JSON.stringify(data?.pages?.home?.blocks, null, 2)}</pre>
+            `;
+        }
+        
+        document.addEventListener('DOMContentLoaded', debugData);
+    </script>
+</body>
+</html>

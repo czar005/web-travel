@@ -6,8 +6,8 @@ class DataManager {
     }
 
     init() {
-        // Инициализация данных по умолчанию если их нет
         if (!this.getData()) {
+            console.log('Initializing default data...');
             this.setDefaultData();
         }
     }
@@ -15,7 +15,8 @@ class DataManager {
     getData() {
         try {
             const data = localStorage.getItem(this.storageKey);
-            return data ? JSON.parse(data) : null;
+            if (!data) return null;
+            return JSON.parse(data);
         } catch (error) {
             console.error('Error reading data:', error);
             return null;
@@ -25,9 +26,9 @@ class DataManager {
     setData(data) {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(data));
+            console.log('Data saved successfully');
             this.triggerDataUpdate();
             
-            // Уведомляем о изменении данных
             if (window.dataSync) {
                 window.dataSync.notifyDataChange();
             }
@@ -40,37 +41,7 @@ class DataManager {
 
     setDefaultData() {
         const defaultData = {
-            countries: [
-                {
-                    id: 1,
-                    name: 'Франция',
-                    image: 'images/travel-placeholder.svg',
-                    description: 'Романтический Париж и Лазурный берег',
-                    tours: [
-                        { id: 1, name: 'Париж романтический', price: 500, duration: '7 дней' },
-                        { id: 2, name: 'Лазурный берег', price: 700, duration: '10 дней' }
-                    ]
-                },
-                {
-                    id: 2,
-                    name: 'Италия', 
-                    image: 'images/travel-placeholder.svg',
-                    description: 'Вкусная кухня и богатая история',
-                    tours: [
-                        { id: 3, name: 'Рим и Ватикан', price: 600, duration: '8 дней' },
-                        { id: 4, name: 'Венеция и Флоренция', price: 550, duration: '6 дней' }
-                    ]
-                },
-                {
-                    id: 3,
-                    name: 'Испания',
-                    image: 'images/travel-placeholder.svg', 
-                    description: 'Солнечные пляжи и яркая культура',
-                    tours: [
-                        { id: 5, name: 'Барселона и Коста-Брава', price: 450, duration: '7 дней' }
-                    ]
-                }
-            ],
+            countries: [],
             contacts: {
                 phone: '+7 (999) 123-45-67',
                 email: 'info@worldtravel.com',
@@ -81,16 +52,6 @@ class DataManager {
                 siteTitle: 'WorldTravel - Туристическая компания',
                 companyName: 'WorldTravel'
             },
-            // Совместимость со старым форматом
-            content: {
-                countries: [],
-                contacts: {}
-            },
-            design: {
-                primaryColor: '#2c5aa0',
-                secondaryColor: '#4a7bc8'
-            },
-            // Новая система страниц
             pages: {
                 home: {
                     id: 'home',
@@ -114,77 +75,15 @@ class DataManager {
                                 { value: 50, label: 'Стран мира' },
                                 { value: '10 лет', label: 'Опыта работы' }
                             ]
-                        },
-                        {
-                            id: 'services',
-                            type: 'services',
-                            title: 'Наши услуги',
-                            services: [
-                                { icon: 'plane', title: 'Авиабилеты', description: 'Подбор и бронирование лучших авиаперелетов по выгодным ценам' },
-                                { icon: 'hotel', title: 'Отели', description: 'Бронирование отелей любого уровня комфорта по всему миру' },
-                                { icon: 'map-marked-alt', title: 'Туры', description: 'Индивидуальные и групповые туры с профессиональными гидами' },
-                                { icon: 'shield-alt', title: 'Страхование', description: 'Полное страховое сопровождение вашего путешествия' }
-                            ]
-                        },
-                        {
-                            id: 'destinations',
-                            type: 'destinations',
-                            title: 'Популярные направления',
-                            subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'
-                        },
-                        {
-                            id: 'contact',
-                            type: 'contact',
-                            title: 'Свяжитесь с нами',
-                            subtitle: 'Мы всегда рады помочь вам с организацией путешествия'
                         }
                     ]
                 }
             }
         };
-        this.setData(defaultData);
-        return defaultData;
+        return this.setData(defaultData);
     }
 
-    // СОВМЕСТИМОСТЬ СО СТАРЫМИ МЕТОДАМИ АДМИНКИ
-    getContent() {
-        const data = this.getData();
-        return { countries: data?.countries || [], contacts: data?.contacts || {} };
-    }
-
-    updateContent(newContent) {
-        const data = this.getData();
-        if (!data) return false;
-        if (newContent.countries) data.countries = newContent.countries;
-        if (newContent.contacts) data.contacts = newContent.contacts;
-        return this.setData(data);
-    }
-
-    updateCountries(countries) {
-        const data = this.getData();
-        if (!data) return false;
-        data.countries = countries;
-        return this.setData(data);
-    }
-
-    getDesign() {
-        const data = this.getData();
-        return data?.design || { primaryColor: '#2c5aa0', secondaryColor: '#4a7bc8' };
-    }
-
-    updateDesign(design) {
-        const data = this.getData();
-        if (!data) return false;
-        data.design = { ...data.design, ...design };
-        return this.setData(data);
-    }
-
-    syncWithMainPage() {
-        console.log('Sync with main page called');
-        return true;
-    }
-
-    // НОВЫЕ МЕТОДЫ ДЛЯ СТРАНИЦ
+    // Страницы
     getPages() {
         const data = this.getData();
         return data?.pages || {};
@@ -195,33 +94,39 @@ class DataManager {
         return pages[pageId];
     }
 
-    updatePage(pageId, pageData) {
-        const data = this.getData();
-        if (!data) return false;
-        
-        if (!data.pages) data.pages = {};
-        data.pages[pageId] = { ...data.pages[pageId], ...pageData };
-        return this.setData(data);
-    }
-
     updatePageBlocks(pageId, blocks) {
         const data = this.getData();
-        if (!data) return false;
+        if (!data) {
+            console.error('No data found');
+            return false;
+        }
         
         if (!data.pages) data.pages = {};
         if (!data.pages[pageId]) data.pages[pageId] = { id: pageId, blocks: [] };
         
+        console.log('Updating blocks for page', pageId, blocks);
         data.pages[pageId].blocks = blocks;
-        console.log('Saving blocks for page', pageId, blocks);
         return this.setData(data);
     }
 
-    // НОВЫЕ МЕТОДЫ
-    getCountries() { return this.getData()?.countries || []; }
-    
+    // Страны
+    getCountries() {
+        const data = this.getData();
+        return data?.countries || [];
+    }
+
     addCountry(country) {
-        const data = this.getData() || this.setDefaultData();
-        const newCountry = { id: Date.now(), image: 'images/travel-placeholder.svg', tours: [], ...country };
+        const data = this.getData();
+        if (!data) return null;
+        
+        const newCountry = {
+            id: Date.now(),
+            image: 'images/travel-placeholder.svg',
+            tours: [],
+            ...country
+        };
+        
+        if (!data.countries) data.countries = [];
         data.countries.push(newCountry);
         return this.setData(data) ? newCountry : null;
     }
@@ -229,6 +134,7 @@ class DataManager {
     updateCountry(id, updates) {
         const data = this.getData();
         if (!data) return null;
+        
         const countryIndex = data.countries.findIndex(c => c.id === id);
         if (countryIndex !== -1) {
             data.countries[countryIndex] = { ...data.countries[countryIndex], ...updates };
@@ -240,13 +146,16 @@ class DataManager {
     deleteCountry(id) {
         const data = this.getData();
         if (!data) return false;
+        
         data.countries = data.countries.filter(c => c.id !== id);
         return this.setData(data);
     }
 
+    // Туры
     addTour(countryId, tour) {
         const data = this.getData();
         if (!data) return null;
+        
         const country = data.countries.find(c => c.id === countryId);
         if (country) {
             const newTour = { id: Date.now(), ...tour };
@@ -260,6 +169,7 @@ class DataManager {
     deleteTour(countryId, tourId) {
         const data = this.getData();
         if (!data) return false;
+        
         const country = data.countries.find(c => c.id === countryId);
         if (country && country.tours) {
             country.tours = country.tours.filter(t => t.id !== tourId);
@@ -268,25 +178,69 @@ class DataManager {
         return false;
     }
 
-    getContacts() { return this.getData()?.contacts || {}; }
+    // Контакты
+    getContacts() {
+        const data = this.getData();
+        return data?.contacts || {};
+    }
 
     updateContacts(updates) {
         const data = this.getData();
         if (!data) return {};
+        
         data.contacts = { ...data.contacts, ...updates };
         return this.setData(data) ? data.contacts : {};
     }
 
-    getSettings() { return this.getData()?.settings || {}; }
+    // Настройки
+    getSettings() {
+        const data = this.getData();
+        return data?.settings || {};
+    }
 
     updateSettings(updates) {
         const data = this.getData();
         if (!data) return {};
+        
         data.settings = { ...data.settings, ...updates };
         return this.setData(data) ? data.settings : {};
     }
 
-    // События обновления данных
+    // Совместимость
+    getContent() {
+        return { countries: this.getCountries(), contacts: this.getContacts() };
+    }
+
+    updateContent(newContent) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        if (newContent.countries) data.countries = newContent.countries;
+        if (newContent.contacts) data.contacts = newContent.contacts;
+        return this.setData(data);
+    }
+
+    updateCountries(countries) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        data.countries = countries;
+        return this.setData(data);
+    }
+
+    getDesign() {
+        return { primaryColor: '#2c5aa0', secondaryColor: '#4a7bc8' };
+    }
+
+    updateDesign(design) {
+        return true;
+    }
+
+    syncWithMainPage() {
+        return true;
+    }
+
+    // События
     onDataUpdate(callback) {
         this.dataUpdateCallbacks = this.dataUpdateCallbacks || [];
         this.dataUpdateCallbacks.push(callback);
@@ -295,11 +249,15 @@ class DataManager {
     triggerDataUpdate() {
         if (this.dataUpdateCallbacks) {
             this.dataUpdateCallbacks.forEach(callback => {
-                try { callback(this.getData()); } catch (error) { console.error('Error in callback:', error); }
+                try {
+                    callback(this.getData());
+                } catch (error) {
+                    console.error('Error in data update callback:', error);
+                }
             });
         }
     }
 }
 
-// Глобальный экземпляр менеджера данных
+// Глобальный экземпляр
 window.dataManager = new DataManager();
