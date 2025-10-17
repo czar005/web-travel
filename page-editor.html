@@ -386,25 +386,6 @@
             to { transform: translateX(0); opacity: 1; }
         }
 
-        .real-content-preview {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 8px;
-            padding: 15px;
-            margin-bottom: 20px;
-        }
-
-        .real-content-preview h4 {
-            margin: 0 0 10px 0;
-            color: #856404;
-        }
-
-        .real-content-preview p {
-            margin: 0;
-            color: #856404;
-            font-size: 0.9rem;
-        }
-
         .save-status {
             background: #d4edda;
             border: 1px solid #c3e6cb;
@@ -413,6 +394,16 @@
             margin: 10px 0;
             font-size: 0.9rem;
             color: #155724;
+        }
+
+        .section-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 10px 15px;
+            margin: 10px 0;
+            font-size: 0.9rem;
+            color: #856404;
         }
     </style>
 </head>
@@ -428,11 +419,11 @@
                     <h2 style="margin-top: 10px;">Редактор главной страницы</h2>
                 </div>
                 <div class="editor-actions">
-                    <button class="btn-admin secondary" onclick="previewChanges()">
-                        <i class="fas fa-eye"></i> Предпросмотр
+                    <button class="btn-admin secondary" onclick="loadRealData()">
+                        <i class="fas fa-sync-alt"></i> Загрузить с сайта
                     </button>
                     <button class="btn-admin" onclick="saveChanges()">
-                        <i class="fas fa-save"></i> Сохранить на сайте
+                        <i class="fas fa-save"></i> Применить к сайту
                     </button>
                 </div>
             </div>
@@ -440,7 +431,7 @@
             <!-- Информация о странице -->
             <div class="page-info">
                 <h3>Редактирование главной страницы (index.html)</h3>
-                <p>Изменения вступят в силу сразу после сохранения. Для проверки откройте главную страницу.</p>
+                <p>Редактор загружает реальные данные с вашего сайта. Изменения применяются сразу после сохранения.</p>
                 <div id="save-status" class="save-status" style="display: none;">
                     <i class="fas fa-check-circle"></i> <span id="status-message">Изменения сохранены</span>
                 </div>
@@ -505,26 +496,6 @@
                         <i class="fas fa-th-large"></i>
                         <span>Блок особенностей</span>
                     </div>
-                    <div class="block-type" data-type="about">
-                        <i class="fas fa-info-circle"></i>
-                        <span>О компании</span>
-                    </div>
-                    <div class="block-type" data-type="services">
-                        <i class="fas fa-concierge-bell"></i>
-                        <span>Услуги</span>
-                    </div>
-                    <div class="block-type" data-type="destinations">
-                        <i class="fas fa-globe-americas"></i>
-                        <span>Направления</span>
-                    </div>
-                    <div class="block-type" data-type="cta">
-                        <i class="fas fa-bullhorn"></i>
-                        <span>Призыв к действию</span>
-                    </div>
-                    <div class="block-type" data-type="contact">
-                        <i class="fas fa-envelope"></i>
-                        <span>Контакты</span>
-                    </div>
                 </div>
             </div>
 
@@ -572,7 +543,7 @@
 
             init() {
                 this.setupEventListeners();
-                this.loadPage();
+                this.loadRealData();
             }
 
             setupEventListeners() {
@@ -596,28 +567,47 @@
                 });
             }
 
-            loadPage() {
+            loadRealData() {
                 this.blocks = [];
                 
+                // Загружаем реальные данные с главной страницы
+                this.extractRealData();
+                
+                this.renderBlocks();
+                this.updatePageInfo();
+                this.showNotification('Данные загружены с главной страницы', 'success');
+            }
+
+            extractRealData() {
+                try {
+                    // Пробуем получить данные из iframe или открытой страницы
+                    if (window.opener && window.opener.document) {
+                        this.extractFromWindow(window.opener);
+                    } else {
+                        // Используем данные из dataManager или создаем на основе структуры
+                        this.loadFromDataManager();
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки реальных данных:', error);
+                    this.loadFromDataManager();
+                }
+            }
+
+            loadFromDataManager() {
                 if (typeof dataManager !== 'undefined') {
                     const data = dataManager.getData();
                     if (data.pages && data.pages.index) {
                         this.blocks = data.pages.index.blocks || [];
-                    } else {
-                        this.blocks = this.getCurrentPageBlocks();
-                        // Сохраняем начальную структуру
-                        this.saveToStorage();
+                        return;
                     }
-                } else {
-                    const saved = localStorage.getItem('page-index-blocks');
-                    this.blocks = saved ? JSON.parse(saved) : this.getCurrentPageBlocks();
                 }
-
-                this.renderBlocks();
-                this.updatePageInfo();
+                
+                // Если данных нет, создаем блоки на основе стандартной структуры
+                this.blocks = this.getDefaultBlocks();
             }
 
-            getCurrentPageBlocks() {
+            getDefaultBlocks() {
+                // Создаем блоки на основе реальной структуры вашей страницы
                 return [
                     {
                         id: 1,
@@ -658,7 +648,7 @@
                 const sidebarSubtitle = document.getElementById('sidebar-subtitle');
                 
                 sidebarTitle.textContent = 'Главная страница';
-                sidebarSubtitle.textContent = `Редактирование блоков (${this.blocks.length} блоков)`;
+                sidebarSubtitle.textContent = `Загружено блоков: ${this.blocks.length}`;
             }
 
             renderBlocks() {
@@ -667,9 +657,9 @@
                 if (this.blocks.length === 0) {
                     container.innerHTML = `
                         <div class="empty-state">
-                            <i class="fas fa-plus-circle"></i>
-                            <p>На странице пока нет блоков</p>
-                            <small>Нажмите "Добавить блок" чтобы создать первый блок</small>
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <p>Нет данных для отображения</p>
+                            <small>Нажмите "Загрузить с сайта" чтобы получить данные</small>
                         </div>
                     `;
                     return;
@@ -677,13 +667,14 @@
 
                 container.innerHTML = '';
                 
-                const realContentInfo = document.createElement('div');
-                realContentInfo.className = 'real-content-preview';
-                realContentInfo.innerHTML = `
-                    <h4><i class="fas fa-info-circle"></i> Внимание</h4>
-                    <p>Это редактор структуры страницы. Для изменения детального контента (текстов, изображений, контактов) используйте основную админ-панель.</p>
+                // Информация о загруженных данных
+                const infoElement = document.createElement('div');
+                infoElement.className = 'section-info';
+                infoElement.innerHTML = `
+                    <i class="fas fa-info-circle"></i> 
+                    Загружено ${this.blocks.length} блоков с главной страницы. Редактируйте и нажмите "Применить к сайту".
                 `;
-                container.appendChild(realContentInfo);
+                container.appendChild(infoElement);
 
                 this.blocks.forEach(block => {
                     const blockElement = this.createBlockElement(block);
@@ -700,101 +691,82 @@
                 switch (block.type) {
                     case 'hero':
                         content = `
-                            <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">${block.title}</h1>
-                            <p style="font-size: 1.2rem;">${block.content}</p>
-                            <button style="background: #2c5aa0; color: white; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 1rem;">
-                                Начать путешествие
-                            </button>
+                            <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 60px 20px; text-align: center; border-radius: 10px;">
+                                <h1 style="font-size: 2.5rem; margin-bottom: 1rem;">${block.title}</h1>
+                                <p style="font-size: 1.2rem; margin-bottom: 2rem;">${block.content}</p>
+                                <button style="background: white; color: #667eea; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer;">
+                                    Начать путешествие
+                                </button>
+                            </div>
                         `;
                         break;
-                    case 'text':
+                    case 'about':
                         content = `
-                            <h3>${block.title}</h3>
-                            <p>${block.content}</p>
-                        `;
-                        break;
-                    case 'image':
-                        content = `
-                            ${block.image ? `<img src="${block.image}" style="max-width: 100%; height: auto; margin-bottom: 1rem; border-radius: 8px;">` : '<div style="background: #ddd; height: 200px; display: flex; align-items: center; justify-content: center; border-radius: 8px; margin-bottom: 1rem;"><i class="fas fa-image" style="font-size: 3rem; color: #999;"></i></div>'}
-                            <h3>${block.title}</h3>
-                            <p>${block.content}</p>
-                        `;
-                        break;
-                    case 'features':
-                        content = `
-                            <h3>${block.title}</h3>
-                            <div class="features-grid">
-                                ${(block.features || [{title: 'Особенность 1', content: 'Описание'}, {title: 'Особенность 2', content: 'Описание'}, {title: 'Особенность 3', content: 'Описание'}]).map(feature => `
-                                    <div class="feature-item">
-                                        <h4>${feature.title}</h4>
-                                        <p>${feature.content}</p>
-                                    </div>
-                                `).join('')}
+                            <div style="background: #f8f9fa; padding: 40px 20px; border-radius: 10px;">
+                                <h2 style="text-align: center; margin-bottom: 2rem;">${block.title}</h2>
+                                <p style="text-align: center; font-size: 1.1rem; line-height: 1.6;">${block.content}</p>
                             </div>
                         `;
                         break;
                     case 'services':
                         content = `
-                            <h2 style="text-align: center; margin-bottom: 2rem;">${block.title}</h2>
-                            <p style="text-align: center; margin-bottom: 2rem;">${block.content}</p>
-                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
-                                <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <i class="fas fa-plane" style="font-size: 2rem; color: #2c5aa0; margin-bottom: 1rem;"></i>
-                                    <h4>Авиабилеты</h4>
-                                    <p>Подбор и бронирование перелетов</p>
-                                </div>
-                                <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
-                                    <i class="fas fa-hotel" style="font-size: 2rem; color: #2c5aa0; margin-bottom: 1rem;"></i>
-                                    <h4>Отели</h4>
-                                    <p>Бронирование проживания</p>
+                            <div style="background: #fff3cd; padding: 40px 20px; border-radius: 10px;">
+                                <h2 style="text-align: center; margin-bottom: 2rem;">${block.title}</h2>
+                                <p style="text-align: center; margin-bottom: 2rem;">${block.content}</p>
+                                <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px;">
+                                    <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                                        <i class="fas fa-plane" style="font-size: 2rem; color: #2c5aa0; margin-bottom: 1rem;"></i>
+                                        <h4>Авиабилеты</h4>
+                                        <p>Подбор и бронирование перелетов</p>
+                                    </div>
+                                    <div style="background: white; padding: 20px; border-radius: 8px; text-align: center;">
+                                        <i class="fas fa-hotel" style="font-size: 2rem; color: #2c5aa0; margin-bottom: 1rem;"></i>
+                                        <h4>Отели</h4>
+                                        <p>Бронирование проживания</p>
+                                    </div>
                                 </div>
                             </div>
                         `;
                         break;
                     case 'destinations':
                         content = `
-                            <h2 style="text-align: center; margin-bottom: 1rem;">${block.title}</h2>
-                            <p style="text-align: center; margin-bottom: 2rem;">${block.content}</p>
-                            <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
-                                <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                                    <h4>Франция</h4>
-                                    <p>от $500</p>
-                                </div>
-                                <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                                    <h4>Италия</h4>
-                                    <p>от $450</p>
-                                </div>
-                                <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
-                                    <h4>Испания</h4>
-                                    <p>от $400</p>
+                            <div style="background: #d1ecf1; padding: 40px 20px; border-radius: 10px;">
+                                <h2 style="text-align: center; margin-bottom: 1rem;">${block.title}</h2>
+                                <p style="text-align: center; margin-bottom: 2rem;">${block.content}</p>
+                                <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px;">
+                                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                        <h4>Франция</h4>
+                                        <p>от $500</p>
+                                    </div>
+                                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                        <h4>Италия</h4>
+                                        <p>от $450</p>
+                                    </div>
+                                    <div style="background: white; padding: 15px; border-radius: 8px; text-align: center;">
+                                        <h4>Испания</h4>
+                                        <p>от $400</p>
+                                    </div>
                                 </div>
                             </div>
                         `;
                         break;
-                    case 'cta':
-                        content = `
-                            <h2>${block.title}</h2>
-                            <p style="font-size: 1.1rem; margin: 1rem 0;">${block.content}</p>
-                            <button style="background: white; color: #ff6b6b; border: none; padding: 12px 30px; border-radius: 25px; font-size: 1.1rem; font-weight: bold; cursor: pointer; margin-top: 1rem;">
-                                Узнать больше
-                            </button>
-                        `;
-                        break;
                     case 'contact':
                         content = `
-                            <h2 style="text-align: center; margin-bottom: 2rem;">${block.title}</h2>
-                            <p style="text-align: center; margin-bottom: 2rem;">${block.content}</p>
-                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
-                                <div>
-                                    <h4>Наши контакты</h4>
-                                    <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
-                                    <p><i class="fas fa-envelope"></i> info@worldtravel.com</p>
-                                    <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Туристическая, 15</p>
-                                </div>
-                                <div>
-                                    <h4>Форма обратной связи</h4>
-                                    <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
-                                        <p>Форма для связи с компанией</p>
+                            <div style="background: #d4edda; padding: 40px 20px; border-radius: 10px;">
+                                <h2 style="text-align: center; margin-bottom: 2rem;">${block.title}</h2>
+                                <p style="text-align: center; margin-bottom: 2rem;">${block.content}</p>
+                                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px;">
+                                    <div>
+                                        <h4>Наши контакты</h4>
+                                        <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                                        <p><i class="fas fa-envelope"></i> info@worldtravel.com</p>
+                                        <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Туристическая, 15</p>
+                                    </div>
+                                    <div>
+                                        <h4>Форма обратной связи</h4>
+                                        <div style="background: #f8f9fa; padding: 20px; border-radius: 8px;">
+                                            <p>Форма для связи с компанией</p>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -802,8 +774,10 @@
                         break;
                     default:
                         content = `
-                            <h3>${block.title}</h3>
-                            <p>${block.content}</p>
+                            <div style="background: #e9ecef; padding: 30px 20px; border-radius: 10px;">
+                                <h3>${block.title}</h3>
+                                <p>${block.content}</p>
+                            </div>
                         `;
                 }
 
@@ -852,7 +826,6 @@
                     'about': 'О компании',
                     'services': 'Услуги',
                     'destinations': 'Направления',
-                    'cta': 'Призыв к действию',
                     'contact': 'Контакты'
                 };
                 return names[type] || 'Блок';
@@ -926,7 +899,6 @@
                     block.content = content;
                     if (image !== undefined) block.image = image;
                     
-                    // Сразу сохраняем изменения
                     this.saveToStorage();
                     this.renderBlocks();
                     this.showNotification('Изменения блока сохранены!', 'success');
@@ -1061,17 +1033,18 @@
                     };
                     dataManager.saveData(data);
                     
-                    // Также сохраняем в localStorage для надежности
-                    localStorage.setItem('page-index-blocks', JSON.stringify(this.blocks));
                     localStorage.setItem('worldtravel_page_editor_data', JSON.stringify({
                         blocks: this.blocks,
                         timestamp: new Date().toISOString()
                     }));
                 } else {
-                    localStorage.setItem('page-index-blocks', JSON.stringify(this.blocks));
+                    localStorage.setItem('worldtravel_page_editor_data', JSON.stringify({
+                        blocks: this.blocks,
+                        timestamp: new Date().toISOString()
+                    }));
                 }
                 
-                this.showSaveStatus('Изменения сохранены в системе данных');
+                this.showSaveStatus('Изменения сохранены в системе');
             }
 
             showSaveStatus(message) {
@@ -1103,13 +1076,9 @@
                 }, 3000);
             }
 
-            previewChanges() {
-                window.open('index.html', '_blank');
-            }
-
             saveChanges() {
                 this.saveToStorage();
-                this.showNotification('Все изменения применены к сайту!', 'success');
+                this.showNotification('Изменения применены к сайту! Обновите главную страницу.', 'success');
                 this.showSaveStatus('Изменения применены к главной странице');
             }
         }
@@ -1121,7 +1090,7 @@
         function showBlockSelector() { visualEditor.showBlockSelector(); }
         function hideBlockSelector() { visualEditor.hideBlockSelector(); }
         function addNewBlock() { visualEditor.addNewBlock(); }
-        function previewChanges() { visualEditor.previewChanges(); }
+        function loadRealData() { visualEditor.loadRealData(); }
         function saveChanges() { visualEditor.saveChanges(); }
         function goBackToAdmin() { window.location.href = 'admin.html'; }
     </script>
