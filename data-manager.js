@@ -1,180 +1,204 @@
-// Data Manager for WorldTravel - ULTRA RELIABLE VERSION
-console.log('🔄 Загрузка data-manager...');
+// Data Manager - управление данными сайта
+class DataManager {
+    constructor() {
+        this.storageKey = 'worldtravel_data';
+        this.init();
+    }
 
-window.dataManager = {
-    // Основная функция получения данных
-    getData: function() {
-        try {
-            // Пробуем получить из worldtravel_data
-            const saved = localStorage.getItem('worldtravel_data');
-            if (saved) {
-                const data = JSON.parse(saved);
-                console.log('✅ Данные загружены из worldtravel_data');
-                return data;
-            }
-            
-            // Если нет, создаем новые данные
-            console.log('🆕 Создание новых данных по умолчанию');
-            return this.getDefaultData();
-            
-        } catch (error) {
-            console.error('❌ Ошибка загрузки данных:', error);
-            return this.getDefaultData();
+    init() {
+        // Инициализация данных по умолчанию если их нет
+        if (!this.getData()) {
+            this.setDefaultData();
         }
-    },
+    }
 
-    // Надежное сохранение данных
-    saveToLocalStorage: function(data) {
+    getData() {
         try {
-            localStorage.setItem('worldtravel_data', JSON.stringify(data));
-            console.log('💾 Данные сохранены в worldtravel_data');
+            const data = localStorage.getItem(this.storageKey);
+            return data ? JSON.parse(data) : null;
+        } catch (error) {
+            console.error('Error reading data:', error);
+            return null;
+        }
+    }
+
+    setData(data) {
+        try {
+            localStorage.setItem(this.storageKey, JSON.stringify(data));
+            this.triggerDataUpdate();
             return true;
         } catch (error) {
-            console.error('❌ Ошибка сохранения:', error);
-            return false;
-        }
-    },
-
-    // Данные по умолчанию
-    getDefaultData: function() {
-        return {
-            countries: [],
-            content: {
-                heroTitle: "Откройте мир с WorldTravel",
-                heroText: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин – ваше приключение начинается здесь.",
-                contactPhone: "+7 (999) 123-45-67",
-                contactEmail: "info@worldtravel.com",
-                contactAddress: "Москва, ул. Туристическая, 15",
-                contactHours: "Пн-Пт: 9:00-18:00"
-            },
-            design: {
-                blocks: {
-                    hero: true,
-                    destinations: true,
-                    contact: true
-                }
-            },
-            settings: {
-                companyName: "WorldTravel",
-                primaryColor: "#2c5aa0",
-                secondaryColor: "#4a7bc8",
-                language: "ru"
-            }
-        };
-    },
-
-    // === ФУНКЦИИ ДЛЯ СТРАН ===
-    getCountries: function() {
-        const data = this.getData();
-        return data.countries || [];
-    },
-
-    updateCountries: function(countries) {
-        console.log('💾 Сохранение стран:', countries);
-        try {
-            const data = this.getData();
-            data.countries = countries;
-            const success = this.saveToLocalStorage(data);
-            
-            // Синхронизируем с worldtravel_current_data
-            if (success) {
-                this.syncWithCurrentData();
-            }
-            
-            return success;
-        } catch (error) {
-            console.error('❌ Ошибка сохранения стран:', error);
-            return false;
-        }
-    },
-
-    // === ФУНКЦИИ ДЛЯ КОНТЕНТА ===
-    getContent: function() {
-        const data = this.getData();
-        return data.content || {};
-    },
-
-    updateContent: function(content) {
-        console.log('💾 Сохранение контента:', content);
-        try {
-            const data = this.getData();
-            data.content = { ...data.content, ...content };
-            const success = this.saveToLocalStorage(data);
-            
-            // Синхронизируем с worldtravel_current_data
-            if (success) {
-                this.syncWithCurrentData();
-            }
-            
-            return success;
-        } catch (error) {
-            console.error('❌ Ошибка сохранения контента:', error);
-            return false;
-        }
-    },
-
-    // === ФУНКЦИИ ДЛЯ ДИЗАЙНА ===
-    getDesign: function() {
-        const data = this.getData();
-        return data.design || {};
-    },
-
-    updateDesign: function(design) {
-        console.log('💾 Сохранение дизайна:', design);
-        try {
-            const data = this.getData();
-            data.design = { ...data.design, ...design };
-            const success = this.saveToLocalStorage(data);
-            
-            // Синхронизируем с worldtravel_current_data
-            if (success) {
-                this.syncWithCurrentData();
-            }
-            
-            return success;
-        } catch (error) {
-            console.error('❌ Ошибка сохранения дизайна:', error);
-            return false;
-        }
-    },
-
-    // === ФУНКЦИИ ДЛЯ НАСТРОЕК ===
-    getSettings: function() {
-        const data = this.getData();
-        return data.settings || {};
-    },
-
-    updateSettings: function(settings) {
-        console.log('💾 Сохранение настроек:', settings);
-        try {
-            const data = this.getData();
-            data.settings = { ...data.settings, ...settings };
-            const success = this.saveToLocalStorage(data);
-            
-            // Синхронизируем с worldtravel_current_data
-            if (success) {
-                this.syncWithCurrentData();
-            }
-            
-            return success;
-        } catch (error) {
-            console.error('❌ Ошибка сохранения настроек:', error);
-            return false;
-        }
-    },
-
-    // Синхронизация с worldtravel_current_data
-    syncWithCurrentData: function() {
-        try {
-            const data = this.getData();
-            localStorage.setItem('worldtravel_current_data', JSON.stringify(data));
-            console.log('🔄 Данные синхронизированы с worldtravel_current_data');
-            return true;
-        } catch (error) {
-            console.error('❌ Ошибка синхронизации:', error);
+            console.error('Error saving data:', error);
             return false;
         }
     }
-};
 
-console.log('✅ data-manager загружен и готов к работе');
+    setDefaultData() {
+        const defaultData = {
+            countries: [
+                {
+                    id: 1,
+                    name: 'Франция',
+                    image: 'images/travel-placeholder.svg',
+                    description: 'Романтический Париж и Лазурный берег',
+                    tours: [
+                        { id: 1, name: 'Париж романтический', price: 500, duration: '7 дней' },
+                        { id: 2, name: 'Лазурный берег', price: 700, duration: '10 дней' }
+                    ]
+                },
+                {
+                    id: 2,
+                    name: 'Италия', 
+                    image: 'images/travel-placeholder.svg',
+                    description: 'Вкусная кухня и богатая история',
+                    tours: [
+                        { id: 3, name: 'Рим и Ватикан', price: 600, duration: '8 дней' },
+                        { id: 4, name: 'Венеция и Флоренция', price: 550, duration: '6 дней' }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: 'Испания',
+                    image: 'images/travel-placeholder.svg', 
+                    description: 'Солнечные пляжи и яркая культура',
+                    tours: [
+                        { id: 5, name: 'Барселона и Коста-Брава', price: 450, duration: '7 дней' }
+                    ]
+                }
+            ],
+            contacts: {
+                phone: '+7 (999) 123-45-67',
+                email: 'info@worldtravel.com',
+                address: 'Москва, ул. Туристическая, 15',
+                hours: 'Пн-Пт: 9:00-18:00'
+            },
+            settings: {
+                siteTitle: 'WorldTravel - Туристическая компания',
+                companyName: 'WorldTravel'
+            }
+        };
+        this.setData(defaultData);
+        return defaultData;
+    }
+
+    // Страны
+    getCountries() {
+        const data = this.getData();
+        return data?.countries || [];
+    }
+
+    addCountry(country) {
+        const data = this.getData() || this.setDefaultData();
+        const newCountry = {
+            id: Date.now(),
+            image: 'images/travel-placeholder.svg',
+            tours: [],
+            ...country
+        };
+        data.countries.push(newCountry);
+        this.setData(data);
+        return newCountry;
+    }
+
+    updateCountry(id, updates) {
+        const data = this.getData();
+        if (!data) return null;
+        
+        const countryIndex = data.countries.findIndex(c => c.id === id);
+        if (countryIndex !== -1) {
+            data.countries[countryIndex] = { ...data.countries[countryIndex], ...updates };
+            this.setData(data);
+            return data.countries[countryIndex];
+        }
+        return null;
+    }
+
+    deleteCountry(id) {
+        const data = this.getData();
+        if (!data) return;
+        
+        data.countries = data.countries.filter(c => c.id !== id);
+        this.setData(data);
+    }
+
+    // Туры
+    addTour(countryId, tour) {
+        const data = this.getData();
+        if (!data) return null;
+        
+        const country = data.countries.find(c => c.id === countryId);
+        if (country) {
+            const newTour = {
+                id: Date.now(),
+                ...tour
+            };
+            if (!country.tours) country.tours = [];
+            country.tours.push(newTour);
+            this.setData(data);
+            return newTour;
+        }
+        return null;
+    }
+
+    deleteTour(countryId, tourId) {
+        const data = this.getData();
+        if (!data) return;
+        
+        const country = data.countries.find(c => c.id === countryId);
+        if (country && country.tours) {
+            country.tours = country.tours.filter(t => t.id !== tourId);
+            this.setData(data);
+        }
+    }
+
+    // Контакты
+    getContacts() {
+        const data = this.getData();
+        return data?.contacts || {};
+    }
+
+    updateContacts(updates) {
+        const data = this.getData();
+        if (!data) return {};
+        
+        data.contacts = { ...data.contacts, ...updates };
+        this.setData(data);
+        return data.contacts;
+    }
+
+    // Настройки
+    getSettings() {
+        const data = this.getData();
+        return data?.settings || {};
+    }
+
+    updateSettings(updates) {
+        const data = this.getData();
+        if (!data) return {};
+        
+        data.settings = { ...data.settings, ...updates };
+        this.setData(data);
+        return data.settings;
+    }
+
+    // События обновления данных
+    onDataUpdate(callback) {
+        this.dataUpdateCallbacks = this.dataUpdateCallbacks || [];
+        this.dataUpdateCallbacks.push(callback);
+    }
+
+    triggerDataUpdate() {
+        if (this.dataUpdateCallbacks) {
+            this.dataUpdateCallbacks.forEach(callback => {
+                try {
+                    callback(this.getData());
+                } catch (error) {
+                    console.error('Error in data update callback:', error);
+                }
+            });
+        }
+    }
+}
+
+// Глобальный экземпляр менеджера данных
+window.dataManager = new DataManager();

@@ -1,341 +1,361 @@
-// admin.js - УПРОЩЕННАЯ РАБОЧАЯ ВЕРСИЯ
-console.log('🚀 Админка загружена');
-function saveTravelData(data) {
-    localStorage.setItem('travelData', JSON.stringify(data));
-    alert('Изменения сохранены! Обновите основную страницу.');
-}
-
-// Вызывайте эту функцию при сохранении в админке
-class SimpleAdmin {
-    constructor() {
-        this.countries = [];
-        this.init();
-    }
-
-    async init() {
-        await this.loadData();
-        this.setupEventListeners();
-        this.renderCountries();
-        console.log('✅ Админка инициализирована');
-    }
-
-    async loadData() {
-        try {
-            const data = sessionStorage.getItem('worldtravel_data') || localStorage.getItem('worldtravel_data');
-            if (data) {
-                const parsed = JSON.parse(data);
-                this.countries = parsed.countries || [];
-                console.log('📁 Загружено стран:', this.countries.length);
-            }
-        } catch (error) {
-            console.error('Ошибка загрузки:', error);
-            this.countries = [];
-        }
-    }
-
-    setupEventListeners() {
-        // Кнопка добавления страны
-        const addBtn = document.getElementById('add-country-btn') || 
-                      document.querySelector('button[onclick*="addCountry"]') ||
-                      document.querySelector('.btn-success');
-        
-        if (addBtn) {
-            console.log('✅ Найдена кнопка добавления');
-            addBtn.onclick = () => this.openCountryModal();
-            addBtn.style.border = '2px solid #28a745';
-        } else {
-            console.error('❌ Кнопка не найдена, создаем свою');
-            this.createAddButton();
-        }
-
-        // Форма
-        const form = document.getElementById('countryForm');
-        if (form) {
-            form.onsubmit = (e) => {
-                e.preventDefault();
-                this.saveCountry();
-            };
-        }
-    }
-
-    createAddButton() {
-        const btn = document.createElement('button');
-        btn.innerHTML = '<i class="fas fa-plus"></i> Добавить страну';
-        btn.style.cssText = `
-            background: #28a745;
-            color: white;
-            border: none;
-            padding: 12px 24px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 16px;
-            margin: 10px;
-        `;
-        btn.onclick = () => this.openCountryModal();
-        
-        // Добавляем в начало контента
-        const content = document.querySelector('.content-area') || document.body;
-        content.prepend(btn);
-    }
-
-    openCountryModal() {
-        console.log('🎯 Открываем модальное окно');
-        this.showModal();
-    }
-
-    showModal() {
-        // Пробуем найти существующее модальное окно
-        let modal = document.getElementById('addCountryModal') || 
-                   document.getElementById('country-modal') ||
-                   document.querySelector('.modal');
-        
-        if (modal) {
-            modal.style.display = 'block';
-            modal.style.opacity = '1';
-        } else {
-            // Создаем модальное окно
-            this.createModal();
-        }
-    }
-
-    createModal() {
-        const modal = document.createElement('div');
-        modal.id = 'simpleAdminModal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 10000;
-        `;
-
-        modal.innerHTML = `
-            <div style="background: white; padding: 30px; border-radius: 10px; width: 90%; max-width: 500px;">
-                <h3 style="margin-top: 0; color: #2c5aa0;">Добавить страну</h3>
-                <form id="simpleAdminForm">
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Название страны:</label>
-                        <input type="text" id="adminCountryName" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px;" placeholder="Введите название страны" required>
-                    </div>
-                    <div style="margin-bottom: 15px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Описание:</label>
-                        <textarea id="adminCountryDesc" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; height: 100px; font-size: 16px;" placeholder="Описание страны" required></textarea>
-                    </div>
-                    <div style="margin-bottom: 20px;">
-                        <label style="display: block; margin-bottom: 5px; font-weight: bold;">Цена:</label>
-                        <input type="text" id="adminCountryPrice" style="width: 100%; padding: 12px; border: 2px solid #ddd; border-radius: 6px; font-size: 16px;" placeholder="от $500" value="от $">
-                    </div>
-                    <div style="display: flex; gap: 10px; justify-content: flex-end;">
-                        <button type="button" onclick="window.simpleAdmin.closeModal()" style="padding: 12px 24px; background: #6c757d; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Отмена</button>
-                        <button type="submit" style="padding: 12px 24px; background: #28a745; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 16px;">Добавить страну</button>
-                    </div>
-                </form>
-            </div>
-        `;
-
-        document.body.appendChild(modal);
-
-        // Обработчик формы
-        document.getElementById('simpleAdminForm').onsubmit = (e) => {
-            e.preventDefault();
-            this.saveCountry();
-        };
-    }
-
-    closeModal() {
-        const modal = document.getElementById('simpleAdminModal');
-        if (modal) modal.remove();
-    }
-
-    saveCountry() {
-        const name = document.getElementById('adminCountryName')?.value || 
-                    document.getElementById('country-name')?.value;
-        const description = document.getElementById('adminCountryDesc')?.value || 
-                           document.getElementById('country-description')?.value;
-        const price = document.getElementById('adminCountryPrice')?.value || 
-                     document.getElementById('country-price')?.value;
-
-        if (!name) {
-            alert('❌ Введите название страны');
-            return;
-        }
-
-        const newCountry = {
-            id: name.toLowerCase().replace(/ /g, '-'),
-            name: name,
-            description: description,
-            price: price,
-            shortDescription: (description || '').substring(0, 100) + '...',
-            images: [],
-            tours: []
-        };
-
-        this.countries.push(newCountry);
-        this.saveToStorage();
-        this.renderCountries();
-        this.closeModal();
-
-        console.log('✅ Страна добавлена:', newCountry);
-        alert('✅ Страна "' + name + '" добавлена! Главная страница обновится через 2 секунды.');
-    }
-
-    saveToStorage() {
-        const data = {
-            countries: this.countries,
-            tours: [],
-            content: {},
-            lastUpdate: new Date().toISOString()
-        };
-
-        sessionStorage.setItem('worldtravel_data', JSON.stringify(data));
-        localStorage.setItem('worldtravel_data', JSON.stringify(data));
-
-        console.log('💾 Данные сохранены:', this.countries.length, 'стран');
-    }
-
-    renderCountries() {
-        const container = document.getElementById('countries-list') || 
-                         document.querySelector('.content-area') || 
-                         document.body;
-
-        let html = '<h3>Управление странами</h3>';
-        
-        if (this.countries.length === 0) {
-            html += '<p>Стран пока нет</p>';
-        } else {
-            html += this.countries.map(country => `
-                <div style="background: white; padding: 20px; margin: 10px 0; border-radius: 8px; border-left: 4px solid #2c5aa0;">
-                    <h4 style="margin: 0 0 10px 0;">${country.name}</h4>
-                    <p style="margin: 0 0 10px 0; color: #666;">${country.description}</p>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <strong style="color: #2c5aa0;">${country.price}</strong>
-                        <button onclick="window.simpleAdmin.deleteCountry('${country.id}')" style="background: #dc3545; color: white; border: none; padding: 8px 16px; border-radius: 4px; cursor: pointer;">Удалить</button>
-                    </div>
-                </div>
-            `).join('');
-        }
-
-        container.innerHTML = html;
-    }
-
-    deleteCountry(countryId) {
-        if (confirm('Удалить страну?')) {
-            this.countries = this.countries.filter(c => c.id !== countryId);
-            this.saveToStorage();
-            this.renderCountries();
-            console.log('🗑️ Страна удалена:', countryId);
-        }
-    }
-}
-// admin.js - ДОБАВИТЬ в конец:
-
-// Инициализация админки
+// Admin JavaScript - управление данными через админ-панель
 document.addEventListener('DOMContentLoaded', function() {
     initializeAdmin();
 });
 
 function initializeAdmin() {
-    loadCountriesForAdmin();
-    setupEventListeners();
+    loadAdminData();
+    setupAdminEventListeners();
+    loadCountrySelect();
 }
 
-function setupEventListeners() {
-    // Кнопка сохранения
-    const saveBtn = document.querySelector('.btn-save');
-    if (saveBtn) {
-        saveBtn.addEventListener('click', saveAdminChanges);
+function setupAdminEventListeners() {
+    // Обработчики для форм
+    const addCountryForm = document.getElementById('add-country-form');
+    const addTourForm = document.getElementById('add-tour-form');
+    const contactForm = document.getElementById('contact-form');
+    const settingsForm = document.getElementById('settings-form');
+    
+    if (addCountryForm) {
+        addCountryForm.addEventListener('submit', handleAddCountry);
     }
     
-    // Кнопка добавления страны
-    const addCountryBtn = document.querySelector('.btn-add-country');
-    if (addCountryBtn) {
-        addCountryBtn.addEventListener('click', showAddCountryForm);
+    if (addTourForm) {
+        addTourForm.addEventListener('submit', handleAddTour);
     }
-}
-
-// Загрузить страны для админки
-async function loadCountriesForAdmin() {
-    const data = await loadData();
-    displayCountriesInAdmin(data.countries);
-}
-
-// Показать страны в админке
-function displayCountriesInAdmin(countries) {
-    const container = document.getElementById('countries-list');
-    if (!container) return;
     
-    container.innerHTML = countries.map(country => `
-        <div class="country-item" data-id="${country.id}">
-            <h4>${country.name}</h4>
-            <p>${country.description}</p>
-            <button onclick="editCountry(${country.id})">Редактировать</button>
-            <button onclick="deleteCountry(${country.id})">Удалить</button>
-        </div>
-    `).join('');
-}
-
-// Сохранить изменения из админки
-async function saveAdminChanges() {
-    const currentData = await loadData();
-    
-    // Здесь будет логика сохранения изменений из форм
-    // Пока просто сохраняем текущие данные в LocalStorage
-    
-    if (window.dataManager) {
-        window.dataManager.saveToLocalStorage(currentData);
-        alert('Данные сохранены! Обновите основную страницу.');
-    } else {
-        alert('Ошибка: Менеджер данных не загружен');
+    if (contactForm) {
+        contactForm.addEventListener('submit', handleUpdateContacts);
     }
-}
-
-// Добавить новую страну
-function showAddCountryForm() {
-    const name = prompt('Введите название страны:');
-    const description = prompt('Введите описание:');
     
-    if (name && description) {
-        addNewCountry(name, description);
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', handleUpdateSettings);
     }
-}
-
-async function addNewCountry(name, description) {
-    const data = await loadData();
-    const newId = Math.max(...data.countries.map(c => c.id), 0) + 1;
     
-    data.countries.push({
-        id: newId,
-        name: name,
-        description: description,
-        image: "images/travel-placeholder.svg"
+    // Загрузка данных при смене вкладок
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            switch(tabName) {
+                case 'countries':
+                    loadCountriesTable();
+                    break;
+                case 'tours':
+                    loadToursTable();
+                    break;
+                case 'contacts':
+                    loadContactsForm();
+                    break;
+                case 'settings':
+                    loadSettingsForm();
+                    break;
+            }
+        });
     });
+}
+
+function loadAdminData() {
+    if (!window.dataManager) {
+        console.error('Data manager not available');
+        showAdminNotification('Ошибка загрузки данных менеджера', 'error');
+        return;
+    }
+    
+    const data = window.dataManager.getData();
+    console.log('Admin loaded data:', data);
+    
+    if (data) {
+        loadCountriesTable();
+        loadContactsForm();
+        loadSettingsForm();
+    } else {
+        showAdminNotification('Данные не найдены, создаем стандартные', 'warning');
+        window.dataManager.setDefaultData();
+        loadAdminData(); // Перезагружаем
+    }
+}
+
+function loadCountriesTable() {
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const tbody = document.querySelector('#countries-table tbody');
+    
+    console.log('Loading countries table:', countries);
+    
+    if (tbody) {
+        if (countries.length > 0) {
+            tbody.innerHTML = countries.map(country => `
+                <tr>
+                    <td>${country.name}</td>
+                    <td>${country.description}</td>
+                    <td>${country.tours ? country.tours.length : 0}</td>
+                    <td>
+                        <button class="btn-small" onclick="editCountry(${country.id})">Редактировать</button>
+                        <button class="btn-small danger" onclick="deleteCountry(${country.id})">Удалить</button>
+                    </td>
+                </tr>
+            `).join('');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Страны не добавлены</td></tr>';
+        }
+    }
+}
+
+function loadToursTable() {
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const tbody = document.querySelector('#tours-table tbody');
+    
+    if (tbody) {
+        let toursHTML = '';
+        let hasTours = false;
+        
+        countries.forEach(country => {
+            if (country.tours && country.tours.length > 0) {
+                hasTours = true;
+                country.tours.forEach(tour => {
+                    toursHTML += `
+                        <tr>
+                            <td>${tour.name}</td>
+                            <td>${country.name}</td>
+                            <td>$${tour.price}</td>
+                            <td>${tour.duration}</td>
+                            <td>
+                                <button class="btn-small danger" onclick="deleteTour(${country.id}, ${tour.id})">Удалить</button>
+                            </td>
+                        </tr>
+                    `;
+                });
+            }
+        });
+        
+        tbody.innerHTML = hasTours ? toursHTML : '<tr><td colspan="5" style="text-align: center; color: #999;">Туры не найдены</td></tr>';
+    }
+}
+
+function loadContactsForm() {
+    if (!window.dataManager) return;
+    
+    const contacts = window.dataManager.getContacts();
+    const form = document.getElementById('contact-form');
+    
+    console.log('Loading contacts form:', contacts);
+    
+    if (form) {
+        form.querySelector('#contact-phone').value = contacts.phone || '';
+        form.querySelector('#contact-email').value = contacts.email || '';
+        form.querySelector('#contact-address').value = contacts.address || '';
+        form.querySelector('#contact-hours').value = contacts.hours || '';
+    }
+}
+
+function loadSettingsForm() {
+    if (!window.dataManager) return;
+    
+    const settings = window.dataManager.getSettings();
+    const form = document.getElementById('settings-form');
+    
+    console.log('Loading settings form:', settings);
+    
+    if (form) {
+        form.querySelector('#site-title').value = settings.siteTitle || '';
+        form.querySelector('#company-name').value = settings.companyName || '';
+    }
+}
+
+function loadCountrySelect() {
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const select = document.getElementById('tour-country');
+    
+    if (select) {
+        if (countries.length > 0) {
+            select.innerHTML = countries.map(country => 
+                `<option value="${country.id}">${country.name}</option>`
+            ).join('');
+        } else {
+            select.innerHTML = '<option value="">Сначала добавьте страны</option>';
+        }
+    }
+}
+
+// Обработчики форм
+function handleAddCountry(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const countryData = {
+        name: formData.get('name').trim(),
+        description: formData.get('description').trim()
+    };
+    
+    if (!countryData.name) {
+        showAdminNotification('Введите название страны', 'error');
+        return;
+    }
     
     if (window.dataManager) {
-        window.dataManager.saveToLocalStorage(data);
-        loadCountriesForAdmin(); // Обновляем список
-        alert('Страна добавлена!');
+        window.dataManager.addCountry(countryData);
+        form.reset();
+        loadCountriesTable();
+        loadCountrySelect();
+        showAdminNotification('Страна успешно добавлена!', 'success');
     }
 }
 
-// Удалить страну
-function deleteCountry(id) {
-    if (confirm('Удалить эту страну?')) {
-        // Логика удаления будет в следующем шаге
-        alert('Функция удаления будет добавлена');
+function handleAddTour(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const tourData = {
+        name: formData.get('name').trim(),
+        price: parseInt(formData.get('price')),
+        duration: formData.get('duration').trim()
+    };
+    
+    const countryId = parseInt(formData.get('country'));
+    
+    if (!tourData.name || !tourData.price || !tourData.duration) {
+        showAdminNotification('Заполните все поля тура', 'error');
+        return;
+    }
+    
+    if (window.dataManager) {
+        const result = window.dataManager.addTour(countryId, tourData);
+        if (result) {
+            form.reset();
+            loadToursTable();
+            showAdminNotification('Тур успешно добавлен!', 'success');
+        } else {
+            showAdminNotification('Ошибка при добавлении тура', 'error');
+        }
     }
 }
 
-function editCountry(id) {
-    alert('Функция редактирования будет добавлена');
+function handleUpdateContacts(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const contactData = {
+        phone: formData.get('phone').trim(),
+        email: formData.get('email').trim(),
+        address: formData.get('address').trim(),
+        hours: formData.get('hours').trim()
+    };
+    
+    if (window.dataManager) {
+        window.dataManager.updateContacts(contactData);
+        showAdminNotification('Контактная информация обновлена!', 'success');
+    }
 }
-// Инициализация
-let simpleAdmin;
-document.addEventListener('DOMContentLoaded', () => {
-    simpleAdmin = new SimpleAdmin();
-    window.simpleAdmin = simpleAdmin;
-});
+
+function handleUpdateSettings(e) {
+    e.preventDefault();
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const settingsData = {
+        siteTitle: formData.get('siteTitle').trim(),
+        companyName: formData.get('companyName').trim()
+    };
+    
+    if (window.dataManager) {
+        window.dataManager.updateSettings(settingsData);
+        showAdminNotification('Настройки сайта обновлены!', 'success');
+    }
+}
+
+// Функции управления
+function editCountry(countryId) {
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    
+    if (country) {
+        const newName = prompt('Введите новое название страны:', country.name);
+        if (newName === null) return;
+        
+        const newDesc = prompt('Введите новое описание:', country.description);
+        if (newDesc === null) return;
+        
+        if (newName.trim() && newDesc.trim()) {
+            window.dataManager.updateCountry(countryId, {
+                name: newName.trim(),
+                description: newDesc.trim()
+            });
+            loadCountriesTable();
+            loadCountrySelect();
+            showAdminNotification('Страна обновлена!', 'success');
+        } else {
+            showAdminNotification('Название и описание не могут быть пустыми', 'error');
+        }
+    }
+}
+
+function deleteCountry(countryId) {
+    if (confirm('Вы уверены, что хотите удалить эту страну? Все туры в этой стране также будут удалены.')) {
+        if (window.dataManager) {
+            window.dataManager.deleteCountry(countryId);
+            loadCountriesTable();
+            loadToursTable();
+            loadCountrySelect();
+            showAdminNotification('Страна удалена!', 'success');
+        }
+    }
+}
+
+function deleteTour(countryId, tourId) {
+    if (confirm('Вы уверены, что хотите удалить этот тур?')) {
+        if (window.dataManager) {
+            window.dataManager.deleteTour(countryId, tourId);
+            loadToursTable();
+            showAdminNotification('Тур удален!', 'success');
+        }
+    }
+}
+
+function showAdminNotification(message, type = 'info') {
+    // Создаем уведомление
+    const notification = document.createElement('div');
+    const bgColor = type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : type === 'success' ? '#28a745' : '#007bff';
+    
+    notification.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${bgColor};
+            color: white;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        ">
+            <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            ${message}
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        notification.remove();
+    }, 3000);
+}
+
+// Инициализация при загрузке
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initializeAdmin);
+} else {
+    initializeAdmin();
+}
