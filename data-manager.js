@@ -85,13 +85,18 @@ class DataManager {
             content: {
                 countries: [],
                 contacts: {}
+            },
+            design: {
+                // Настройки дизайна для совместимости
+                primaryColor: '#2c5aa0',
+                secondaryColor: '#4a7bc8'
             }
         };
         this.setData(defaultData);
         return defaultData;
     }
 
-    // СОВМЕСТИМОСТЬ СО СТАРЫМИ МЕТОДАМИ
+    // СОВМЕСТИМОСТЬ СО СТАРЫМИ МЕТОДАМИ АДМИНКИ
     getContent() {
         const data = this.getData();
         return {
@@ -120,6 +125,29 @@ class DataManager {
         
         data.countries = countries;
         return this.setData(data);
+    }
+
+    getDesign() {
+        const data = this.getData();
+        return data?.design || {
+            primaryColor: '#2c5aa0',
+            secondaryColor: '#4a7bc8'
+        };
+    }
+
+    updateDesign(design) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        data.design = { ...data.design, ...design };
+        return this.setData(data);
+    }
+
+    // Синхронизация с главной страницей (пустая функция для совместимости)
+    syncWithMainPage() {
+        console.log('Sync with main page called');
+        // Автоматически происходит через события
+        return true;
     }
 
     // НОВЫЕ МЕТОДЫ
