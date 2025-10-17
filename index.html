@@ -5,10 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorldTravel - Путешествия по миру</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        :root {
-            --primary-color: #2c5aa0;
-            --secondary-color: #4a7bc8;
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .error-message {
+            background: #ffe6e6;
+            color: #d63031;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px;
+            text-align: center;
         }
         
         .contact-info {
@@ -32,7 +43,7 @@
         
         .contact-item i {
             font-size: 2rem;
-            color: var(--primary-color);
+            color: #2c5aa0;
             margin-bottom: 15px;
         }
         
@@ -48,7 +59,17 @@
         
         .phone, .email, .address, .hours {
             font-weight: bold;
-            color: var(--primary-color);
+            color: #2c5aa0;
+        }
+        
+        .contact-phone, .contact-email {
+            color: #2c5aa0;
+            text-decoration: none;
+            font-weight: bold;
+        }
+        
+        .contact-phone:hover, .contact-email:hover {
+            text-decoration: underline;
         }
     </style>
 </head>
@@ -66,8 +87,14 @@
     <section class="destinations">
         <div class="container">
             <h2>Популярные направления</h2>
+            <div id="loading-message" class="loading">
+                <i class="fas fa-spinner fa-spin"></i> Загружаем направления...
+            </div>
             <div class="countries-grid" id="countries-grid">
                 <!-- Страны будут загружены здесь -->
+            </div>
+            <div id="error-message" class="error-message" style="display: none;">
+                Ошибка загрузки данных. Пожалуйста, обновите страницу.
             </div>
         </div>
     </section>
@@ -104,17 +131,68 @@
     </section>
 
     <!-- Scripts -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/js/all.min.js"></script>
     <script src="script.js"></script>
     
     <script>
-    // Добавляем обработчик для кнопки "Начать путешествие"
+    // Обработчик для кнопки "Начать путешествие"
     document.querySelector('.cta-button')?.addEventListener('click', function() {
         const countriesGrid = document.getElementById('countries-grid');
         if (countriesGrid) {
             countriesGrid.scrollIntoView({ behavior: 'smooth' });
         }
     });
+
+    // Загрузка стран при загрузке страницы
+    document.addEventListener('DOMContentLoaded', function() {
+        setTimeout(loadCountries, 100);
+    });
+    
+    function loadCountries() {
+        const loadingMsg = document.getElementById('loading-message');
+        const errorMsg = document.getElementById('error-message');
+        const countriesGrid = document.getElementById('countries-grid');
+        
+        try {
+            if (window.countries && window.countries.length > 0) {
+                displayCountries(window.countries);
+                loadingMsg.style.display = 'none';
+            } else {
+                // Если данные не загрузились, показываем заглушки
+                showFallbackCountries();
+                loadingMsg.style.display = 'none';
+            }
+        } catch (error) {
+            console.error('Error loading countries:', error);
+            loadingMsg.style.display = 'none';
+            errorMsg.style.display = 'block';
+            showFallbackCountries();
+        }
+    }
+    
+    function showFallbackCountries() {
+        const fallbackCountries = [
+            { name: 'Франция', image: 'images/travel-placeholder.svg', description: 'Романтический Париж' },
+            { name: 'Италия', image: 'images/travel-placeholder.svg', description: 'Вкусная кухня' },
+            { name: 'Испания', image: 'images/travel-placeholder.svg', description: 'Солнечные пляжи' },
+            { name: 'Греция', image: 'images/travel-placeholder.svg', description: 'Античные руины' }
+        ];
+        displayCountries(fallbackCountries);
+    }
+    
+    function displayCountries(countries) {
+        const grid = document.getElementById('countries-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = countries.map(country => `
+            <div class="country-card">
+                <img src="${country.image || 'images/travel-placeholder.svg'}" 
+                     alt="${country.name}" 
+                     onerror="this.src='images/travel-placeholder.svg'">
+                <h3>${country.name}</h3>
+                <p>${country.description || 'Увлекательные туры'}</p>
+            </div>
+        `).join('');
+    }
     </script>
 </body>
 </html>
