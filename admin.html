@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Admin Panel - WorldTravel</title>
-    <link rel="stylesheet" href="admin-style.css">
     <style>
         * {
             margin: 0;
@@ -317,29 +316,86 @@
         <div id="message" class="message"></div>
     </div>
 
-    <!-- ПОДКЛЮЧАЕМ СКРИПТЫ АДМИНКИ -->
-    <script src="data-manager.js"></script>
-    <script src="admin.js"></script>
-
     <script>
         // 🔓 ОТКЛЮЧЕНА ПРОВЕРКА АВТОРИЗАЦИИ
         console.log('✅ ADMIN PANEL LOADED - AUTH CHECK DISABLED');
 
+        // ВСТРАИВАЕМ ФУНКЦИОНАЛ DATA-MANAGER ПРЯМО СЮДА
+        const dataManager = {
+            // Сохранить данные в LocalStorage
+            saveToLocalStorage: function(data) {
+                localStorage.setItem('travelData', JSON.stringify(data));
+                console.log('💾 Данные сохранены в LocalStorage');
+                return true;
+            },
+
+            // Загрузить данные из LocalStorage
+            loadFromLocalStorage: function() {
+                const saved = localStorage.getItem('travelData');
+                return saved ? JSON.parse(saved) : null;
+            },
+
+            // Получить данные (сначала из LocalStorage, потом из файла)
+            getData: async function() {
+                try {
+                    const localData = this.loadFromLocalStorage();
+                    if (localData && localData.countries) {
+                        console.log('📁 Данные загружены из LocalStorage');
+                        return localData;
+                    }
+                    
+                    // Если в LocalStorage нет данных, пробуем загрузить из файла
+                    console.log('🔄 Загрузка данных из content.json...');
+                    const response = await fetch('./data/content.json');
+                    if (response.ok) {
+                        const data = await response.json();
+                        console.log('✅ Данные загружены из content.json');
+                        return data;
+                    }
+                    throw new Error('Файл не найден');
+                } catch (error) {
+                    console.error('❌ Ошибка загрузки данных:', error);
+                    // Возвращаем заглушку
+                    return {
+                        countries: [],
+                        cities: []
+                    };
+                }
+            },
+
+            // Обновить данные
+            updateData: function(newData) {
+                return this.saveToLocalStorage(newData);
+            }
+        };
+
         // Инициализация админки
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', async function() {
+            console.log('🚀 Инициализация админки...');
+            
             // Показываем имя пользователя если есть
-            const username = localStorage.getItem('adminUsername') || sessionStorage.getItem('adminUsername');
-            if (username) {
-                document.getElementById('adminUsername').textContent = username;
+            try {
+                const username = localStorage.getItem('adminUsername') || sessionStorage.getItem('adminUsername') || 'Администратор';
+                const usernameElement = document.getElementById('adminUsername');
+                if (usernameElement) {
+                    usernameElement.textContent = username;
+                }
+            } catch (error) {
+                console.log('⚠️ Не удалось установить имя пользователя');
             }
             
             // Инициализируем функционал админки
-            initializeAdmin();
-            console.log('🚀 Admin panel initialized with full functionality');
+            try {
+                await initializeAdmin();
+                console.log('✅ Админка инициализирована');
+            } catch (error) {
+                console.error('❌ Ошибка инициализации админки:', error);
+                showMessage('Ошибка загрузки админки', 'error');
+            }
         });
 
         function adminLogout() {
-            console.log('🚪 Logging out...');
+            console.log('🚪 Выход из системы...');
             localStorage.removeItem('adminAuthenticated');
             localStorage.removeItem('adminUsername');
             sessionStorage.removeItem('adminAuthenticated');
@@ -349,13 +405,15 @@
 
         function showMessage(text, type) {
             const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = 'message ' + type;
-            
-            setTimeout(() => {
-                messageEl.textContent = '';
-                messageEl.className = 'message';
-            }, 3000);
+            if (messageEl) {
+                messageEl.textContent = text;
+                messageEl.className = 'message ' + type;
+                
+                setTimeout(() => {
+                    messageEl.textContent = '';
+                    messageEl.className = 'message';
+                }, 3000);
+            }
         }
 
         // Функции для работы с админкой
@@ -365,35 +423,49 @@
                 await loadCitiesForAdmin();
                 updateStats();
                 populateCountrySelect();
+                console.log('✅ Все модули админки загружены');
             } catch (error) {
-                console.error('Error initializing admin:', error);
-                showMessage('Ошибка загрузки данных', 'error');
+                console.error('❌ Ошибка инициализации админки:', error);
+                throw error;
             }
         }
 
         async function loadCountriesForAdmin() {
-            const data = await window.dataManager.getData();
-            displayCountriesInAdmin(data.countries);
+            try {
+                const data = await dataManager.getData();
+                displayCountriesInAdmin(data.countries || []);
+            } catch (error) {
+                console.error('❌ Ошибка загрузки стран:', error);
+                displayCountriesInAdmin([]);
+            }
         }
 
         async function loadCitiesForAdmin() {
-            const data = await window.dataManager.getData();
-            displayCitiesInAdmin(data.cities);
+            try {
+                const data = await dataManager.getData();
+                displayCitiesInAdmin(data.cities || []);
+            } catch (error) {
+                console.error('❌ Ошибка загрузки городов:', error);
+                displayCitiesInAdmin([]);
+            }
         }
 
         function displayCountriesInAdmin(countries) {
             const container = document.getElementById('countriesList');
-            if (!container) return;
+            if (!container) {
+                console.error('❌ Элемент countriesList не найден');
+                return;
+            }
             
             if (!countries || countries.length === 0) {
-                container.innerHTML = '<div class="country-item"><p>Стран пока нет</p></div>';
+                container.innerHTML = '<div class="country-item"><p>🌍 Стран пока нет. Добавьте первую страну!</p></div>';
                 return;
             }
             
             container.innerHTML = countries.map(country => `
                 <div class="country-item">
-                    <h3>${country.name}</h3>
-                    <p>${country.description}</p>
+                    <h3>${country.name || 'Без названия'}</h3>
+                    <p>${country.description || 'Нет описания'}</p>
                     ${country.image ? `<img src="${country.image}" alt="${country.name}" style="max-width: 100px; margin: 10px 0; border-radius: 5px;">` : ''}
                     <div class="country-actions">
                         <button class="btn-edit" onclick="editCountry(${country.id})">✏️ Редактировать</button>
@@ -401,21 +473,26 @@
                     </div>
                 </div>
             `).join('');
+            
+            console.log(`✅ Отображено ${countries.length} стран`);
         }
 
         function displayCitiesInAdmin(cities) {
             const container = document.getElementById('citiesList');
-            if (!container) return;
+            if (!container) {
+                console.error('❌ Элемент citiesList не найден');
+                return;
+            }
             
             if (!cities || cities.length === 0) {
-                container.innerHTML = '<div class="city-item"><p>Городов пока нет</p></div>';
+                container.innerHTML = '<div class="city-item"><p>🏙️ Городов пока нет. Добавьте первый город!</p></div>';
                 return;
             }
             
             container.innerHTML = cities.map(city => `
                 <div class="city-item">
-                    <h3>${city.name}</h3>
-                    <p>${city.description}</p>
+                    <h3>${city.name || 'Без названия'}</h3>
+                    <p>${city.description || 'Нет описания'}</p>
                     <div class="city-actions">
                         <button class="btn-edit" onclick="editCity(${city.id})">✏️ Редактировать</button>
                         <button class="btn-delete" onclick="deleteCity(${city.id})">🗑️ Удалить</button>
@@ -426,15 +503,37 @@
 
         function populateCountrySelect() {
             const select = document.getElementById('cityCountry');
+            if (!select) return;
+            
+            // Очищаем select кроме первого option
+            select.innerHTML = '<option value="">Выберите страну</option>';
+            
             // Заполняем select странами из данных
+            dataManager.getData().then(data => {
+                const countries = data.countries || [];
+                countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.id;
+                    option.textContent = country.name;
+                    select.appendChild(option);
+                });
+            });
         }
 
-        function updateStats() {
-            // Обновляем статистику
-            const data = window.dataManager.getData();
-            if (data) {
-                document.getElementById('countriesCount').textContent = data.countries ? data.countries.length : 0;
-                document.getElementById('citiesCount').textContent = data.cities ? data.cities.length : 0;
+        async function updateStats() {
+            try {
+                const data = await dataManager.getData();
+                const countriesCount = document.getElementById('countriesCount');
+                const citiesCount = document.getElementById('citiesCount');
+                
+                if (countriesCount) {
+                    countriesCount.textContent = data.countries ? data.countries.length : 0;
+                }
+                if (citiesCount) {
+                    citiesCount.textContent = data.cities ? data.cities.length : 0;
+                }
+            } catch (error) {
+                console.error('❌ Ошибка обновления статистики:', error);
             }
         }
 
@@ -444,12 +543,12 @@
             const image = document.getElementById('countryImage').value;
 
             if (!name || !desc) {
-                showMessage('Заполните название и описание страны', 'error');
+                showMessage('❌ Заполните название и описание страны', 'error');
                 return;
             }
 
             try {
-                const data = await window.dataManager.getData();
+                const data = await dataManager.getData();
                 const newId = data.countries.length > 0 ? Math.max(...data.countries.map(c => c.id)) + 1 : 1;
                 
                 data.countries.push({
@@ -459,46 +558,161 @@
                     image: image || "images/travel-placeholder.jpg"
                 });
                 
-                window.dataManager.saveToLocalStorage(data);
-                displayCountriesInAdmin(data.countries);
-                updateStats();
-                showMessage(`Страна "${name}" добавлена успешно!`, 'success');
-                
-                // Очищаем поля
-                document.getElementById('countryName').value = '';
-                document.getElementById('countryDescription').value = '';
-                document.getElementById('countryImage').value = '';
+                const success = dataManager.saveToLocalStorage(data);
+                if (success) {
+                    await loadCountriesForAdmin();
+                    await updateStats();
+                    showMessage(`✅ Страна "${name}" добавлена успешно!`, 'success');
+                    
+                    // Очищаем поля
+                    document.getElementById('countryName').value = '';
+                    document.getElementById('countryDescription').value = '';
+                    document.getElementById('countryImage').value = '';
+                } else {
+                    showMessage('❌ Ошибка при сохранении страны', 'error');
+                }
                 
             } catch (error) {
-                showMessage('Ошибка при добавлении страны', 'error');
+                console.error('❌ Ошибка при добавлении страны:', error);
+                showMessage('❌ Ошибка при добавлении страны', 'error');
             }
         }
 
-        function addCity() {
-            // Функционал добавления города
-            showMessage('Функция добавления города будет реализована', 'success');
-        }
+        async function addCity() {
+            const countryId = document.getElementById('cityCountry').value;
+            const name = document.getElementById('cityName').value;
+            const desc = document.getElementById('cityDescription').value;
 
-        function editCountry(id) {
-            const newName = prompt('Введите новое название страны:');
-            if (newName) {
-                showMessage(`Страна с ID ${id} будет переименована в "${newName}"`, 'success');
+            if (!countryId || !name || !desc) {
+                showMessage('❌ Заполните все поля для города', 'error');
+                return;
+            }
+
+            try {
+                const data = await dataManager.getData();
+                const newId = data.cities.length > 0 ? Math.max(...data.cities.map(c => c.id)) + 1 : 1;
+                
+                data.cities.push({
+                    id: newId,
+                    countryId: parseInt(countryId),
+                    name: name,
+                    description: desc
+                });
+                
+                const success = dataManager.saveToLocalStorage(data);
+                if (success) {
+                    await loadCitiesForAdmin();
+                    await updateStats();
+                    showMessage(`✅ Город "${name}" добавлен успешно!`, 'success');
+                    
+                    // Очищаем поля
+                    document.getElementById('cityName').value = '';
+                    document.getElementById('cityDescription').value = '';
+                } else {
+                    showMessage('❌ Ошибка при сохранении города', 'error');
+                }
+                
+            } catch (error) {
+                console.error('❌ Ошибка при добавлении города:', error);
+                showMessage('❌ Ошибка при добавлении города', 'error');
             }
         }
 
-        function deleteCountry(id) {
-            if (confirm('Удалить эту страну?')) {
-                showMessage(`Страна с ID ${id} удалена`, 'success');
+        async function editCountry(id) {
+            try {
+                const data = await dataManager.getData();
+                const country = data.countries.find(c => c.id === id);
+                
+                if (!country) {
+                    showMessage('❌ Страна не найдена', 'error');
+                    return;
+                }
+
+                const newName = prompt('Введите новое название страны:', country.name);
+                const newDesc = prompt('Введите новое описание:', country.description);
+                const newImage = prompt('Введите новый URL изображения:', country.image);
+                
+                if (newName && newDesc) {
+                    country.name = newName;
+                    country.description = newDesc;
+                    if (newImage) country.image = newImage;
+                    
+                    const success = dataManager.saveToLocalStorage(data);
+                    if (success) {
+                        await loadCountriesForAdmin();
+                        showMessage(`✅ Страна "${newName}" обновлена!`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Ошибка редактирования страны:', error);
+                showMessage('❌ Ошибка при редактировании страны', 'error');
             }
         }
 
-        function editCity(id) {
-            showMessage(`Редактирование города с ID ${id}`, 'success');
+        async function deleteCountry(id) {
+            if (!confirm('❌ Удалить эту страну?')) return;
+            
+            try {
+                const data = await dataManager.getData();
+                data.countries = data.countries.filter(c => c.id !== id);
+                
+                const success = dataManager.saveToLocalStorage(data);
+                if (success) {
+                    await loadCountriesForAdmin();
+                    await updateStats();
+                    showMessage('✅ Страна удалена!', 'success');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка удаления страны:', error);
+                showMessage('❌ Ошибка при удалении страны', 'error');
+            }
         }
 
-        function deleteCity(id) {
-            if (confirm('Удалить этот город?')) {
-                showMessage(`Город с ID ${id} удален`, 'success');
+        async function editCity(id) {
+            try {
+                const data = await dataManager.getData();
+                const city = data.cities.find(c => c.id === id);
+                
+                if (!city) {
+                    showMessage('❌ Город не найден', 'error');
+                    return;
+                }
+
+                const newName = prompt('Введите новое название города:', city.name);
+                const newDesc = prompt('Введите новое описание:', city.description);
+                
+                if (newName && newDesc) {
+                    city.name = newName;
+                    city.description = newDesc;
+                    
+                    const success = dataManager.saveToLocalStorage(data);
+                    if (success) {
+                        await loadCitiesForAdmin();
+                        showMessage(`✅ Город "${newName}" обновлен!`, 'success');
+                    }
+                }
+            } catch (error) {
+                console.error('❌ Ошибка редактирования города:', error);
+                showMessage('❌ Ошибка при редактировании города', 'error');
+            }
+        }
+
+        async function deleteCity(id) {
+            if (!confirm('❌ Удалить этот город?')) return;
+            
+            try {
+                const data = await dataManager.getData();
+                data.cities = data.cities.filter(c => c.id !== id);
+                
+                const success = dataManager.saveToLocalStorage(data);
+                if (success) {
+                    await loadCitiesForAdmin();
+                    await updateStats();
+                    showMessage('✅ Город удален!', 'success');
+                }
+            } catch (error) {
+                console.error('❌ Ошибка удаления города:', error);
+                showMessage('❌ Ошибка при удалении города', 'error');
             }
         }
     </script>
