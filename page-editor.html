@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .editor-container {
+            display: flex;
+            height: 100vh;
+            background: #f8f9fa;
+        }
+
+        .editor-sidebar {
+            width: 300px;
+            background: white;
+            border-right: 1px solid #e9ecef;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .editor-header {
+            background: white;
+            padding: 1rem 2rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-preview {
+            flex: 1;
+            background: white;
+            margin: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            overflow: auto;
+            position: relative;
+        }
+
+        .blocks-panel {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .blocks-list {
+            display: grid;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .block-item {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            padding: 1rem;
+            border-radius: 8px;
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .block-item:hover {
+            background: #e9ecef;
+            transform: translateY(-2px);
+        }
+
+        .block-item i {
+            margin-right: 0.5rem;
+            color: #2c5aa0;
+        }
+
+        .page-blocks {
+            padding: 1rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        .page-block {
+            background: white;
+            border: 2px dashed #dee2e6;
+            border-radius: 10px;
+            margin-bottom: 1rem;
+            padding: 1.5rem;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .page-block:hover {
+            border-color: #2c5aa0;
+        }
+
+        .page-block.active {
+            border-color: #2c5aa0;
+            border-style: solid;
+            background: #f8f9fa;
+        }
+
+        .block-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .page-block:hover .block-actions {
+            opacity: 1;
+        }
+
+        .block-btn {
+            background: white;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            padding: 5px 8px;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+
+        .block-btn.edit { color: #2c5aa0; }
+        .block-btn.delete { color: #dc3545; }
+
+        .block-preview {
+            pointer-events: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem;
+            color: #6c757d;
+        }
+
+        .empty-state i {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #dee2e6;
+        }
+
+        .editor-actions {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .page-selector {
+            padding: 1rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .page-select {
+            width: 100%;
+            padding: 0.5rem;
+            border: 1px solid #dee2e6;
+            border-radius: 5px;
+            background: white;
+        }
+
+        .block-editor {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            z-index: 1000;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow-y: auto;
+            display: none;
+        }
+
+        .editor-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.5);
+            z-index: 999;
+            display: none;
+        }
+
+        .block-editor.active,
+        .editor-overlay.active {
+            display: block;
+        }
+
+        .editor-header-inner {
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .editor-body {
+            padding: 1.5rem;
+        }
+
+        .editor-footer {
+            padding: 1rem 1.5rem;
+            border-top: 1px solid #e9ecef;
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+        }
+
+        .block-type-icon {
+            width: 40px;
+            height: 40px;
+            background: #2c5aa0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            margin-right: 1rem;
+        }
+
+        .block-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Сайдбар -->
+        <div class="editor-sidebar">
+            <div class="page-selector">
+                <h3>Выберите страницу</h3>
+                <select class="page-select" id="page-select">
+                    <option value="home">Главная страница</option>
+                </select>
+            </div>
+            
+            <div class="blocks-panel">
+                <h3>Блоки</h3>
+                <div class="blocks-list">
+                    <div class="block-item" data-type="hero">
+                        <i class="fas fa-star"></i> Герой-секция
+                    </div>
+                    <div class="block-item" data-type="about">
+                        <i class="fas fa-info-circle"></i> О компании
+                    </div>
+                    <div class="block-item" data-type="services">
+                        <i class="fas fa-concierge-bell"></i> Услуги
+                    </div>
+                    <div class="block-item" data-type="destinations">
+                        <i class="fas fa-globe-americas"></i> Направления
+                    </div>
+                    <div class="block-item" data-type="contact">
+                        <i class="fas fa-envelope"></i> Контакты
+                    </div>
+                </div>
+            </div>
+
+            <div class="page-blocks">
+                <h3>Структура страницы</h3>
+                <div id="page-structure">
+                    <!-- Блоки будут добавляться здесь -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Основной контент -->
+        <div class="editor-content">
+            <div class="editor-header">
+                <h2 id="current-page-title">Редактор: Главная страница</h2>
+                <div class="editor-actions">
+                    <button class="btn-admin secondary" onclick="previewChanges()">
+                        <i class="fas fa-eye"></i> Предпросмотр
+                    </button>
+                    <button class="btn-admin" onclick="saveChanges()">
+                        <i class="fas fa-save"></i> Сохранить изменения
+                    </button>
+                    <button class="btn-admin secondary" onclick="exitEditor()">
+                        <i class="fas fa-times"></i> Выйти
+                    </button>
+                </div>
+            </div>
+
+            <div class="editor-preview">
+                <iframe id="page-preview" src="index.html?preview=true" style="width: 100%; height: 100%; border: none;"></iframe>
+            </div>
+        </div>
+    </div>
+
+    <!-- Редактор блока -->
+    <div class="editor-overlay" id="editor-overlay"></div>
+    <div class="block-editor" id="block-editor">
+        <div class="editor-header-inner">
+            <h3 id="block-editor-title">Редактирование блока</h3>
+            <button class="btn-admin secondary" onclick="closeBlockEditor()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="editor-body" id="block-editor-content">
+            <!-- Контент редактора будет добавляться динамически -->
+        </div>
+        <div class="editor-footer">
+            <button class="btn-admin secondary" onclick="closeBlockEditor()">Отмена</button>
+            <button class="btn-admin" onclick="saveBlockChanges()">Сохранить</button>
+        </div>
+    </div>
+
+    <script src="data-manager.js"></script>
+    <script src="page-editor.js"></script>
+</body>
+</html>

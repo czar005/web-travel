@@ -6,6 +6,7 @@ class DataManager {
     }
 
     init() {
+        // Инициализация данных по умолчанию если их нет
         if (!this.getData()) {
             this.setDefaultData();
         }
@@ -25,6 +26,8 @@ class DataManager {
         try {
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             this.triggerDataUpdate();
+            
+            // Уведомляем о изменении данных
             if (window.dataSync) {
                 window.dataSync.notifyDataChange();
             }
@@ -39,7 +42,9 @@ class DataManager {
         const defaultData = {
             countries: [
                 {
-                    id: 1, name: 'Франция', image: 'images/travel-placeholder.svg',
+                    id: 1,
+                    name: 'Франция',
+                    image: 'images/travel-placeholder.svg',
                     description: 'Романтический Париж и Лазурный берег',
                     tours: [
                         { id: 1, name: 'Париж романтический', price: 500, duration: '7 дней' },
@@ -47,29 +52,89 @@ class DataManager {
                     ]
                 },
                 {
-                    id: 2, name: 'Италия', image: 'images/travel-placeholder.svg',
+                    id: 2,
+                    name: 'Италия', 
+                    image: 'images/travel-placeholder.svg',
                     description: 'Вкусная кухня и богатая история',
                     tours: [
                         { id: 3, name: 'Рим и Ватикан', price: 600, duration: '8 дней' },
                         { id: 4, name: 'Венеция и Флоренция', price: 550, duration: '6 дней' }
                     ]
+                },
+                {
+                    id: 3,
+                    name: 'Испания',
+                    image: 'images/travel-placeholder.svg', 
+                    description: 'Солнечные пляжи и яркая культура',
+                    tours: [
+                        { id: 5, name: 'Барселона и Коста-Брава', price: 450, duration: '7 дней' }
+                    ]
                 }
             ],
             contacts: {
-                phone: '+7 (999) 123-45-67', email: 'info@worldtravel.com',
-                address: 'Москва, ул. Туристическая, 15', hours: 'Пн-Пт: 9:00-18:00'
+                phone: '+7 (999) 123-45-67',
+                email: 'info@worldtravel.com',
+                address: 'Москва, ул. Туристическая, 15',
+                hours: 'Пн-Пт: 9:00-18:00'
             },
             settings: {
-                siteTitle: 'WorldTravel - Туристическая компания', companyName: 'WorldTravel'
+                siteTitle: 'WorldTravel - Туристическая компания',
+                companyName: 'WorldTravel'
             },
-            content: { countries: [], contacts: {} },
-            design: { primaryColor: '#2c5aa0', secondaryColor: '#4a7bc8' }
+            // Совместимость со старым форматом
+            content: {
+                countries: [],
+                contacts: {}
+            },
+            design: {
+                primaryColor: '#2c5aa0',
+                secondaryColor: '#4a7bc8'
+            },
+            // Новая система страниц
+            pages: {
+                home: {
+                    id: 'home',
+                    name: 'Главная страница',
+                    url: 'index.html',
+                    blocks: [
+                        {
+                            id: 'hero',
+                            type: 'hero',
+                            title: 'Откройте мир с WorldTravel',
+                            subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                            buttonText: 'Начать путешествие'
+                        },
+                        {
+                            id: 'about',
+                            type: 'about',
+                            title: 'О нашей компании',
+                            content: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.',
+                            stats: [
+                                { value: 5000, label: 'Довольных клиентов' },
+                                { value: 50, label: 'Стран мира' },
+                                { value: '10 лет', label: 'Опыта работы' }
+                            ]
+                        },
+                        {
+                            id: 'services',
+                            type: 'services',
+                            title: 'Наши услуги',
+                            services: [
+                                { icon: 'plane', title: 'Авиабилеты', description: 'Подбор и бронирование лучших авиаперелетов по выгодным ценам' },
+                                { icon: 'hotel', title: 'Отели', description: 'Бронирование отелей любого уровня комфорта по всему миру' },
+                                { icon: 'map-marked-alt', title: 'Туры', description: 'Индивидуальные и групповые туры с профессиональными гидами' },
+                                { icon: 'shield-alt', title: 'Страхование', description: 'Полное страховое сопровождение вашего путешествия' }
+                            ]
+                        }
+                    ]
+                }
+            }
         };
         this.setData(defaultData);
         return defaultData;
     }
 
-    // ========== СОВМЕСТИМОСТЬ С АДМИНКОЙ ==========
+    // СОВМЕСТИМОСТЬ СО СТАРЫМИ МЕТОДАМИ АДМИНКИ
     getContent() {
         const data = this.getData();
         return { countries: data?.countries || [], contacts: data?.contacts || {} };
@@ -91,13 +156,11 @@ class DataManager {
     }
 
     getDesign() {
-        console.log('getDesign() called');
         const data = this.getData();
         return data?.design || { primaryColor: '#2c5aa0', secondaryColor: '#4a7bc8' };
     }
 
     updateDesign(design) {
-        console.log('updateDesign() called with:', design);
         const data = this.getData();
         if (!data) return false;
         data.design = { ...data.design, ...design };
@@ -105,11 +168,42 @@ class DataManager {
     }
 
     syncWithMainPage() {
-        console.log('syncWithMainPage() called');
+        console.log('Sync with main page called');
         return true;
     }
 
-    // ========== НОВЫЕ МЕТОДЫ ==========
+    // НОВЫЕ МЕТОДЫ ДЛЯ СТРАНИЦ
+    getPages() {
+        const data = this.getData();
+        return data?.pages || {};
+    }
+
+    getPage(pageId) {
+        const pages = this.getPages();
+        return pages[pageId];
+    }
+
+    updatePage(pageId, pageData) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        if (!data.pages) data.pages = {};
+        data.pages[pageId] = { ...data.pages[pageId], ...pageData };
+        return this.setData(data);
+    }
+
+    updatePageBlocks(pageId, blocks) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        if (!data.pages) data.pages = {};
+        if (!data.pages[pageId]) data.pages[pageId] = { id: pageId, blocks: [] };
+        
+        data.pages[pageId].blocks = blocks;
+        return this.setData(data);
+    }
+
+    // НОВЫЕ МЕТОДЫ
     getCountries() { return this.getData()?.countries || []; }
     
     addCountry(country) {
@@ -179,6 +273,7 @@ class DataManager {
         return this.setData(data) ? data.settings : {};
     }
 
+    // События обновления данных
     onDataUpdate(callback) {
         this.dataUpdateCallbacks = this.dataUpdateCallbacks || [];
         this.dataUpdateCallbacks.push(callback);
@@ -193,5 +288,5 @@ class DataManager {
     }
 }
 
-// Глобальный экземпляр
+// Глобальный экземпляр менеджера данных
 window.dataManager = new DataManager();
