@@ -6,6 +6,7 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeAdmin() {
     loadAdminData();
     setupAdminEventListeners();
+    loadCountrySelect();
 }
 
 function setupAdminEventListeners() {
@@ -42,6 +43,7 @@ function setupAdminEventListeners() {
                     break;
                 case 'tours':
                     loadToursTable();
+                    loadCountrySelect(); // Перезагружаем список стран
                     break;
                 case 'contacts':
                     loadContactsForm();
@@ -66,6 +68,7 @@ function loadAdminData() {
     
     if (data) {
         loadCountriesTable();
+        loadToursTable();
         loadContactsForm();
         loadSettingsForm();
     } else {
@@ -87,17 +90,23 @@ function loadCountriesTable() {
         if (countries.length > 0) {
             tbody.innerHTML = countries.map(country => `
                 <tr>
-                    <td>${country.name}</td>
-                    <td>${country.description}</td>
-                    <td>${country.tours ? country.tours.length : 0}</td>
+                    <td><strong>${country.name}</strong></td>
+                    <td>${country.description || 'Описание отсутствует'}</td>
+                    <td><span class="tour-count-badge">${country.tours ? country.tours.length : 0}</span></td>
                     <td>
-                        <button class="btn-small" onclick="editCountry(${country.id})">Редактировать</button>
-                        <button class="btn-small danger" onclick="deleteCountry(${country.id})">Удалить</button>
+                        <div class="action-buttons">
+                            <button class="btn-small" onclick="editCountry(${country.id})" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-small danger" onclick="deleteCountry(${country.id})" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
                     </td>
                 </tr>
             `).join('');
         } else {
-            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999;">Страны не добавлены</td></tr>';
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 40px;">Страны не добавлены</td></tr>';
         }
     }
 }
@@ -107,6 +116,8 @@ function loadToursTable() {
     
     const countries = window.dataManager.getCountries();
     const tbody = document.querySelector('#tours-table tbody');
+    
+    console.log('Loading tours table from countries:', countries);
     
     if (tbody) {
         let toursHTML = '';
@@ -118,12 +129,30 @@ function loadToursTable() {
                 country.tours.forEach(tour => {
                     toursHTML += `
                         <tr>
-                            <td>${tour.name}</td>
-                            <td>${country.name}</td>
-                            <td>$${tour.price}</td>
-                            <td>${tour.duration}</td>
                             <td>
-                                <button class="btn-small danger" onclick="deleteTour(${country.id}, ${tour.id})">Удалить</button>
+                                <div class="tour-info">
+                                    <strong>${tour.name}</strong>
+                                    <small>ID: ${tour.id}</small>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="country-badge">${country.name}</span>
+                            </td>
+                            <td>
+                                <span class="price-tag">$${tour.price}</span>
+                            </td>
+                            <td>
+                                <span class="duration-badge">${tour.duration}</span>
+                            </td>
+                            <td>
+                                <div class="action-buttons">
+                                    <button class="btn-small warning" onclick="editTour(${country.id}, ${tour.id})" title="Редактировать">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    <button class="btn-small danger" onclick="deleteTour(${country.id}, ${tour.id})" title="Удалить">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
                             </td>
                         </tr>
                     `;
@@ -131,7 +160,19 @@ function loadToursTable() {
             }
         });
         
-        tbody.innerHTML = hasTours ? toursHTML : '<tr><td colspan="5" style="text-align: center; color: #999;">Туры не найдены</td></tr>';
+        if (hasTours) {
+            tbody.innerHTML = toursHTML;
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #999; padding: 40px;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 3rem; margin-bottom: 15px; display: block; color: #ccc;"></i>
+                        <p>Туры не найдены</p>
+                        <small>Добавьте первый тур используя форму выше</small>
+                    </td>
+                </tr>
+            `;
+        }
     }
 }
 
@@ -171,11 +212,14 @@ function loadCountrySelect() {
     const countries = window.dataManager.getCountries();
     const select = document.getElementById('tour-country');
     
+    console.log('Loading country select with:', countries);
+    
     if (select) {
         if (countries.length > 0) {
-            select.innerHTML = countries.map(country => 
-                `<option value="${country.id}">${country.name}</option>`
-            ).join('');
+            select.innerHTML = '<option value="">-- Выберите страну --</option>' + 
+                countries.map(country => 
+                    `<option value="${country.id}">${country.name}</option>`
+                ).join('');
         } else {
             select.innerHTML = '<option value="">Сначала добавьте страны</option>';
         }
@@ -199,11 +243,15 @@ function handleAddCountry(e) {
     }
     
     if (window.dataManager) {
-        window.dataManager.addCountry(countryData);
-        form.reset();
-        loadCountriesTable();
-        loadCountrySelect();
-        showAdminNotification('Страна успешно добавлена!', 'success');
+        const result = window.dataManager.addCountry(countryData);
+        if (result) {
+            form.reset();
+            loadCountriesTable();
+            loadCountrySelect();
+            showAdminNotification(`Страна "${countryData.name}" успешно добавлена!`, 'success');
+        } else {
+            showAdminNotification('Ошибка при добавлении страны', 'error');
+        }
     }
 }
 
@@ -220,8 +268,24 @@ function handleAddTour(e) {
     
     const countryId = parseInt(formData.get('country'));
     
-    if (!tourData.name || !tourData.price || !tourData.duration) {
-        showAdminNotification('Заполните все поля тура', 'error');
+    // Валидация
+    if (!tourData.name) {
+        showAdminNotification('Введите название тура', 'error');
+        return;
+    }
+    
+    if (!tourData.price || tourData.price <= 0) {
+        showAdminNotification('Введите корректную цену', 'error');
+        return;
+    }
+    
+    if (!tourData.duration) {
+        showAdminNotification('Введите длительность тура', 'error');
+        return;
+    }
+    
+    if (!countryId) {
+        showAdminNotification('Выберите страну', 'error');
         return;
     }
     
@@ -230,7 +294,7 @@ function handleAddTour(e) {
         if (result) {
             form.reset();
             loadToursTable();
-            showAdminNotification('Тур успешно добавлен!', 'success');
+            showAdminNotification(`Тур "${tourData.name}" успешно добавлен!`, 'success');
         } else {
             showAdminNotification('Ошибка при добавлении тура', 'error');
         }
@@ -252,9 +316,6 @@ function handleUpdateContacts(e) {
     if (window.dataManager) {
         window.dataManager.updateContacts(contactData);
         showAdminNotification('Контактная информация обновлена!', 'success');
-        
-        // Вместо window.open используем кнопку для перехода
-        showMainPageButton();
     }
 }
 
@@ -271,13 +332,10 @@ function handleUpdateSettings(e) {
     if (window.dataManager) {
         window.dataManager.updateSettings(settingsData);
         showAdminNotification('Настройки сайта обновлены!', 'success');
-        
-        // Вместо window.open используем кнопку для перехода
-        showMainPageButton();
     }
 }
 
-// Функции управления
+// Функции управления странами
 function editCountry(countryId) {
     if (!window.dataManager) return;
     
@@ -288,88 +346,114 @@ function editCountry(countryId) {
         const newName = prompt('Введите новое название страны:', country.name);
         if (newName === null) return;
         
-        const newDesc = prompt('Введите новое описание:', country.description);
+        const newDesc = prompt('Введите новое описание:', country.description || '');
         if (newDesc === null) return;
         
-        if (newName.trim() && newDesc.trim()) {
+        if (newName.trim()) {
             window.dataManager.updateCountry(countryId, {
                 name: newName.trim(),
                 description: newDesc.trim()
             });
             loadCountriesTable();
             loadCountrySelect();
+            loadToursTable(); // Обновляем туры т.к. название страны могло измениться
             showAdminNotification('Страна обновлена!', 'success');
         } else {
-            showAdminNotification('Название и описание не могут быть пустыми', 'error');
+            showAdminNotification('Название страны не может быть пустым', 'error');
         }
     }
 }
 
 function deleteCountry(countryId) {
-    if (confirm('Вы уверены, что хотите удалить эту страну? Все туры в этой стране также будут удалены.')) {
-        if (window.dataManager) {
-            window.dataManager.deleteCountry(countryId);
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    
+    if (!country) return;
+    
+    const tourCount = country.tours ? country.tours.length : 0;
+    const message = tourCount > 0 
+        ? `Вы уверены, что хотите удалить страну "${country.name}"? Все ${tourCount} туров в этой стране также будут удалены.`
+        : `Вы уверены, что хотите удалить страну "${country.name}"?`;
+    
+    if (confirm(message)) {
+        if (window.dataManager.deleteCountry(countryId)) {
             loadCountriesTable();
             loadToursTable();
             loadCountrySelect();
             showAdminNotification('Страна удалена!', 'success');
+        } else {
+            showAdminNotification('Ошибка при удалении страны', 'error');
+        }
+    }
+}
+
+// Функции управления турами
+function editTour(countryId, tourId) {
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    const tour = country?.tours?.find(t => t.id === tourId);
+    
+    if (tour) {
+        const newName = prompt('Введите новое название тура:', tour.name);
+        if (newName === null) return;
+        
+        const newPrice = prompt('Введите новую цену ($):', tour.price);
+        if (newPrice === null) return;
+        
+        const newDuration = prompt('Введите новую длительность:', tour.duration);
+        if (newDuration === null) return;
+        
+        if (newName.trim() && newPrice && newDuration.trim()) {
+            const price = parseInt(newPrice);
+            if (price > 0) {
+                // Создаем обновленный тур
+                const updatedTour = {
+                    name: newName.trim(),
+                    price: price,
+                    duration: newDuration.trim()
+                };
+                
+                // Удаляем старый тур и добавляем обновленный
+                if (window.dataManager.deleteTour(countryId, tourId)) {
+                    window.dataManager.addTour(countryId, updatedTour);
+                    loadToursTable();
+                    showAdminNotification('Тур обновлен!', 'success');
+                }
+            } else {
+                showAdminNotification('Цена должна быть положительным числом', 'error');
+            }
+        } else {
+            showAdminNotification('Все поля должны быть заполнены', 'error');
         }
     }
 }
 
 function deleteTour(countryId, tourId) {
-    if (confirm('Вы уверены, что хотите удалить этот тур?')) {
-        if (window.dataManager) {
-            window.dataManager.deleteTour(countryId, tourId);
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    const tour = country?.tours?.find(t => t.id === tourId);
+    
+    if (tour && confirm(`Вы уверены, что хотите удалить тур "${tour.name}"?`)) {
+        if (window.dataManager.deleteTour(countryId, tourId)) {
             loadToursTable();
             showAdminNotification('Тур удален!', 'success');
+        } else {
+            showAdminNotification('Ошибка при удалении тура', 'error');
         }
     }
-}
-
-// Показываем кнопку для перехода на главную вместо window.open
-function showMainPageButton() {
-    // Создаем или находим контейнер для кнопки
-    let buttonContainer = document.getElementById('main-page-button-container');
-    if (!buttonContainer) {
-        buttonContainer = document.createElement('div');
-        buttonContainer.id = 'main-page-button-container';
-        buttonContainer.style.cssText = `
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            background: white;
-            padding: 15px;
-            border-radius: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            z-index: 1000;
-            border-left: 4px solid #4CAF50;
-        `;
-        document.body.appendChild(buttonContainer);
-    }
-    
-    buttonContainer.innerHTML = `
-        <p style="margin: 0 0 10px 0; font-weight: bold;">Данные сохранены!</p>
-        <a href="index.html" target="_blank" class="btn-admin" style="display: block; text-align: center;">
-            <i class="fas fa-external-link-alt"></i> Открыть главную страницу
-        </a>
-        <button onclick="this.parentElement.remove()" style="margin-top: 8px; background: #6c757d; color: white; border: none; padding: 5px 10px; border-radius: 3px; cursor: pointer; width: 100%;">
-            Закрыть
-        </button>
-    `;
-    
-    // Автоматически скрываем через 10 секунд
-    setTimeout(() => {
-        if (buttonContainer && buttonContainer.parentElement) {
-            buttonContainer.remove();
-        }
-    }, 10000);
 }
 
 function showAdminNotification(message, type = 'info') {
     // Создаем уведомление
     const notification = document.createElement('div');
     const bgColor = type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : type === 'success' ? '#28a745' : '#007bff';
+    const textColor = type === 'warning' ? '#000' : '#fff';
     
     notification.innerHTML = `
         <div style="
@@ -377,13 +461,17 @@ function showAdminNotification(message, type = 'info') {
             top: 20px;
             right: 20px;
             background: ${bgColor};
-            color: white;
+            color: ${textColor};
             padding: 15px 20px;
-            border-radius: 5px;
+            border-radius: 10px;
             z-index: 10000;
             animation: slideInRight 0.3s ease;
-            max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
         ">
             <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
             ${message}
@@ -396,7 +484,7 @@ function showAdminNotification(message, type = 'info') {
         if (notification.parentElement) {
             notification.remove();
         }
-    }, 3000);
+    }, 4000);
 }
 
 // Инициализация при загрузке
