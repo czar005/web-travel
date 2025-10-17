@@ -606,40 +606,36 @@
 </div>
 
 <script>
-// Упрощенная проверка авторизации
+// ПРОСТАЯ ПРОВЕРКА АВТОРИЗАЦИИ
 document.addEventListener('DOMContentLoaded', function() {
-    const isAuthenticated = localStorage.getItem('adminAuthenticated');
+    console.log('🔍 ADMIN.HTML LOADED');
     
-    console.log('🔍 ADMIN.HML AUTH CHECK:');
-    console.log('adminAuthenticated:', isAuthenticated);
+    // Пробуем оба хранилища
+    const sessionAuth = sessionStorage.getItem('adminAuthenticated');
+    const localAuth = localStorage.getItem('adminAuthenticated');
+    
+    console.log('SessionStorage auth:', sessionAuth);
+    console.log('LocalStorage auth:', localAuth);
+    console.log('All sessionStorage:', sessionStorage);
     console.log('All localStorage:', localStorage);
     
-    // ВРЕМЕННО ОТКЛЮЧАЕМ ПРОВЕРКУ ДЛЯ ТЕСТА
-    if (false) { // Измените на true чтобы включить проверку обратно
-        if (!isAuthenticated) {
-            console.log('❌ Not authenticated, redirecting...');
-            window.location.href = 'admin-login.html';
-            return;
-        }
+    // ЕСЛИ НЕТ АВТОРИЗАЦИИ - показываем сообщение но НЕ перенаправляем
+    if (!sessionAuth && !localAuth) {
+        console.log('❌ NO AUTH FOUND - but continuing for testing');
+        // window.location.href = 'admin-login.html';
+        // return;
+    } else {
+        console.log('✅ AUTH FOUND - loading admin panel');
     }
     
-    console.log('✅ Authentication OK, loading admin panel');
-    
-    // Показываем имя пользователя
-    const username = localStorage.getItem('adminUsername');
-    if (username) {
-        const userElement = document.querySelector('.user-info, .admin-user, [class*="user"], [class*="username"]');
-        if (userElement) {
-            userElement.textContent = username;
-        }
-    }
+    // Загружаем админку в любом случае
+    console.log('🚀 LOADING ADMIN PANEL...');
 });
 
 function adminLogout() {
-    console.log('🚪 Logging out...');
-    localStorage.removeItem('adminAuthenticated');
-    localStorage.removeItem('adminUsername');
-    localStorage.removeItem('authTime');
+    console.log('🚪 LOGGING OUT...');
+    sessionStorage.clear();
+    localStorage.clear();
     window.location.href = 'admin-login.html';
 }
 </script>

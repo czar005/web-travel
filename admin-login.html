@@ -179,14 +179,13 @@
     </div>
 
     <script>
-        let currentAuthCode = '';
-        let currentUsername = '';
+   let currentAuthCode = '';
+let currentUsername = '';
 
-      async function handleLogin() {
+async function handleLogin() {
     const username = document.getElementById('username').value;
     const password = document.getElementById('password').value;
 
-    // Простая проверка логина и пароля
     if (username !== 'admin' || password !== 'admin') {
         showMessage('Неверный логин или пароль', 'error');
         return;
@@ -196,74 +195,42 @@
     setLoadingState(true);
 
     try {
-        // Генерируем 6-значный код
         currentAuthCode = Math.floor(100000 + Math.random() * 900000).toString();
         currentUsername = username;
         
-        console.log('Сгенерирован код:', currentAuthCode);
+        console.log('🔐 GENERATED CODE:', currentAuthCode);
 
-        // Отправка кода на почту через Formspree
-        const response = await fetch('https://formspree.io/f/mpwybjkj', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                _replyto: 'narekgrigoryan424@gmail.com',
-                _subject: 'Код аутентификации Admin Panel - WorldTravel',
-                message: `Код для входа в админ-панель: ${currentAuthCode}\n\nЛогин: ${username}\nВремя: ${new Date().toLocaleString()}\n\nНикому не сообщайте этот код!`,
-                code: currentAuthCode,
-                login: username
-            })
-        });
-
-        console.log('Response status:', response.status);
-        console.log('Response ok:', response.ok);
-
-        if (response.ok) {
-            const result = await response.json();
-            console.log('Formspree response:', result);
-            
-            showMessage('✅ Код отправлен! Проверьте вашу почту narekgrigoryan424@gmail.com', 'success');
-            // Переключаемся на ввод кода
-            document.getElementById('loginSection').classList.add('hidden');
-            document.getElementById('codeSection').classList.remove('hidden');
-            // Очищаем поля ввода кода
-            clearCodeInputs();
-            // Фокус на первое поле ввода кода
-            document.querySelector('.code-inputs input').focus();
-            
-            // ПОКАЗЫВАЕМ КОД ДЛЯ ТЕСТА (удалите потом эту строку)
-            showMessage(`✅ Код отправлен! Тестовый код: ${currentAuthCode}`, 'success');
-        } else {
-            const errorText = await response.text();
-            console.error('Formspree error:', errorText);
-            showMessage('❌ Ошибка отправки кода. Попробуйте еще раз.', 'error');
-        }
+        // ВРЕМЕННО ПРОПУСКАЕМ ОТПРАВКУ EMAIL - используем тестовый код
+        console.log('📧 Email sending skipped for testing');
+        
+        showMessage('✅ Код отправлен! Тестовый код: ' + currentAuthCode, 'success');
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('codeSection').classList.remove('hidden');
+        clearCodeInputs();
+        document.querySelector('.code-inputs input').focus();
+        
     } catch (error) {
-        console.error('Network error:', error);
-        showMessage('❌ Ошибка сети. Проверьте подключение.', 'error');
+        console.error('Error:', error);
+        showMessage('❌ Ошибка', 'error');
     } finally {
         setLoadingState(false);
     }
 }
-        function moveToNext(input, nextIndex) {
-            const inputs = document.querySelectorAll('.code-inputs input');
-            
-            // Если введен символ - переходим к следующему полю
-            if (input.value.length === 1 && nextIndex < inputs.length) {
-                inputs[nextIndex].focus();
-            }
-            
-            // Если все поля заполнены - автоматически проверяем код
-            const allFilled = Array.from(inputs).every(input => input.value.length === 1);
-            if (allFilled) {
-                verifyCode();
-            }
-        }
 
- function verifyCode() {
+function moveToNext(input, nextIndex) {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    
+    if (input.value.length === 1 && nextIndex < inputs.length) {
+        inputs[nextIndex].focus();
+    }
+    
+    const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+    if (allFilled) {
+        verifyCode();
+    }
+}
+
+function verifyCode() {
     const inputs = document.querySelectorAll('.code-inputs input');
     const enteredCode = Array.from(inputs).map(input => input.value).join('');
     
@@ -278,104 +245,103 @@
         if (enteredCode === currentAuthCode) {
             showMessage('✅ Успешный вход! Перенаправление...', 'success');
             
-            // СОХРАНЯЕМ ДАННЫЕ С ОТЛАДКОЙ
+            // СОХРАНЯЕМ В SessionStorage (работает лучше)
+            sessionStorage.setItem('adminAuthenticated', 'true');
+            sessionStorage.setItem('adminUsername', currentUsername);
+            sessionStorage.setItem('authTime', Date.now().toString());
+            
+            // ДУБЛИРУЕМ В LocalStorage
             localStorage.setItem('adminAuthenticated', 'true');
             localStorage.setItem('adminUsername', currentUsername);
             localStorage.setItem('authTime', Date.now().toString());
             
-            // ОТЛАДКА: проверяем что сохранилось
-            console.log('🔐 AUTH DATA SAVED:');
-            console.log('adminAuthenticated:', localStorage.getItem('adminAuthenticated'));
-            console.log('adminUsername:', localStorage.getItem('adminUsername'));
-            console.log('authTime:', localStorage.getItem('authTime'));
+            console.log('💾 SAVED TO STORAGE:');
+            console.log('SessionStorage:', {
+                auth: sessionStorage.getItem('adminAuthenticated'),
+                user: sessionStorage.getItem('adminUsername')
+            });
+            console.log('LocalStorage:', {
+                auth: localStorage.getItem('adminAuthenticated'),
+                user: localStorage.getItem('adminUsername')
+            });
             
-            // Перенаправляем через 2 секунды
-            setTimeout(() => {
-                console.log('🔄 Redirecting to admin.html...');
-                window.location.href = 'admin.html';
-            }, 2000);
+            // ПЕРЕНАПРАВЛЯЕМ СРАЗУ
+            console.log('🔄 REDIRECTING TO ADMIN.HTML');
+            window.location.href = 'admin.html';
+            
         } else {
             showMessage('❌ Неверный код. Попробуйте еще раз.', 'error');
             shakeCodeInputs();
         }
         setLoadingState(false);
-    }, 1000);
+    }, 500);
 }
-       function goBackToLogin() {
-            document.getElementById('codeSection').classList.add('hidden');
-            document.getElementById('loginSection').classList.remove('hidden');
-            showMessage('', '');
-            currentAuthCode = '';
+
+function goBackToLogin() {
+    document.getElementById('codeSection').classList.add('hidden');
+    document.getElementById('loginSection').classList.remove('hidden');
+    showMessage('', '');
+    currentAuthCode = '';
+}
+
+function clearCodeInputs() {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    inputs.forEach(input => input.value = '');
+}
+
+function shakeCodeInputs() {
+    const container = document.querySelector('.code-inputs');
+    container.style.animation = 'shake 0.5s';
+    setTimeout(() => {
+        container.style.animation = '';
+        clearCodeInputs();
+        document.querySelector('.code-inputs input').focus();
+    }, 500);
+}
+
+function setLoadingState(loading) {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = loading;
+        button.classList.toggle('loading', loading);
+    });
+}
+
+function showMessage(text, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = 'message';
+    if (type) {
+        messageEl.classList.add(type);
+    }
+}
+
+// Анимация тряски
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+`;
+document.head.appendChild(style);
+
+// Автофокус
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('username').focus();
+});
+
+// Обработка Enter
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        if (!document.getElementById('codeSection').classList.contains('hidden')) {
+            verifyCode();
+        } else {
+            handleLogin();
         }
-
-        function clearCodeInputs() {
-            const inputs = document.querySelectorAll('.code-inputs input');
-            inputs.forEach(input => input.value = '');
-        }
-
-        function shakeCodeInputs() {
-            const container = document.querySelector('.code-inputs');
-            container.style.animation = 'shake 0.5s';
-            setTimeout(() => {
-                container.style.animation = '';
-                clearCodeInputs();
-                document.querySelector('.code-inputs input').focus();
-            }, 500);
-        }
-
-        function setLoadingState(loading) {
-            const buttons = document.querySelectorAll('button');
-            buttons.forEach(button => {
-                button.disabled = loading;
-                button.classList.toggle('loading', loading);
-            });
-        }
-
-        function showMessage(text, type) {
-            const messageEl = document.getElementById('message');
-            messageEl.textContent = text;
-            messageEl.className = 'message';
-            if (type) {
-                messageEl.classList.add(type);
-            }
-            
-            // Автоматически скрываем успешные сообщения через 5 секунд
-            if (type === 'success' && text) {
-                setTimeout(() => {
-                    if (messageEl.textContent === text) {
-                        messageEl.textContent = '';
-                        messageEl.className = 'message';
-                    }
-                }, 5000);
-            }
-        }
-
-        // Добавляем анимацию тряски
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes shake {
-                0%, 100% { transform: translateX(0); }
-                25% { transform: translateX(-5px); }
-                75% { transform: translateX(5px); }
-            }
-        `;
-        document.head.appendChild(style);
-
-        // Автофокус на логин при загрузке
-        document.addEventListener('DOMContentLoaded', function() {
-            document.getElementById('username').focus();
-        });
-
-        // Обработка нажатия Enter
-        document.addEventListener('keypress', function(e) {
-            if (e.key === 'Enter') {
-                if (!document.getElementById('codeSection').classList.contains('hidden')) {
-                    verifyCode();
-                } else {
-                    handleLogin();
-                }
-            }
-        });
+    }
+});
     </script>
 </body>
 </html>
