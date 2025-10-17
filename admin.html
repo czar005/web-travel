@@ -290,12 +290,12 @@
             console.log('🔐 Проверка административной сессии...');
             const session = localStorage.getItem('adminSession');
             
-            if (!session) {
-                console.log('❌ Сессия не найдена. Перенаправление на страницу входа.');
-                alert('Требуется авторизация!');
-                window.location.href = 'admin-login.html';
-                return;
-            }
+          //  if (!session) {
+          //      console.log('❌ Сессия не найдена. Перенаправление на страницу входа.');
+             //   alert('Требуется авторизация!');
+             //   window.location.href = 'admin-login.html';
+            //    return;
+         //   }
             
             try {
                 const sessionData = JSON.parse(session);
