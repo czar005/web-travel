@@ -7,11 +7,358 @@
     <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        /* ... существующие стили остаются без изменений ... */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .editor-panel {
+            width: 450px;
+            background: white;
+            border-left: 2px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: #2c5aa0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-frame-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .section-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .section-item:hover {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .section-item.active {
+            border-color: #2c5aa0;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .section-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .section-item.active .section-desc {
+            color: #e0e0e0;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3d6f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .stats-editor {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .stat-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .stat-row input {
+            flex: 1;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            background: #28a745;
+            color: white;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            border-bottom-color: #2c5aa0;
+            background: white;
+            color: #2c5aa0;
+        }
+
+        .content-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .save-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-indicator.show {
+            display: flex;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 15px;
+        }
     </style>
 </head>
 <body>
-    <!-- ... существующая HTML структура остается без изменений ... -->
+    <div class="editor-container">
+        <!-- Левая панель - предпросмотр -->
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn btn-secondary" onclick="editor.safeRefresh()">
+                        <i class="fas fa-sync"></i> Обновить
+                    </button>
+                    <button class="btn btn-success" onclick="editor.saveAndExit()" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="save-indicator" id="save-indicator">
+                <i class="fas fa-check-circle"></i>
+                <span id="save-message">Изменения сохранены</span>
+            </div>
+
+            <div class="preview-frame-container">
+                <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true&nocache=1"></iframe>
+            </div>
+        </div>
+
+        <!-- Правая панель - редактор -->
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="editor.showTab('sections')">Секции</button>
+                <button class="tab-button" onclick="editor.showTab('content')">Контент</button>
+            </div>
+
+            <div class="panel-content" id="sections-tab">
+                <div class="content-header">
+                    <h3>Доступные секции</h3>
+                    <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Выберите секцию для редактирования</p>
+                </div>
+                <div class="section-list" id="section-list">
+                    <!-- Секции будут загружены через JS -->
+                </div>
+            </div>
+
+            <div class="panel-content" id="content-tab" style="display: none;">
+                <div id="content-editor">
+                    <div class="empty-state">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Выберите секцию для редактирования</p>
+                        <small>Перейдите на вкладку "Секции" и выберите нужный блок</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
         class StablePageEditor {
@@ -109,43 +456,10 @@
             }
 
             loadCurrentData() {
-                // Проверяем доступность dataManager
-                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                if (window.dataManager) {
                     this.currentData = window.dataManager.getData() || {};
                     console.log('📁 Загружены текущие данные:', this.currentData);
-                } else {
-                    console.warn('⚠️ DataManager не доступен, используем локальные данные');
-                    this.currentData = this.getLocalData();
                 }
-            }
-
-            getLocalData() {
-                // Локальное хранилище данных как fallback
-                const localData = localStorage.getItem('worldtravel_editor_data');
-                if (localData) {
-                    return JSON.parse(localData);
-                }
-                return {
-                    content: {
-                        hero: { title: 'Откройте мир с WorldTravel', subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.' },
-                        about: { 
-                            title: 'О нашей компании', 
-                            description: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.',
-                            stats: [
-                                { value: '5000', label: 'Довольных клиентов' },
-                                { value: '50', label: 'Стран мира' },
-                                { value: '10 лет', label: 'Опыта работы' }
-                            ]
-                        },
-                        services: { title: 'Наши услуги' },
-                        destinations: { title: 'Популярные направления', subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами' },
-                        contact: { title: 'Свяжитесь с нами' }
-                    }
-                };
-            }
-
-            saveLocalData(data) {
-                localStorage.setItem('worldtravel_editor_data', JSON.stringify(data));
             }
 
             selectSection(sectionId) {
@@ -168,31 +482,19 @@
             }
 
             showTab(tabName) {
-                console.log('📑 Переключение на вкладку:', tabName);
-                
                 // Скрываем все вкладки
                 document.querySelectorAll('.panel-content').forEach(tab => {
                     tab.style.display = 'none';
                 });
                 
                 // Показываем выбранную вкладку
-                const targetTab = document.getElementById(tabName + '-tab');
-                if (targetTab) {
-                    targetTab.style.display = 'block';
-                }
+                document.getElementById(tabName + '-tab').style.display = 'block';
                 
                 // Обновляем активные кнопки
                 document.querySelectorAll('.tab-button').forEach(btn => {
                     btn.classList.remove('active');
                 });
-                
-                // Находим кнопку соответствующей вкладки
-                const targetButton = Array.from(document.querySelectorAll('.tab-button')).find(btn => 
-                    btn.textContent.includes(tabName === 'sections' ? 'Секции' : 'Контент')
-                );
-                if (targetButton) {
-                    targetButton.classList.add('active');
-                }
+                event.target.classList.add('active');
             }
 
             showContentEditor() {
@@ -208,7 +510,7 @@
                     </div>
                 `;
 
-                // Загружаем текущие значения
+                // Загружаем текущие значения из dataManager или из фрейма
                 this.currentSection.fields.forEach(field => {
                     if (field.type === 'stats') {
                         editorHTML += this.getStatsEditor();
@@ -246,32 +548,30 @@
             }
 
             getCurrentValue(field) {
-                // Пробуем получить из dataManager
-                if (typeof window.dataManager !== 'undefined' && window.dataManager && this.currentData.content) {
+                // Сначала пробуем получить из dataManager
+                if (window.dataManager && this.currentData.content) {
                     const sectionData = this.currentData.content[this.currentSection.id];
                     if (sectionData && sectionData[field.id]) {
                         return this.escapeHtml(sectionData[field.id]);
                     }
                 }
                 
-                // Если в dataManager нет, пробуем получить из локальных данных
-                if (this.currentData.content && this.currentData.content[this.currentSection.id]) {
-                    const sectionData = this.currentData.content[this.currentSection.id];
-                    if (sectionData[field.id]) {
-                        return this.escapeHtml(sectionData[field.id]);
-                    }
+                // Если в dataManager нет, пробуем получить из фрейма
+                try {
+                    const frame = document.getElementById('preview-frame');
+                    const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                    const element = frameDoc.querySelector(field.selector);
+                    return element ? this.escapeHtml(element.textContent) : '';
+                } catch (error) {
+                    return '';
                 }
-                
-                // Если данных нет, возвращаем пустую строку
-                return '';
             }
 
             getStatsEditor() {
                 let stats = [];
                 
-                // Пробуем получить статистику из dataManager или локальных данных
-                if ((typeof window.dataManager !== 'undefined' && window.dataManager && this.currentData.content && this.currentData.content.about) ||
-                    (this.currentData.content && this.currentData.content.about)) {
+                // Пробуем получить статистику из dataManager
+                if (window.dataManager && this.currentData.content && this.currentData.content.about) {
                     stats = this.currentData.content.about.stats || [];
                 }
                 
@@ -310,21 +610,17 @@
                 console.log('💾 Сохранение изменений для секции:', this.currentSection.id);
 
                 try {
-                    // Сохраняем данные
-                    const success = this.saveToDataManager();
+                    // 1. Сохраняем в dataManager
+                    this.saveToDataManager();
                     
-                    if (success) {
-                        // Обновляем фрейм предпросмотра
-                        this.updatePreviewFrame();
-                        
-                        // Показываем уведомление
-                        this.showSaveIndicator('Изменения успешно сохранены!');
-                        this.showNotification('Изменения применены и сохранены!');
-                        
-                        this.hasUnsavedChanges = false;
-                    } else {
-                        throw new Error('Не удалось сохранить данные');
-                    }
+                    // 2. Обновляем фрейм предпросмотра
+                    this.updatePreviewFrame();
+                    
+                    // 3. Показываем уведомление
+                    this.showSaveIndicator('Изменения успешно сохранены!');
+                    this.showNotification('Изменения применены и сохранены!');
+                    
+                    this.hasUnsavedChanges = false;
                     
                 } catch (error) {
                     console.error('❌ Ошибка сохранения:', error);
@@ -333,6 +629,10 @@
             }
 
             saveToDataManager() {
+                if (!window.dataManager) {
+                    throw new Error('DataManager не доступен');
+                }
+
                 const updates = {};
                 
                 // Собираем обновления для обычных полей
@@ -362,38 +662,22 @@
                     updates.stats = stats;
                 }
 
-                console.log('📝 Сохранение данных для секции:', this.currentSection.id, updates);
-
-                // Пробуем сохранить через dataManager
-                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
-                    const success = window.dataManager.updateContent(this.currentSection.id, updates);
-                    if (success) {
-                        // Обновляем локальные данные
-                        this.loadCurrentData();
-                        return true;
-                    }
+                console.log('📝 Сохранение в dataManager:', this.currentSection.id, updates);
+                
+                // Сохраняем в dataManager
+                const success = window.dataManager.updateContent(this.currentSection.id, updates);
+                if (!success) {
+                    throw new Error('Не удалось сохранить в dataManager');
                 }
 
-                // Fallback: сохраняем в локальное хранилище
-                console.log('⚠️ Используем локальное сохранение');
-                if (!this.currentData.content) {
-                    this.currentData.content = {};
-                }
-                if (!this.currentData.content[this.currentSection.id]) {
-                    this.currentData.content[this.currentSection.id] = {};
-                }
-                
-                Object.assign(this.currentData.content[this.currentSection.id], updates);
-                this.saveLocalData(this.currentData);
-                
-                return true;
+                // Обновляем локальные данные
+                this.loadCurrentData();
             }
 
             updatePreviewFrame() {
                 const frame = document.getElementById('preview-frame');
-                // Перезагружаем фрейм с новым timestamp
-                const currentSrc = frame.src.split('&t=')[0];
-                frame.src = currentSrc + '&t=' + Date.now();
+                // Просто перезагружаем фрейм - ContentUpdater сам применит изменения из dataManager
+                frame.src = frame.src + '&t=' + Date.now();
             }
 
             safeRefresh() {
@@ -410,7 +694,7 @@
 
             saveAndExit() {
                 if (this.hasUnsavedChanges) {
-                    if (confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
+                    if (!confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
                         this.saveChanges();
                     }
                 }
