@@ -1,133 +1,56 @@
 // script.js - Основной скрипт для главной страницы
 console.log('WorldTravel script loaded');
 
-// Функция для загрузки данных из редактора страниц
-function loadPageEditorData() {
+// Функция для загрузки изменений из редактора
+function loadEditorChanges() {
     try {
-        // Пробуем загрузить из dataManager
-        if (typeof dataManager !== 'undefined') {
-            const data = dataManager.getData();
-            if (data.pages && data.pages.index && data.pages.index.blocks) {
-                console.log('Загружены данные из редактора страниц:', data.pages.index.blocks);
-                return data.pages.index.blocks;
-            }
-        }
+        const savedHTML = localStorage.getItem('worldtravel_edited_page');
+        const timestamp = localStorage.getItem('worldtravel_edit_timestamp');
         
-        // Пробуем загрузить из localStorage
-        const savedData = localStorage.getItem('worldtravel_page_editor_data');
-        if (savedData) {
-            const parsedData = JSON.parse(savedData);
-            console.log('Загружены данные из localStorage:', parsedData.blocks);
-            return parsedData.blocks;
+        if (savedHTML && timestamp) {
+            console.log('Загружены изменения из редактора от:', timestamp);
+            
+            // Создаем временный div для парсинга HTML
+            const tempDiv = document.createElement('div');
+            tempDiv.innerHTML = savedHTML;
+            
+            // Обновляем основные разделы
+            updateSectionFromEditor(tempDiv, '#home h1', '#home h1');
+            updateSectionFromEditor(tempDiv, '#home p', '#home p');
+            updateSectionFromEditor(tempDiv, '#about .section-title', '#about .section-title');
+            updateSectionFromEditor(tempDiv, '.about-text p', '.about-text p');
+            updateSectionFromEditor(tempDiv, '#services .section-title', '#services .section-title');
+            updateSectionFromEditor(tempDiv, '#destinations .section-title', '#destinations .section-title');
+            updateSectionFromEditor(tempDiv, '.destinations .section-subtitle', '.destinations .section-subtitle');
+            updateSectionFromEditor(tempDiv, '#contact .section-title', '#contact .section-title');
+            
+            console.log('Изменения из редактора применены');
         }
-        
-        // Пробуем загрузить старые данные
-        const oldData = localStorage.getItem('page-index-blocks');
-        if (oldData) {
-            console.log('Загружены старые данные:', JSON.parse(oldData));
-            return JSON.parse(oldData);
-        }
-        
-        console.log('Данные редактора не найдены, используются стандартные блоки');
-        return null;
     } catch (error) {
-        console.error('Ошибка загрузки данных редактора:', error);
-        return null;
+        console.error('Ошибка загрузки изменений из редактора:', error);
     }
 }
 
-// Функция применения данных редактора к странице
-function applyEditorData() {
-    const editorBlocks = loadPageEditorData();
-    if (!editorBlocks || !Array.isArray(editorBlocks)) {
-        console.log('Нет данных редактора для применения');
-        return;
-    }
-
-    console.log('Применяем данные редактора:', editorBlocks);
-
-    // Применяем данные к соответствующим секциям
-    editorBlocks.forEach(block => {
-        switch(block.type) {
-            case 'hero':
-                applyHeroData(block);
-                break;
-            case 'about':
-                applyAboutData(block);
-                break;
-            case 'services':
-                applyServicesData(block);
-                break;
-            case 'destinations':
-                applyDestinationsData(block);
-                break;
-            case 'contact':
-                applyContactData(block);
-                break;
+function updateSectionFromEditor(sourceDoc, sourceSelector, targetSelector) {
+    try {
+        const sourceElement = sourceDoc.querySelector(sourceSelector);
+        const targetElement = document.querySelector(targetSelector);
+        
+        if (sourceElement && targetElement && sourceElement.textContent !== targetElement.textContent) {
+            targetElement.textContent = sourceElement.textContent;
         }
-    });
-}
-
-// Функции применения данных к конкретным секциям
-function applyHeroData(block) {
-    const heroTitle = document.querySelector('.hero h1');
-    const heroContent = document.querySelector('.hero p');
-    
-    if (heroTitle && block.title) {
-        heroTitle.textContent = block.title;
-    }
-    if (heroContent && block.content) {
-        heroContent.textContent = block.content;
-    }
-}
-
-function applyAboutData(block) {
-    const aboutTitle = document.querySelector('.about .section-title');
-    const aboutContent = document.querySelector('.about-text p');
-    
-    if (aboutTitle && block.title) {
-        aboutTitle.textContent = block.title;
-    }
-    if (aboutContent && block.content) {
-        aboutContent.textContent = block.content;
-    }
-}
-
-function applyServicesData(block) {
-    const servicesTitle = document.querySelector('.services .section-title');
-    
-    if (servicesTitle && block.title) {
-        servicesTitle.textContent = block.title;
-    }
-}
-
-function applyDestinationsData(block) {
-    const destinationsTitle = document.querySelector('.destinations .section-title');
-    const destinationsSubtitle = document.querySelector('.destinations .section-subtitle');
-    
-    if (destinationsTitle && block.title) {
-        destinationsTitle.textContent = block.title;
-    }
-    if (destinationsSubtitle && block.content) {
-        destinationsSubtitle.textContent = block.content;
-    }
-}
-
-function applyContactData(block) {
-    const contactTitle = document.querySelector('.contact .section-title');
-    
-    if (contactTitle && block.title) {
-        contactTitle.textContent = block.title;
+    } catch (error) {
+        console.error('Ошибка обновления секции:', error);
     }
 }
 
 // Инициализация при загрузке страницы
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('DOM loaded, applying editor data...');
+    console.log('DOM loaded');
     
-    // Применяем данные редактора
+    // Загружаем изменения из редактора
     setTimeout(() => {
-        applyEditorData();
+        loadEditorChanges();
     }, 100);
     
     // Остальной существующий код...
@@ -145,7 +68,30 @@ document.addEventListener('DOMContentLoaded', function() {
             animateCounter(counter.querySelector('h3'), 0, target, 2000);
         }
     });
+
+    // Проверяем параметр editor для отключения функционала
+    const urlParams = new URLSearchParams(window.location.search);
+    if (urlParams.has('editor')) {
+        document.body.classList.add('editor-mode');
+        disableEditorFunctionality();
+    }
 });
+
+function disableEditorFunctionality() {
+    // Отключаем навигацию по якорям
+    const navLinks = document.querySelectorAll('a[href^="#"]');
+    navLinks.forEach(link => {
+        link.onclick = (e) => e.preventDefault();
+    });
+    
+    // Отключаем формы
+    const forms = document.querySelectorAll('form');
+    forms.forEach(form => {
+        form.onsubmit = (e) => e.preventDefault();
+    });
+    
+    console.log('Функционал отключен для режима редактора');
+}
 
 // Остальные существующие функции...
 function animateCounter(element, start, end, duration) {
