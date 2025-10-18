@@ -1,7 +1,14 @@
-// Main JavaScript with improved data loading
+// Enhanced main page script with content updates
 document.addEventListener('DOMContentLoaded', function() {
     initializePage();
     setupEventListeners();
+    
+    // Apply content updates after a short delay to ensure dataManager is ready
+    setTimeout(() => {
+        if (window.updatePageContent) {
+            window.updatePageContent();
+        }
+    }, 500);
 });
 
 function initializePage() {
@@ -60,7 +67,7 @@ function loadCountriesData() {
                 const data = window.dataManager.getData();
                 const countries = data?.countries || [];
                 
-                console.log('Loading countries data:', countries);
+                console.log('Loading countries data:', countries.length, 'countries');
                 
                 if (countries.length > 0) {
                     displayCountries(countries);
@@ -214,5 +221,19 @@ function scrollToDestinations() {
 if (window.location.search.includes('fromAdmin=true')) {
     setTimeout(() => {
         loadCountriesData();
+        if (window.updatePageContent) {
+            window.updatePageContent();
+        }
     }, 500);
 }
+
+// Auto-refresh content when data changes
+window.addEventListener('dataUpdated', function() {
+    console.log('Main page: data updated, refreshing...');
+    setTimeout(() => {
+        loadCountriesData();
+        if (window.updatePageContent) {
+            window.updatePageContent();
+        }
+    }, 100);
+});

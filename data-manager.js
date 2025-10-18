@@ -1,8 +1,9 @@
-// Improved Data Manager with force refresh and better synchronization
+// Enhanced Data Manager with reliable update triggering
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
-        this.version = '2.0';
+        this.version = '3.0';
+        this.updateCallbacks = [];
         this.init();
     }
 
@@ -13,7 +14,7 @@ class DataManager {
             this.setDefaultData();
         }
         
-        // Listen for storage changes
+        // Listen for storage changes from other tabs
         window.addEventListener('storage', (e) => {
             if (e.key === this.storageKey) {
                 console.log('🔄 Data changed in another tab');
@@ -21,10 +22,7 @@ class DataManager {
             }
         });
 
-        // Listen for custom data updates
-        window.addEventListener('dataUpdated', () => {
-            console.log('🔄 Data updated event received');
-        });
+        console.log('✅ DataManager ready');
     }
 
     getData() {
@@ -34,22 +32,11 @@ class DataManager {
                 console.log('📭 No data found in localStorage');
                 return null;
             }
-            const parsed = JSON.parse(data);
-            console.log('📁 Loaded data:', {
-                countries: parsed.countries?.length || 0,
-                tours: this.countAllTours(parsed.countries),
-                version: parsed.version || '1.0'
-            });
-            return parsed;
+            return JSON.parse(data);
         } catch (error) {
             console.error('❌ Error reading data:', error);
             return null;
         }
-    }
-
-    countAllTours(countries) {
-        if (!countries) return 0;
-        return countries.reduce((total, country) => total + (country.tours?.length || 0), 0);
     }
 
     setData(data) {
@@ -57,19 +44,9 @@ class DataManager {
             data.version = this.version;
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
-            console.log('💾 Data saved successfully:', {
-                countries: data.countries?.length || 0,
-                tours: this.countAllTours(data.countries)
-            });
+            console.log('💾 Data saved successfully');
             
             this.triggerDataUpdate();
-            
-            // Notify other tabs
-            window.dispatchEvent(new StorageEvent('storage', {
-                key: this.storageKey,
-                newValue: JSON.stringify(data)
-            }));
-            
             return true;
         } catch (error) {
             console.error('❌ Error saving data:', error);
@@ -163,6 +140,58 @@ class DataManager {
         return this.setData(defaultData);
     }
 
+    // Content management
+    getContent() {
+        const data = this.getData();
+        return data?.content || {};
+    }
+
+    updateContent(section, updates) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        if (!data.content) data.content = {};
+        data.content[section] = { ...data.content[section], ...updates };
+        
+        console.log('📝 Updating content for section:', section, updates);
+        return this.setData(data);
+    }
+
+    updateStats(stats) {
+        console.log('📊 Updating stats:', stats);
+        return this.updateContent('about', { stats });
+    }
+
+    // Contacts management
+    getContacts() {
+        const data = this.getData();
+        return data?.contacts || {};
+    }
+
+    updateContacts(updates) {
+        const data = this.getData();
+        if (!data) return {};
+        
+        data.contacts = { ...data.contacts, ...updates };
+        console.log('📞 Updating contacts:', updates);
+        return this.setData(data) ? data.contacts : {};
+    }
+
+    // Settings management
+    getSettings() {
+        const data = this.getData();
+        return data?.settings || {};
+    }
+
+    updateSettings(updates) {
+        const data = this.getData();
+        if (!data) return {};
+        
+        data.settings = { ...data.settings, ...updates };
+        console.log('⚙️ Updating settings:', updates);
+        return this.setData(data) ? data.settings : {};
+    }
+
     // Countries management
     getCountries() {
         const data = this.getData();
@@ -238,88 +267,6 @@ class DataManager {
         return false;
     }
 
-    // Content management
-    getContent() {
-        const data = this.getData();
-        return data?.content || {};
-    }
-
-    updateContent(section, updates) {
-        const data = this.getData();
-        if (!data) return false;
-        
-        if (!data.content) data.content = {};
-        data.content[section] = { ...data.content[section], ...updates };
-        
-        return this.setData(data);
-    }
-
-    updateStats(stats) {
-        return this.updateContent('about', { stats });
-    }
-
-    // Contacts management
-    getContacts() {
-        const data = this.getData();
-        return data?.contacts || {};
-    }
-
-    updateContacts(updates) {
-        const data = this.getData();
-        if (!data) return {};
-        
-        data.contacts = { ...data.contacts, ...updates };
-        return this.setData(data) ? data.contacts : {};
-    }
-
-    // Settings management
-    getSettings() {
-        const data = this.getData();
-        return data?.settings || {};
-    }
-
-    updateSettings(updates) {
-        const data = this.getData();
-        if (!data) return {};
-        
-        data.settings = { ...data.settings, ...updates };
-        return this.setData(data) ? data.settings : {};
-    }
-
-    // Force refresh
-    forceRefresh() {
-        console.log('🔄 Force refreshing data...');
-        this.triggerDataUpdate();
-        return this.getData();
-    }
-
-    // Event system
-    onDataUpdate(callback) {
-        this.dataUpdateCallbacks = this.dataUpdateCallbacks || [];
-        this.dataUpdateCallbacks.push(callback);
-    }
-
-    triggerDataUpdate() {
-        console.log('🔄 Triggering data update...');
-        
-        // Trigger callbacks
-        if (this.dataUpdateCallbacks) {
-            this.dataUpdateCallbacks.forEach(callback => {
-                try {
-                    callback(this.getData());
-                } catch (error) {
-                    console.error('Error in data update callback:', error);
-                }
-            });
-        }
-        
-        // Trigger global event
-        window.dispatchEvent(new CustomEvent('dataUpdated', {
-            detail: { timestamp: new Date().toISOString() }
-        }));
-    }
-
-    // Utility methods
     getAllTours() {
         const countries = this.getCountries();
         const allTours = [];
@@ -337,55 +284,70 @@ class DataManager {
         return allTours;
     }
 
-    // Debug method
-    debugData() {
+    // Update triggering with multiple methods for reliability
+    triggerDataUpdate() {
+        console.log('🔄 Triggering data update...');
+        
+        // Method 1: Custom event (most reliable)
+        window.dispatchEvent(new CustomEvent('dataUpdated', {
+            detail: { 
+                timestamp: new Date().toISOString(),
+                source: 'dataManager'
+            }
+        }));
+        
+        // Method 2: Call registered callbacks
+        this.updateCallbacks.forEach(callback => {
+            try {
+                callback(this.getData());
+            } catch (error) {
+                console.error('Error in update callback:', error);
+            }
+        });
+        
+        // Method 3: Storage event for other tabs
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: this.storageKey,
+            newValue: localStorage.getItem(this.storageKey),
+            oldValue: localStorage.getItem(this.storageKey),
+            storageArea: localStorage,
+            url: window.location.href
+        }));
+    }
+
+    onUpdate(callback) {
+        this.updateCallbacks.push(callback);
+    }
+
+    // Force refresh
+    forceRefresh() {
+        console.log('🔄 Force refreshing all data...');
+        this.triggerDataUpdate();
+        return this.getData();
+    }
+
+    // Debug
+    debug() {
         const data = this.getData();
         console.log('🔍 DataManager Debug:', {
             countries: data?.countries?.length || 0,
             tours: this.getAllTours().length,
+            content: data?.content ? '✓' : '✗',
             contacts: data?.contacts ? '✓' : '✗',
             settings: data?.settings ? '✓' : '✗',
-            content: data?.content ? '✓' : '✗',
-            lastUpdate: data?.lastUpdate || 'never'
+            lastUpdate: data?.lastUpdate || 'never',
+            version: data?.version || 'unknown'
         });
         return data;
     }
 }
 
-// Global instance with error handling
-try {
-    window.dataManager = new DataManager();
-    console.log('✅ DataManager loaded successfully');
-} catch (error) {
-    console.error('❌ Failed to initialize DataManager:', error);
-    window.dataManager = {
-        getData: () => null,
-        setData: () => false,
-        getCountries: () => [],
-        debugData: () => null
-    };
-}
+// Global instance
+window.dataManager = new DataManager();
 
-// Auto-refresh system
-window.addEventListener('dataUpdated', function(e) {
-    console.log('🔄 Global data update received:', e.detail?.timestamp);
-    
-    // Refresh admin panels
-    if (typeof loadCountriesTable === 'function') {
-        setTimeout(loadCountriesTable, 100);
-    }
-    if (typeof loadToursTable === 'function') {
-        setTimeout(loadToursTable, 100);
-    }
-    if (typeof loadCountriesData === 'function') {
-        setTimeout(loadCountriesData, 100);
-    }
-});
-
-// Initialize on load
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('📄 Page loaded, initializing DataManager...');
+// Auto-debug on load
+setTimeout(() => {
     if (window.dataManager) {
-        window.dataManager.debugData();
+        window.dataManager.debug();
     }
-});
+}, 1000);
