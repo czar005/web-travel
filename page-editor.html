@@ -276,18 +276,6 @@
             background: #545b62;
         }
 
-        .loading {
-            text-align: center;
-            padding: 2rem;
-            color: #6c757d;
-        }
-
-        .loading i {
-            font-size: 2rem;
-            margin-bottom: 1rem;
-            color: #2c5aa0;
-        }
-
         .frame-controls {
             display: flex;
             gap: 10px;
@@ -389,7 +377,6 @@
 
             init() {
                 this.setupFrame();
-                this.setupScrollSync();
             }
 
             setupFrame() {
@@ -398,17 +385,22 @@
                     this.disablePageFunctionality();
                     setTimeout(() => {
                         this.setupSections();
-                    }, 1000);
+                        this.setupScrollHandling();
+                    }, 1500);
                 };
             }
 
-            setupScrollSync() {
+            setupScrollHandling() {
                 const frameContainer = document.querySelector('.preview-frame-container');
-                const overlay = document.getElementById('frame-overlay');
                 
+                // Обновляем позиции при скролле
                 frameContainer.addEventListener('scroll', () => {
-                    // Синхронизируем позицию оверлея с фреймом
-                    overlay.scrollTop = frameContainer.scrollTop;
+                    this.updateHighlightsPosition();
+                });
+
+                // Также обновляем при ресайзе
+                window.addEventListener('resize', () => {
+                    this.updateHighlightsPosition();
                 });
             }
 
@@ -434,6 +426,12 @@
                         link.onclick = (e) => e.preventDefault();
                     });
 
+                    // Отключаем бургер меню
+                    const hamburger = frameDoc.querySelector('.hamburger');
+                    if (hamburger) {
+                        hamburger.onclick = (e) => e.preventDefault();
+                    }
+
                     // Добавляем класс для редактора
                     frameDoc.body.classList.add('editor-mode');
 
@@ -446,45 +444,61 @@
                 try {
                     const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                     
+                    // Получаем ВСЕ доступные блоки на странице
                     this.sections = [
                         {
                             id: 'hero',
                             name: 'Герой-секция',
                             selector: '#home, .hero',
-                            title: frameDoc.querySelector('#home h1, .hero h1'),
-                            content: frameDoc.querySelector('#home p, .hero p')
+                            elements: {
+                                title: frameDoc.querySelector('#home h1, .hero h1'),
+                                content: frameDoc.querySelector('#home p, .hero p')
+                            }
                         },
                         {
                             id: 'about',
                             name: 'О компании',
                             selector: '#about, .about',
-                            title: frameDoc.querySelector('#about .section-title, .about .section-title'),
-                            content: frameDoc.querySelector('.about-text p')
+                            elements: {
+                                title: frameDoc.querySelector('#about .section-title, .about .section-title'),
+                                content: frameDoc.querySelector('.about-text p'),
+                                stats: frameDoc.querySelectorAll('.about .stat h3')
+                            }
                         },
                         {
                             id: 'services',
                             name: 'Услуги',
                             selector: '#services, .services',
-                            title: frameDoc.querySelector('#services .section-title, .services .section-title'),
-                            content: null
+                            elements: {
+                                title: frameDoc.querySelector('#services .section-title, .services .section-title'),
+                                serviceCards: frameDoc.querySelectorAll('.service-card')
+                            }
                         },
                         {
                             id: 'destinations',
                             name: 'Направления',
                             selector: '#destinations, .destinations',
-                            title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title'),
-                            content: frameDoc.querySelector('.destinations .section-subtitle')
+                            elements: {
+                                title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title'),
+                                subtitle: frameDoc.querySelector('.destinations .section-subtitle')
+                            }
                         },
                         {
                             id: 'contact',
                             name: 'Контакты',
                             selector: '#contact, .contact',
-                            title: frameDoc.querySelector('#contact .section-title, .contact .section-title'),
-                            content: null
+                            elements: {
+                                title: frameDoc.querySelector('#contact .section-title, .contact .section-title'),
+                                phone: frameDoc.querySelector('.contact-info .contact-item:nth-child(1) p'),
+                                email: frameDoc.querySelector('.contact-info .contact-item:nth-child(2) p'),
+                                address: frameDoc.querySelector('.contact-info .contact-item:nth-child(3) p'),
+                                hours: frameDoc.querySelector('.contact-info .contact-item:nth-child(4) p')
+                            }
                         }
                     ];
 
                     this.setupSectionHighlights();
+                    console.log('Все секции загружены:', this.sections);
                     
                 } catch (error) {
                     console.log('Не удалось настроить разделы:', error);
@@ -502,47 +516,41 @@
                         const element = frameDoc.querySelector(section.selector);
                         
                         if (element) {
-                            const rect = element.getBoundingClientRect();
-                            const frameRect = this.currentFrame.getBoundingClientRect();
-                            const containerRect = this.currentFrame.parentElement.getBoundingClientRect();
-                            
-                            const highlight = document.createElement('div');
-                            highlight.className = 'section-highlight';
-                            highlight.dataset.sectionId = section.id;
-                            
-                            // Правильно позиционируем относительно контейнера
-                            highlight.style.left = '0px';
-                            highlight.style.top = (rect.top + this.currentFrame.contentWindow.scrollY - containerRect.top) + 'px';
-                            highlight.style.width = '100%';
-                            highlight.style.height = rect.height + 'px';
-                            
-                            // Добавляем подсказку
-                            const tooltip = document.createElement('div');
-                            tooltip.className = 'edit-tooltip';
-                            tooltip.textContent = section.name;
-                            highlight.appendChild(tooltip);
-                            
-                            highlight.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                this.selectSection(section, element);
-                            });
-                            
-                            overlay.appendChild(highlight);
+                            this.createHighlightForSection(section, element);
                         }
                     } catch (error) {
-                        console.log('Ошибка создания хайлайта:', section.id, error);
+                        console.log('Ошибка создания хайлайта для:', section.id, error);
                     }
                 });
 
-                // Обновляем хайлайты при скролле
-                this.currentFrame.contentWindow.addEventListener('scroll', () => {
-                    this.updateHighlightsPosition();
+                // Обновляем позиции после создания
+                this.updateHighlightsPosition();
+            }
+
+            createHighlightForSection(section, element) {
+                const overlay = document.getElementById('frame-overlay');
+                
+                const highlight = document.createElement('div');
+                highlight.className = 'section-highlight';
+                highlight.dataset.sectionId = section.id;
+                
+                // Добавляем подсказку
+                const tooltip = document.createElement('div');
+                tooltip.className = 'edit-tooltip';
+                tooltip.textContent = section.name;
+                highlight.appendChild(tooltip);
+                
+                highlight.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectSection(section, element);
                 });
+                
+                overlay.appendChild(highlight);
             }
 
             updateHighlightsPosition() {
                 const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                const containerRect = this.currentFrame.parentElement.getBoundingClientRect();
+                const frameContainer = document.querySelector('.preview-frame-container');
                 
                 this.sections.forEach(section => {
                     try {
@@ -551,11 +559,15 @@
                         
                         if (element && highlight) {
                             const rect = element.getBoundingClientRect();
-                            highlight.style.top = (rect.top + this.currentFrame.contentWindow.scrollY - containerRect.top) + 'px';
+                            const frameRect = frameContainer.getBoundingClientRect();
+                            
+                            highlight.style.left = '0px';
+                            highlight.style.top = (rect.top + frameContainer.scrollTop - frameRect.top) + 'px';
+                            highlight.style.width = '100%';
                             highlight.style.height = rect.height + 'px';
                         }
                     } catch (error) {
-                        console.log('Ошибка обновления позиции:', error);
+                        // Игнорируем ошибки позиционирования
                     }
                 });
             }
@@ -585,30 +597,157 @@
                 sidebarTitle.textContent = section.name;
                 sidebarSubtitle.textContent = 'Редактирование содержимого';
 
-                const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                const currentTitle = section.title ? section.title.textContent : '';
-                const currentContent = section.content ? section.content.textContent : '';
+                let editorHTML = '';
 
-                sidebarContent.innerHTML = `
+                switch(section.id) {
+                    case 'hero':
+                        editorHTML = this.getHeroEditor(section);
+                        break;
+                    case 'about':
+                        editorHTML = this.getAboutEditor(section);
+                        break;
+                    case 'services':
+                        editorHTML = this.getServicesEditor(section);
+                        break;
+                    case 'destinations':
+                        editorHTML = this.getDestinationsEditor(section);
+                        break;
+                    case 'contact':
+                        editorHTML = this.getContactEditor(section);
+                        break;
+                    default:
+                        editorHTML = this.getDefaultEditor(section);
+                }
+
+                sidebarContent.innerHTML = editorHTML;
+            }
+
+            getHeroEditor(section) {
+                const title = section.elements.title ? section.elements.title.textContent : '';
+                const content = section.elements.content ? section.elements.content.textContent : '';
+                
+                return `
                     <div class="form-group">
-                        <label>Заголовок:</label>
-                        <input type="text" class="form-control" id="edit-title" value="${currentTitle}">
+                        <label>Основной заголовок:</label>
+                        <input type="text" class="form-control" id="edit-hero-title" value="${title}">
                     </div>
-                    ${section.content ? `
                     <div class="form-group">
-                        <label>Описание:</label>
-                        <textarea class="form-control" id="edit-content" rows="4">${currentContent}</textarea>
+                        <label>Описание под заголовком:</label>
+                        <textarea class="form-control" id="edit-hero-content" rows="4">${content}</textarea>
                     </div>
-                    ` : ''}
                     <div class="form-actions">
                         <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
                             <i class="fas fa-save"></i> Применить изменения
                         </button>
                     </div>
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-top: 1rem;">
+                `;
+            }
+
+            getAboutEditor(section) {
+                const title = section.elements.title ? section.elements.title.textContent : '';
+                const content = section.elements.content ? section.elements.content.textContent : '';
+                
+                return `
+                    <div class="form-group">
+                        <label>Заголовок "О компании":</label>
+                        <input type="text" class="form-control" id="edit-about-title" value="${title}">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание компании:</label>
+                        <textarea class="form-control" id="edit-about-content" rows="4">${content}</textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
+                            <i class="fas fa-save"></i> Применить изменения
+                        </button>
+                    </div>
+                `;
+            }
+
+            getServicesEditor(section) {
+                const title = section.elements.title ? section.elements.title.textContent : '';
+                
+                return `
+                    <div class="form-group">
+                        <label>Заголовок "Наши услуги":</label>
+                        <input type="text" class="form-control" id="edit-services-title" value="${title}">
+                    </div>
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-bottom: 1rem;">
                         <small style="color: #856404;">
-                            <i class="fas fa-info-circle"></i> Изменения применяются сразу к странице
+                            <i class="fas fa-info-circle"></i> Для редактирования карточек услуг используйте основную админ-панель
                         </small>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
+                            <i class="fas fa-save"></i> Применить изменения
+                        </button>
+                    </div>
+                `;
+            }
+
+            getDestinationsEditor(section) {
+                const title = section.elements.title ? section.elements.title.textContent : '';
+                const subtitle = section.elements.subtitle ? section.elements.subtitle.textContent : '';
+                
+                return `
+                    <div class="form-group">
+                        <label>Заголовок "Популярные направления":</label>
+                        <input type="text" class="form-control" id="edit-destinations-title" value="${title}">
+                    </div>
+                    <div class="form-group">
+                        <label>Подзаголовок:</label>
+                        <textarea class="form-control" id="edit-destinations-subtitle" rows="3">${subtitle}</textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
+                            <i class="fas fa-save"></i> Применить изменения
+                        </button>
+                    </div>
+                `;
+            }
+
+            getContactEditor(section) {
+                const title = section.elements.title ? section.elements.title.textContent : '';
+                const phone = section.elements.phone ? section.elements.phone.textContent : '';
+                const email = section.elements.email ? section.elements.email.textContent : '';
+                const address = section.elements.address ? section.elements.address.textContent : '';
+                const hours = section.elements.hours ? section.elements.hours.textContent : '';
+                
+                return `
+                    <div class="form-group">
+                        <label>Заголовок "Контакты":</label>
+                        <input type="text" class="form-control" id="edit-contact-title" value="${title}">
+                    </div>
+                    <div class="form-group">
+                        <label>Телефон:</label>
+                        <input type="text" class="form-control" id="edit-contact-phone" value="${phone}">
+                    </div>
+                    <div class="form-group">
+                        <label>Email:</label>
+                        <input type="text" class="form-control" id="edit-contact-email" value="${email}">
+                    </div>
+                    <div class="form-group">
+                        <label>Адрес:</label>
+                        <input type="text" class="form-control" id="edit-contact-address" value="${address}">
+                    </div>
+                    <div class="form-group">
+                        <label>Часы работы:</label>
+                        <input type="text" class="form-control" id="edit-contact-hours" value="${hours}">
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
+                            <i class="fas fa-save"></i> Применить изменения
+                        </button>
+                    </div>
+                `;
+            }
+
+            getDefaultEditor(section) {
+                return `
+                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px;">
+                        <p style="color: #856404; margin: 0;">
+                            <i class="fas fa-info-circle"></i> Редактор для этого раздела в разработке
+                        </p>
                     </div>
                 `;
             }
@@ -616,23 +755,27 @@
             saveSectionChanges() {
                 if (!this.selectedSection) return;
 
-                const title = document.getElementById('edit-title')?.value;
-                const content = document.getElementById('edit-content')?.value;
-
                 try {
                     const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                     
-                    // Обновляем заголовок
-                    if (this.selectedSection.title && title) {
-                        this.selectedSection.title.textContent = title;
+                    switch(this.selectedSection.id) {
+                        case 'hero':
+                            this.saveHeroChanges(frameDoc);
+                            break;
+                        case 'about':
+                            this.saveAboutChanges(frameDoc);
+                            break;
+                        case 'services':
+                            this.saveServicesChanges(frameDoc);
+                            break;
+                        case 'destinations':
+                            this.saveDestinationsChanges(frameDoc);
+                            break;
+                        case 'contact':
+                            this.saveContactChanges(frameDoc);
+                            break;
                     }
                     
-                    // Обновляем контент
-                    if (this.selectedSection.content && content) {
-                        this.selectedSection.content.textContent = content;
-                    }
-                    
-                    // Сохраняем изменения
                     this.saveChanges();
                     this.showNotification('Изменения применены!', 'success');
                     
@@ -642,11 +785,91 @@
                 }
             }
 
+            saveHeroChanges(frameDoc) {
+                const title = document.getElementById('edit-hero-title')?.value;
+                const content = document.getElementById('edit-hero-content')?.value;
+                
+                if (title) {
+                    const titleElement = frameDoc.querySelector('#home h1, .hero h1');
+                    if (titleElement) titleElement.textContent = title;
+                }
+                if (content) {
+                    const contentElement = frameDoc.querySelector('#home p, .hero p');
+                    if (contentElement) contentElement.textContent = content;
+                }
+            }
+
+            saveAboutChanges(frameDoc) {
+                const title = document.getElementById('edit-about-title')?.value;
+                const content = document.getElementById('edit-about-content')?.value;
+                
+                if (title) {
+                    const titleElement = frameDoc.querySelector('#about .section-title, .about .section-title');
+                    if (titleElement) titleElement.textContent = title;
+                }
+                if (content) {
+                    const contentElement = frameDoc.querySelector('.about-text p');
+                    if (contentElement) contentElement.textContent = content;
+                }
+            }
+
+            saveServicesChanges(frameDoc) {
+                const title = document.getElementById('edit-services-title')?.value;
+                
+                if (title) {
+                    const titleElement = frameDoc.querySelector('#services .section-title, .services .section-title');
+                    if (titleElement) titleElement.textContent = title;
+                }
+            }
+
+            saveDestinationsChanges(frameDoc) {
+                const title = document.getElementById('edit-destinations-title')?.value;
+                const subtitle = document.getElementById('edit-destinations-subtitle')?.value;
+                
+                if (title) {
+                    const titleElement = frameDoc.querySelector('#destinations .section-title, .destinations .section-title');
+                    if (titleElement) titleElement.textContent = title;
+                }
+                if (subtitle) {
+                    const subtitleElement = frameDoc.querySelector('.destinations .section-subtitle');
+                    if (subtitleElement) subtitleElement.textContent = subtitle;
+                }
+            }
+
+            saveContactChanges(frameDoc) {
+                const title = document.getElementById('edit-contact-title')?.value;
+                const phone = document.getElementById('edit-contact-phone')?.value;
+                const email = document.getElementById('edit-contact-email')?.value;
+                const address = document.getElementById('edit-contact-address')?.value;
+                const hours = document.getElementById('edit-contact-hours')?.value;
+                
+                if (title) {
+                    const titleElement = frameDoc.querySelector('#contact .section-title, .contact .section-title');
+                    if (titleElement) titleElement.textContent = title;
+                }
+                if (phone) {
+                    const phoneElement = frameDoc.querySelector('.contact-info .contact-item:nth-child(1) p');
+                    if (phoneElement) phoneElement.textContent = phone;
+                }
+                if (email) {
+                    const emailElement = frameDoc.querySelector('.contact-info .contact-item:nth-child(2) p');
+                    if (emailElement) emailElement.textContent = email;
+                }
+                if (address) {
+                    const addressElement = frameDoc.querySelector('.contact-info .contact-item:nth-child(3) p');
+                    if (addressElement) addressElement.textContent = address;
+                }
+                if (hours) {
+                    const hoursElement = frameDoc.querySelector('.contact-info .contact-item:nth-child(4) p');
+                    if (hoursElement) hoursElement.textContent = hours;
+                }
+            }
+
             saveChanges() {
                 try {
                     const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                     
-                    // Сохраняем конкретные изменения в localStorage
+                    // Сохраняем ВСЕ изменения в localStorage
                     const changes = {
                         hero: {
                             title: frameDoc.querySelector('#home h1, .hero h1')?.textContent,
@@ -661,16 +884,20 @@
                         },
                         destinations: {
                             title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title')?.textContent,
-                            content: frameDoc.querySelector('.destinations .section-subtitle')?.textContent
+                            subtitle: frameDoc.querySelector('.destinations .section-subtitle')?.textContent
                         },
                         contact: {
-                            title: frameDoc.querySelector('#contact .section-title, .contact .section-title')?.textContent
+                            title: frameDoc.querySelector('#contact .section-title, .contact .section-title')?.textContent,
+                            phone: frameDoc.querySelector('.contact-info .contact-item:nth-child(1) p')?.textContent,
+                            email: frameDoc.querySelector('.contact-info .contact-item:nth-child(2) p')?.textContent,
+                            address: frameDoc.querySelector('.contact-info .contact-item:nth-child(3) p')?.textContent,
+                            hours: frameDoc.querySelector('.contact-info .contact-item:nth-child(4) p')?.textContent
                         },
                         timestamp: new Date().toISOString()
                     };
                     
                     localStorage.setItem('worldtravel_page_changes', JSON.stringify(changes));
-                    this.showSaveStatus('Изменения сохранены');
+                    this.showSaveStatus('Все изменения сохранены');
                     
                 } catch (error) {
                     console.error('Ошибка сохранения:', error);
@@ -688,7 +915,7 @@
 
             saveAndExit() {
                 this.saveChanges();
-                this.showNotification('Изменения сохранены! Переход на главную страницу...', 'success');
+                this.showNotification('Все изменения сохранены! Переход на главную страницу...', 'success');
                 setTimeout(() => {
                     window.location.href = 'index.html';
                 }, 1500);
