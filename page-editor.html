@@ -17,7 +17,7 @@
             flex: 1;
             background: white;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
             display: flex;
             flex-direction: column;
         }
@@ -49,86 +49,259 @@
             flex-shrink: 0;
         }
 
-        .preview-frame-container {
+        .preview-content {
             flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #page-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
+            padding: 20px;
+            overflow-y: auto;
             background: white;
         }
 
-        .frame-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: transparent;
-            z-index: 100;
-            pointer-events: none;
-        }
-
-        .editable-section {
+        .editable-block {
             position: relative;
+            margin-bottom: 30px;
+            border: 2px solid transparent;
+            border-radius: 10px;
+            padding: 30px;
             transition: all 0.3s ease;
+            cursor: pointer;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
         }
 
-        .editable-section:hover::before {
-            content: '';
+        .editable-block:hover {
+            border-color: #2c5aa0;
+            background: #f8f9fa;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.15);
+        }
+
+        .editable-block.selected {
+            border-color: #2c5aa0;
+            background: #f0f7ff;
+            box-shadow: 0 0 0 3px #2c5aa0, 0 4px 20px rgba(0,0,0,0.1);
+        }
+
+        .block-overlay {
             position: absolute;
-            top: -4px;
-            left: -4px;
-            right: -4px;
-            bottom: -4px;
-            border: 2px dashed #2c5aa0;
-            border-radius: 8px;
-            background: rgba(44, 90, 160, 0.1);
-            pointer-events: none;
-            z-index: 101;
-        }
-
-        .editable-section.selected::before {
-            border: 2px solid #2c5aa0;
-            background: rgba(44, 90, 160, 0.2);
-        }
-
-        .section-highlight {
-            position: absolute;
-            background: rgba(44, 90, 160, 0.1);
-            border: 2px dashed #2c5aa0;
-            border-radius: 8px;
-            pointer-events: none;
-            z-index: 99;
-            transition: all 0.3s ease;
-        }
-
-        .section-highlight.active {
-            border: 2px solid #2c5aa0;
-            background: rgba(44, 90, 160, 0.2);
-        }
-
-        .edit-tooltip {
-            position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 15px;
+            right: 15px;
             background: rgba(44, 90, 160, 0.9);
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
+            padding: 8px 12px;
+            border-radius: 20px;
             font-size: 0.8rem;
-            z-index: 102;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            pointer-events: none;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            z-index: 10;
         }
 
-        .editable-section:hover .edit-tooltip {
+        .block-type-badge {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: rgba(44, 90, 160, 0.1);
+            color: #2c5aa0;
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.7rem;
+            font-weight: 500;
+            border: 1px solid rgba(44, 90, 160, 0.2);
+        }
+
+        .block-actions {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .editable-block:hover .block-actions {
             opacity: 1;
+        }
+
+        .block-btn {
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 5px 10px;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.2s ease;
+        }
+
+        .block-btn:hover {
+            background: #2c5aa0;
+            color: white;
+            border-color: #2c5aa0;
+        }
+
+        /* Стили блоков как на реальной странице */
+        .block-hero {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            text-align: center;
+            padding: 80px 40px;
+        }
+
+        .block-hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1.5rem;
+            font-weight: 700;
+        }
+
+        .block-hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+        }
+
+        .block-about {
+            background: #f8f9fa;
+            padding: 60px 40px;
+        }
+
+        .block-about h2 {
+            color: #333;
+            margin-bottom: 2rem;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .block-about p {
+            font-size: 1.1rem;
+            line-height: 1.7;
+            color: #666;
+            text-align: center;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .block-services {
+            background: #fff;
+            padding: 60px 40px;
+        }
+
+        .block-services h2 {
+            color: #333;
+            margin-bottom: 3rem;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 30px;
+            margin-top: 2rem;
+        }
+
+        .service-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .service-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            background: #e3f2fd;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.5rem;
+            font-size: 2rem;
+            color: #2c5aa0;
+        }
+
+        .block-destinations {
+            background: #f0f8ff;
+            padding: 60px 40px;
+        }
+
+        .block-destinations h2 {
+            color: #333;
+            margin-bottom: 1rem;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .block-destinations .subtitle {
+            text-align: center;
+            font-size: 1.2rem;
+            color: #666;
+            margin-bottom: 3rem;
+        }
+
+        .destinations-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 2rem;
+        }
+
+        .destination-card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            text-align: center;
+            box-shadow: 0 3px 15px rgba(0,0,0,0.1);
+        }
+
+        .block-contact {
+            background: #f8f9fa;
+            padding: 60px 40px;
+        }
+
+        .block-contact h2 {
+            color: #333;
+            margin-bottom: 3rem;
+            text-align: center;
+            font-size: 2.5rem;
+        }
+
+        .contact-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 50px;
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .contact-info h3 {
+            color: #333;
+            margin-bottom: 2rem;
+        }
+
+        .contact-item {
+            margin-bottom: 1.5rem;
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+        }
+
+        .contact-item i {
+            color: #2c5aa0;
+            font-size: 1.2rem;
+            margin-top: 2px;
+        }
+
+        .contact-form {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
         }
 
         .sidebar-header {
@@ -245,33 +418,6 @@
             margin-top: 1rem;
         }
 
-        .image-upload {
-            border: 2px dashed #ddd;
-            border-radius: 8px;
-            padding: 2rem;
-            text-align: center;
-            cursor: pointer;
-            transition: border-color 0.3s ease;
-        }
-
-        .image-upload:hover {
-            border-color: #2c5aa0;
-        }
-
-        .image-upload i {
-            font-size: 2rem;
-            color: #6c757d;
-            margin-bottom: 1rem;
-        }
-
-        .current-image {
-            max-width: 100%;
-            height: 150px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin-bottom: 1rem;
-        }
-
         .editor-overlay {
             position: fixed;
             top: 0;
@@ -378,41 +524,58 @@
             color: #856404;
         }
 
-        .frame-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-bottom: 1px solid #e9ecef;
-            flex-shrink: 0;
+        .form-group {
+            margin-bottom: 1.5rem;
         }
 
-        .zoom-controls {
-            display: flex;
-            gap: 5px;
-            align-items: center;
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 500;
+            color: #333;
         }
 
-        .zoom-btn {
-            background: white;
+        .form-control {
+            width: 100%;
+            padding: 10px 12px;
             border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px 10px;
+            border-radius: 5px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        .btn-admin {
+            background: #2c5aa0;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: background 0.3s ease;
         }
 
-        .zoom-btn:hover {
-            background: #e9ecef;
+        .btn-admin:hover {
+            background: #1e3d6f;
         }
 
-        .device-size {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px 10px;
-            font-size: 0.9rem;
+        .btn-admin.secondary {
+            background: #6c757d;
+        }
+
+        .btn-admin.secondary:hover {
+            background: #545b62;
         }
     </style>
 </head>
@@ -428,45 +591,27 @@
                     <h2 style="margin-top: 10px;">Редактор главной страницы</h2>
                 </div>
                 <div class="editor-actions">
-                    <button class="btn-admin secondary" onclick="refreshFrame()">
-                        <i class="fas fa-sync-alt"></i> Обновить
+                    <button class="btn-admin secondary" onclick="resetBlocks()">
+                        <i class="fas fa-undo"></i> Сбросить
                     </button>
                     <button class="btn-admin" onclick="saveChanges()">
-                        <i class="fas fa-save"></i> Сохранить изменения
+                        <i class="fas fa-save"></i> Сохранить на сайте
                     </button>
                 </div>
             </div>
 
             <!-- Информация о странице -->
             <div class="page-info">
-                <h3>Редактирование в реальном времени</h3>
-                <p>Кликните на любой раздел страницы для редактирования. Изменения применяются сразу.</p>
+                <h3>Редактирование блоков страницы</h3>
+                <p>Кликните на любой блок для редактирования. Перетаскивайте блоки для изменения порядка.</p>
                 <div id="save-status" class="save-status" style="display: none;">
                     <i class="fas fa-check-circle"></i> <span id="status-message">Изменения сохранены</span>
                 </div>
             </div>
 
-            <!-- Контролы для фрейма -->
-            <div class="frame-controls">
-                <div class="zoom-controls">
-                    <button class="zoom-btn" onclick="changeZoom(0.5)">50%</button>
-                    <button class="zoom-btn" onclick="changeZoom(0.75)">75%</button>
-                    <button class="zoom-btn" onclick="changeZoom(1)" style="background: #e3f2fd; border-color: #2c5aa0;">100%</button>
-                    <button class="zoom-btn" onclick="changeZoom(1.25)">125%</button>
-                    <button class="zoom-btn" onclick="changeZoom(1.5)">150%</button>
-                </div>
-                <select class="device-size" onchange="changeDeviceSize(this.value)">
-                    <option value="100%">Адаптивный</option>
-                    <option value="375px">Mobile (375px)</option>
-                    <option value="768px">Tablet (768px)</option>
-                    <option value="1200px">Desktop (1200px)</option>
-                </select>
-            </div>
-
-            <!-- Контейнер для фрейма с реальной страницей -->
-            <div class="preview-frame-container">
-                <iframe id="page-frame" src="index.html?editor=true"></iframe>
-                <div class="frame-overlay" id="frame-overlay"></div>
+            <!-- Область с блоками для редактирования -->
+            <div class="preview-content" id="blocks-container">
+                <!-- Блоки будут создаваться здесь -->
             </div>
         </div>
 
@@ -475,21 +620,21 @@
             <div class="sidebar-header">
                 <h3 id="sidebar-title">Редактор контента</h3>
                 <p id="sidebar-subtitle" style="color: #666; margin-top: 0.5rem; font-size: 0.9rem;">
-                    Выберите раздел для редактирования
+                    Выберите блок для редактирования
                 </p>
             </div>
 
             <div class="sidebar-content" id="sidebar-content">
                 <div class="empty-state">
                     <i class="fas fa-mouse-pointer"></i>
-                    <p>Кликните на раздел страницы</p>
-                    <small>Выберите любой элемент на предпросмотре для редактирования</small>
+                    <p>Кликните на блок страницы</p>
+                    <small>Выберите любой блок на предпросмотре для редактирования</small>
                 </div>
             </div>
 
             <div class="sidebar-footer">
                 <button class="add-block-btn" onclick="showBlockSelector()">
-                    <i class="fas fa-plus"></i> Добавить раздел
+                    <i class="fas fa-plus"></i> Добавить новый блок
                 </button>
             </div>
         </div>
@@ -499,14 +644,14 @@
     <div class="editor-overlay" id="block-selector-overlay" style="display: none;"></div>
     <div class="block-editor" id="block-selector" style="display: none;">
         <div class="editor-header-inner">
-            <h3>Добавить новый раздел</h3>
+            <h3>Добавить новый блок</h3>
             <button class="btn-admin secondary" onclick="hideBlockSelector()">
                 <i class="fas fa-times"></i>
             </button>
         </div>
         <div class="editor-body">
             <div class="form-group">
-                <label>Тип раздела</label>
+                <label>Тип блока</label>
                 <div class="block-type-selector" id="block-type-selector">
                     <div class="block-type" data-type="hero">
                         <i class="fas fa-star"></i>
@@ -532,290 +677,39 @@
             </div>
 
             <div class="form-group">
-                <label>Заголовок раздела</label>
+                <label>Заголовок блока</label>
                 <input type="text" id="new-block-title" class="form-control" placeholder="Введите заголовок">
             </div>
 
             <div class="form-group">
-                <label>Описание раздела</label>
+                <label>Описание блока</label>
                 <textarea id="new-block-description" class="form-control" rows="3" placeholder="Введите описание"></textarea>
             </div>
         </div>
         <div class="editor-footer">
             <button class="btn-admin secondary" onclick="hideBlockSelector()">Отмена</button>
-            <button class="btn-admin" onclick="addNewBlock()">Добавить раздел</button>
+            <button class="btn-admin" onclick="addNewBlock()">Добавить блок</button>
         </div>
     </div>
 
     <script>
         class VisualEditor {
             constructor() {
-                this.currentFrame = null;
-                this.selectedElement = null;
-                this.currentZoom = 1;
-                this.currentDeviceSize = '100%';
-                this.sections = [];
+                this.blocks = [];
+                this.selectedBlock = null;
+                this.currentInsertPosition = 'end';
+                this.currentBlockType = null;
                 this.init();
             }
 
             init() {
-                this.setupFrame();
                 this.setupEventListeners();
-                setTimeout(() => {
-                    this.setupSections();
-                }, 2000);
-            }
-
-            setupFrame() {
-                this.currentFrame = document.getElementById('page-frame');
-                this.currentFrame.onload = () => {
-                    this.disablePageFunctionality();
-                    this.setupSections();
-                };
-            }
-
-            disablePageFunctionality() {
-                try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    
-                    // Отключаем клики по навигации
-                    const navLinks = frameDoc.querySelectorAll('a[href^="#"]');
-                    navLinks.forEach(link => {
-                        link.onclick = (e) => e.preventDefault();
-                    });
-
-                    // Отключаем формы
-                    const forms = frameDoc.querySelectorAll('form');
-                    forms.forEach(form => {
-                        form.onsubmit = (e) => e.preventDefault();
-                    });
-
-                    // Отключаем кнопки админки
-                    const adminLinks = frameDoc.querySelectorAll('a[href*="admin"]');
-                    adminLinks.forEach(link => {
-                        link.onclick = (e) => e.preventDefault();
-                    });
-
-                    // Добавляем класс для редактора
-                    frameDoc.body.classList.add('editor-mode');
-
-                } catch (error) {
-                    console.log('Не удалось отключить функционал страницы:', error);
-                }
-            }
-
-            setupSections() {
-                try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    
-                    this.sections = [
-                        {
-                            id: 'hero',
-                            name: 'Герой-секция',
-                            selector: '#home, .hero',
-                            title: frameDoc.querySelector('#home h1, .hero h1')?.textContent || 'Откройте мир с WorldTravel',
-                            content: frameDoc.querySelector('#home p, .hero p')?.textContent || 'Мы создаем незабываемые путешествия по всему миру...'
-                        },
-                        {
-                            id: 'about',
-                            name: 'О компании',
-                            selector: '#about, .about',
-                            title: frameDoc.querySelector('#about .section-title, .about .section-title')?.textContent || 'О нашей компании',
-                            content: frameDoc.querySelector('.about-text p')?.textContent || 'WorldTravel - это команда профессиональных путешественников...'
-                        },
-                        {
-                            id: 'services',
-                            name: 'Услуги',
-                            selector: '#services, .services',
-                            title: frameDoc.querySelector('#services .section-title, .services .section-title')?.textContent || 'Наши услуги',
-                            content: 'Полный спектр туристических услуг'
-                        },
-                        {
-                            id: 'destinations',
-                            name: 'Направления',
-                            selector: '#destinations, .destinations',
-                            title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title')?.textContent || 'Популярные направления',
-                            content: frameDoc.querySelector('.destinations .section-subtitle')?.textContent || 'Откройте для себя лучшие направления мира...'
-                        },
-                        {
-                            id: 'contact',
-                            name: 'Контакты',
-                            selector: '#contact, .contact',
-                            title: frameDoc.querySelector('#contact .section-title, .contact .section-title')?.textContent || 'Свяжитесь с нами',
-                            content: 'Мы всегда готовы помочь вам с организацией вашего идеального путешествия'
-                        }
-                    ];
-
-                    this.setupSectionHighlights();
-                    
-                } catch (error) {
-                    console.log('Не удалось настроить разделы:', error);
-                }
-            }
-
-            setupSectionHighlights() {
-                const overlay = document.getElementById('frame-overlay');
-                overlay.innerHTML = '';
-
-                this.sections.forEach(section => {
-                    try {
-                        const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                        const element = frameDoc.querySelector(section.selector);
-                        
-                        if (element) {
-                            const rect = element.getBoundingClientRect();
-                            const frameRect = this.currentFrame.getBoundingClientRect();
-                            
-                            const highlight = document.createElement('div');
-                            highlight.className = 'section-highlight';
-                            highlight.dataset.sectionId = section.id;
-                            
-                            highlight.style.left = (rect.left + frameRect.left) + 'px';
-                            highlight.style.top = (rect.top + frameRect.top) + 'px';
-                            highlight.style.width = rect.width + 'px';
-                            highlight.style.height = rect.height + 'px';
-                            
-                            highlight.addEventListener('click', (e) => {
-                                e.stopPropagation();
-                                this.selectSection(section, element);
-                            });
-                            
-                            overlay.appendChild(highlight);
-                        }
-                    } catch (error) {
-                        console.log('Не удалось создать хайлайт для раздела:', section.id, error);
-                    }
-                });
-
-                // Клик вне разделов сбрасывает выделение
-                overlay.addEventListener('click', (e) => {
-                    if (e.target === overlay) {
-                        this.deselectSection();
-                    }
-                });
-            }
-
-            selectSection(section, element) {
-                this.selectedElement = element;
-                
-                // Убираем выделение у всех разделов
-                document.querySelectorAll('.section-highlight').forEach(h => {
-                    h.classList.remove('active');
-                });
-                
-                // Выделяем выбранный раздел
-                const highlight = document.querySelector(`[data-section-id="${section.id}"]`);
-                if (highlight) {
-                    highlight.classList.add('active');
-                }
-                
-                this.showEditor(section);
-            }
-
-            deselectSection() {
-                this.selectedElement = null;
-                document.querySelectorAll('.section-highlight').forEach(h => {
-                    h.classList.remove('active');
-                });
-                
-                const sidebarContent = document.getElementById('sidebar-content');
-                sidebarContent.innerHTML = `
-                    <div class="empty-state">
-                        <i class="fas fa-mouse-pointer"></i>
-                        <p>Кликните на раздел страницы</p>
-                        <small>Выберите любой элемент на предпросмотре для редактирования</small>
-                    </div>
-                `;
-            }
-
-            showEditor(section) {
-                const sidebarContent = document.getElementById('sidebar-content');
-                const sidebarTitle = document.getElementById('sidebar-title');
-                const sidebarSubtitle = document.getElementById('sidebar-subtitle');
-
-                sidebarTitle.textContent = section.name;
-                sidebarSubtitle.textContent = 'Редактирование содержимого';
-
-                sidebarContent.innerHTML = this.getEditorForm(section);
-            }
-
-            getEditorForm(section) {
-                return `
-                    <div class="form-group">
-                        <label>Заголовок:</label>
-                        <input type="text" class="form-control" id="edit-title" value="${section.title || ''}">
-                    </div>
-                    <div class="form-group">
-                        <label>Описание:</label>
-                        <textarea class="form-control" id="edit-content" rows="4">${section.content || ''}</textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges('${section.id}')">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                    <div class="section-info">
-                        <i class="fas fa-info-circle"></i>
-                        Изменения применяются сразу к странице
-                    </div>
-                `;
-            }
-
-            saveSectionChanges(sectionId) {
-                const title = document.getElementById('edit-title')?.value;
-                const content = document.getElementById('edit-content')?.value;
-
-                try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    const section = this.sections.find(s => s.id === sectionId);
-                    
-                    if (section) {
-                        // Обновляем заголовок
-                        const titleElement = frameDoc.querySelector(`${section.selector} h1, ${section.selector} h2, ${section.selector} .section-title`);
-                        if (titleElement) {
-                            titleElement.textContent = title;
-                        }
-                        
-                        // Обновляем контент
-                        if (sectionId === 'hero') {
-                            const contentElement = frameDoc.querySelector(`${section.selector} p`);
-                            if (contentElement) {
-                                contentElement.textContent = content;
-                            }
-                        } else if (sectionId === 'about') {
-                            const contentElement = frameDoc.querySelector('.about-text p');
-                            if (contentElement) {
-                                contentElement.textContent = content;
-                            }
-                        } else if (sectionId === 'destinations') {
-                            const contentElement = frameDoc.querySelector('.destinations .section-subtitle');
-                            if (contentElement) {
-                                contentElement.textContent = content;
-                            }
-                        }
-                        
-                        // Сохраняем в localStorage
-                        this.saveToStorage();
-                        this.showNotification('Изменения применены!', 'success');
-                    }
-                } catch (error) {
-                    console.error('Ошибка сохранения:', error);
-                    this.showNotification('Ошибка применения изменений', 'error');
-                }
-            }
-
-            saveToStorage() {
-                // Сохраняем изменения в localStorage
-                const changes = {
-                    timestamp: new Date().toISOString(),
-                    sections: this.sections
-                };
-                localStorage.setItem('worldtravel_editor_changes', JSON.stringify(changes));
-                this.showSaveStatus('Изменения сохранены');
+                this.loadBlocks();
+                this.renderBlocks();
             }
 
             setupEventListeners() {
-                // Обработчики для модального окна
+                // Обработчики для выбора типа блока
                 document.querySelectorAll('.block-type').forEach(type => {
                     type.addEventListener('click', () => {
                         document.querySelectorAll('.block-type').forEach(t => t.style.borderColor = '#e9ecef');
@@ -823,6 +717,414 @@
                         this.currentBlockType = type.dataset.type;
                     });
                 });
+
+                // Обработчики для выбора позиции
+                document.querySelectorAll('.position-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        document.querySelectorAll('.position-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.currentInsertPosition = btn.dataset.position;
+                    });
+                });
+            }
+
+            loadBlocks() {
+                // Загружаем блоки из localStorage или создаем стандартные
+                const saved = localStorage.getItem('worldtravel_editor_blocks');
+                if (saved) {
+                    this.blocks = JSON.parse(saved);
+                } else {
+                    this.blocks = this.getDefaultBlocks();
+                    this.saveToStorage();
+                }
+            }
+
+            getDefaultBlocks() {
+                return [
+                    {
+                        id: 1,
+                        type: 'hero',
+                        title: 'Откройте мир с WorldTravel',
+                        content: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                        image: ''
+                    },
+                    {
+                        id: 2,
+                        type: 'about',
+                        title: 'О нашей компании',
+                        content: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.'
+                    },
+                    {
+                        id: 3,
+                        type: 'services',
+                        title: 'Наши услуги',
+                        content: 'Полный спектр туристических услуг для вашего комфортного путешествия'
+                    },
+                    {
+                        id: 4,
+                        type: 'destinations',
+                        title: 'Популярные направления',
+                        content: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'
+                    },
+                    {
+                        id: 5,
+                        type: 'contact',
+                        title: 'Свяжитесь с нами',
+                        content: 'Мы всегда готовы помочь вам с организацией вашего идеального путешествия'
+                    }
+                ];
+            }
+
+            renderBlocks() {
+                const container = document.getElementById('blocks-container');
+                container.innerHTML = '';
+
+                if (this.blocks.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-plus-circle"></i>
+                            <p>Пока нет блоков</p>
+                            <small>Добавьте первый блок чтобы начать работу</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                this.blocks.forEach(block => {
+                    const blockElement = this.createBlockElement(block);
+                    container.appendChild(blockElement);
+                });
+            }
+
+            createBlockElement(block) {
+                const div = document.createElement('div');
+                div.className = `editable-block block-${block.type}`;
+                div.dataset.blockId = block.id;
+
+                let content = '';
+                switch (block.type) {
+                    case 'hero':
+                        content = `
+                            <div class="block-type-badge">Герой-секция</div>
+                            <div class="block-overlay">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </div>
+                            <h1>${block.title}</h1>
+                            <p>${block.content}</p>
+                            <button style="background: white; color: #667eea; border: none; padding: 15px 40px; border-radius: 30px; font-size: 1.2rem; font-weight: bold; cursor: pointer; margin-top: 1rem;">
+                                Начать путешествие
+                            </button>
+                            <div class="block-actions">
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockUp(${block.id})">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockDown(${block.id})">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.deleteBlock(${block.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        break;
+                    case 'about':
+                        content = `
+                            <div class="block-type-badge">О компании</div>
+                            <div class="block-overlay">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </div>
+                            <h2>${block.title}</h2>
+                            <p>${block.content}</p>
+                            <div class="block-actions">
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockUp(${block.id})">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockDown(${block.id})">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.deleteBlock(${block.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        break;
+                    case 'services':
+                        content = `
+                            <div class="block-type-badge">Услуги</div>
+                            <div class="block-overlay">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </div>
+                            <h2>${block.title}</h2>
+                            <p style="text-align: center; margin-bottom: 3rem;">${block.content}</p>
+                            <div class="services-grid">
+                                <div class="service-card">
+                                    <div class="service-icon">
+                                        <i class="fas fa-plane"></i>
+                                    </div>
+                                    <h3>Авиабилеты</h3>
+                                    <p>Подбор и бронирование лучших авиаперелетов по выгодным ценам</p>
+                                </div>
+                                <div class="service-card">
+                                    <div class="service-icon">
+                                        <i class="fas fa-hotel"></i>
+                                    </div>
+                                    <h3>Отели</h3>
+                                    <p>Бронирование отелей любого уровня комфорта по всему миру</p>
+                                </div>
+                            </div>
+                            <div class="block-actions">
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockUp(${block.id})">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockDown(${block.id})">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.deleteBlock(${block.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        break;
+                    case 'destinations':
+                        content = `
+                            <div class="block-type-badge">Направления</div>
+                            <div class="block-overlay">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </div>
+                            <h2>${block.title}</h2>
+                            <p class="subtitle">${block.content}</p>
+                            <div class="destinations-grid">
+                                <div class="destination-card">
+                                    <h4>Франция</h4>
+                                    <p>от $500</p>
+                                </div>
+                                <div class="destination-card">
+                                    <h4>Италия</h4>
+                                    <p>от $450</p>
+                                </div>
+                                <div class="destination-card">
+                                    <h4>Испания</h4>
+                                    <p>от $400</p>
+                                </div>
+                            </div>
+                            <div class="block-actions">
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockUp(${block.id})">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockDown(${block.id})">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.deleteBlock(${block.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        break;
+                    case 'contact':
+                        content = `
+                            <div class="block-type-badge">Контакты</div>
+                            <div class="block-overlay">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </div>
+                            <h2>${block.title}</h2>
+                            <p style="text-align: center; margin-bottom: 3rem;">${block.content}</p>
+                            <div class="contact-content">
+                                <div class="contact-info">
+                                    <h3>Наши контакты</h3>
+                                    <div class="contact-item">
+                                        <i class="fas fa-phone"></i>
+                                        <div>
+                                            <strong>Телефон:</strong>
+                                            <p>+7 (999) 123-45-67</p>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-envelope"></i>
+                                        <div>
+                                            <strong>Email:</strong>
+                                            <p>info@worldtravel.com</p>
+                                        </div>
+                                    </div>
+                                    <div class="contact-item">
+                                        <i class="fas fa-map-marker-alt"></i>
+                                        <div>
+                                            <strong>Адрес:</strong>
+                                            <p>Москва, ул. Туристическая, 15</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="contact-form">
+                                    <h3>Форма обратной связи</h3>
+                                    <div style="background: #f8f9fa; padding: 20px; border-radius: 10px; text-align: center;">
+                                        <p>Форма для связи с компанией</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="block-actions">
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockUp(${block.id})">
+                                    <i class="fas fa-arrow-up"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.moveBlockDown(${block.id})">
+                                    <i class="fas fa-arrow-down"></i>
+                                </button>
+                                <button class="block-btn" onclick="event.stopPropagation(); visualEditor.deleteBlock(${block.id})">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </div>
+                        `;
+                        break;
+                }
+
+                div.innerHTML = content;
+
+                div.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.selectBlock(block);
+                });
+
+                return div;
+            }
+
+            selectBlock(block) {
+                // Снимаем выделение со всех блоков
+                document.querySelectorAll('.editable-block').forEach(b => {
+                    b.classList.remove('selected');
+                });
+                
+                // Выделяем выбранный блок
+                const blockElement = document.querySelector(`[data-block-id="${block.id}"]`);
+                if (blockElement) {
+                    blockElement.classList.add('selected');
+                }
+
+                this.selectedBlock = block;
+                this.showEditor(block);
+            }
+
+            showEditor(block) {
+                const sidebarContent = document.getElementById('sidebar-content');
+                const sidebarTitle = document.getElementById('sidebar-title');
+                const sidebarSubtitle = document.getElementById('sidebar-subtitle');
+
+                sidebarTitle.textContent = this.getBlockTypeName(block.type);
+                sidebarSubtitle.textContent = 'Редактирование содержимого';
+
+                sidebarContent.innerHTML = this.getEditorForm(block);
+            }
+
+            getBlockTypeName(type) {
+                const names = {
+                    'hero': 'Герой-секция',
+                    'about': 'О компании',
+                    'services': 'Услуги',
+                    'destinations': 'Направления',
+                    'contact': 'Контакты'
+                };
+                return names[type] || 'Блок';
+            }
+
+            getEditorForm(block) {
+                return `
+                    <div class="form-group">
+                        <label>Заголовок:</label>
+                        <input type="text" class="form-control" id="edit-title" value="${block.title || ''}">
+                    </div>
+                    <div class="form-group">
+                        <label>Описание:</label>
+                        <textarea class="form-control" id="edit-content" rows="4">${block.content || ''}</textarea>
+                    </div>
+                    <div class="form-actions">
+                        <button class="btn-admin" onclick="visualEditor.saveBlockChanges()">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                        <button class="btn-admin secondary" onclick="visualEditor.duplicateBlock()">
+                            <i class="fas fa-copy"></i> Дублировать
+                        </button>
+                    </div>
+                    <div class="section-info">
+                        <i class="fas fa-info-circle"></i>
+                        Изменения применяются сразу
+                    </div>
+                `;
+            }
+
+            saveBlockChanges() {
+                if (!this.selectedBlock) return;
+
+                const title = document.getElementById('edit-title')?.value;
+                const content = document.getElementById('edit-content')?.value;
+
+                const block = this.blocks.find(b => b.id === this.selectedBlock.id);
+                if (block) {
+                    block.title = title;
+                    block.content = content;
+                    
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    this.showNotification('Изменения сохранены!', 'success');
+                }
+            }
+
+            duplicateBlock() {
+                if (!this.selectedBlock) return;
+
+                const originalBlock = this.blocks.find(b => b.id === this.selectedBlock.id);
+                if (originalBlock) {
+                    const newBlock = {
+                        id: Date.now(),
+                        type: originalBlock.type,
+                        title: originalBlock.title + ' (копия)',
+                        content: originalBlock.content,
+                        image: originalBlock.image
+                    };
+
+                    const currentIndex = this.blocks.findIndex(b => b.id === this.selectedBlock.id);
+                    this.blocks.splice(currentIndex + 1, 0, newBlock);
+
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    this.showNotification('Блок скопирован!', 'success');
+                }
+            }
+
+            moveBlockUp(blockId) {
+                const index = this.blocks.findIndex(b => b.id === blockId);
+                if (index > 0) {
+                    [this.blocks[index], this.blocks[index - 1]] = [this.blocks[index - 1], this.blocks[index]];
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    this.showNotification('Блок перемещен вверх', 'success');
+                }
+            }
+
+            moveBlockDown(blockId) {
+                const index = this.blocks.findIndex(b => b.id === blockId);
+                if (index < this.blocks.length - 1) {
+                    [this.blocks[index], this.blocks[index + 1]] = [this.blocks[index + 1], this.blocks[index]];
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    this.showNotification('Блок перемещен вниз', 'success');
+                }
+            }
+
+            deleteBlock(blockId) {
+                if (confirm('Удалить этот блок?')) {
+                    this.blocks = this.blocks.filter(b => b.id !== blockId);
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    
+                    const sidebarContent = document.getElementById('sidebar-content');
+                    sidebarContent.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <p>Кликните на блок страницы</p>
+                            <small>Выберите любой блок на предпросмотре для редактирования</small>
+                        </div>
+                    `;
+                    
+                    this.selectedBlock = null;
+                    this.showNotification('Блок удален', 'success');
+                }
             }
 
             showBlockSelector() {
@@ -840,34 +1142,94 @@
                 document.getElementById('block-selector').style.display = 'none';
             }
 
-            changeZoom(zoomLevel) {
-                this.currentZoom = zoomLevel;
-                const frameContainer = document.querySelector('.preview-frame-container');
-                frameContainer.style.transform = `scale(${zoomLevel})`;
-                frameContainer.style.transformOrigin = 'top left';
-                
-                // Обновляем хайлайты после изменения зума
-                setTimeout(() => {
-                    this.setupSectionHighlights();
-                }, 100);
+            addNewBlock() {
+                const title = document.getElementById('new-block-title').value || 'Новый блок';
+                const content = document.getElementById('new-block-description').value || 'Описание блока';
+
+                if (!this.currentBlockType) {
+                    this.showNotification('Пожалуйста, выберите тип блока', 'warning');
+                    return;
+                }
+
+                const newBlock = {
+                    id: Date.now(),
+                    type: this.currentBlockType,
+                    title: title,
+                    content: content,
+                    image: ''
+                };
+
+                switch (this.currentInsertPosition) {
+                    case 'start':
+                        this.blocks.unshift(newBlock);
+                        break;
+                    case 'end':
+                        this.blocks.push(newBlock);
+                        break;
+                    case 'before':
+                        if (this.selectedBlock) {
+                            const index = this.blocks.findIndex(b => b.id === this.selectedBlock.id);
+                            this.blocks.splice(index, 0, newBlock);
+                        } else {
+                            this.blocks.push(newBlock);
+                        }
+                        break;
+                    case 'after':
+                        if (this.selectedBlock) {
+                            const index = this.blocks.findIndex(b => b.id === this.selectedBlock.id);
+                            this.blocks.splice(index + 1, 0, newBlock);
+                        } else {
+                            this.blocks.push(newBlock);
+                        }
+                        break;
+                }
+
+                this.saveToStorage();
+                this.renderBlocks();
+                this.hideBlockSelector();
+                this.showNotification('Блок добавлен!', 'success');
             }
 
-            changeDeviceSize(size) {
-                this.currentDeviceSize = size;
-                const frame = document.getElementById('page-frame');
-                if (size === '100%') {
-                    frame.style.width = '100%';
-                    frame.style.margin = '0 auto';
-                } else {
-                    frame.style.width = size;
-                    frame.style.margin = '0 auto';
-                    frame.style.border = '1px solid #ddd';
-                    frame.style.borderRadius = '8px';
+            saveToStorage() {
+                localStorage.setItem('worldtravel_editor_blocks', JSON.stringify(this.blocks));
+                this.showSaveStatus('Изменения сохранены');
+            }
+
+            resetBlocks() {
+                if (confirm('Сбросить все блоки к стандартным? Это действие нельзя отменить.')) {
+                    this.blocks = this.getDefaultBlocks();
+                    this.saveToStorage();
+                    this.renderBlocks();
+                    this.selectedBlock = null;
+                    
+                    const sidebarContent = document.getElementById('sidebar-content');
+                    sidebarContent.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <p>Кликните на блок страницы</p>
+                            <small>Выберите любой блок на предпросмотре для редактирования</small>
+                        </div>
+                    `;
+                    
+                    this.showNotification('Блоки сброшены к стандартным', 'success');
+                }
+            }
+
+            saveChanges() {
+                // Сохраняем изменения в основную систему
+                if (typeof dataManager !== 'undefined') {
+                    const data = dataManager.getData();
+                    if (!data.pages) data.pages = {};
+                    data.pages.index = { 
+                        blocks: this.blocks,
+                        lastUpdated: new Date().toISOString()
+                    };
+                    dataManager.saveData(data);
                 }
                 
-                setTimeout(() => {
-                    this.setupSectionHighlights();
-                }, 100);
+                this.saveToStorage();
+                this.showNotification('Изменения применены к сайту!', 'success');
+                this.showSaveStatus('Изменения применены к главной странице');
             }
 
             showSaveStatus(message) {
@@ -898,16 +1260,6 @@
                     }
                 }, 3000);
             }
-
-            refreshFrame() {
-                this.currentFrame.src = this.currentFrame.src;
-                this.showNotification('Страница обновлена', 'info');
-            }
-
-            saveChanges() {
-                this.saveToStorage();
-                this.showNotification('Все изменения сохранены!', 'success');
-            }
         }
 
         // Инициализация редактора
@@ -916,17 +1268,10 @@
         // Глобальные функции
         function showBlockSelector() { visualEditor.showBlockSelector(); }
         function hideBlockSelector() { visualEditor.hideBlockSelector(); }
-        function changeZoom(level) { visualEditor.changeZoom(level); }
-        function changeDeviceSize(size) { visualEditor.changeDeviceSize(size); }
-        function refreshFrame() { visualEditor.refreshFrame(); }
+        function addNewBlock() { visualEditor.addNewBlock(); }
+        function resetBlocks() { visualEditor.resetBlocks(); }
         function saveChanges() { visualEditor.saveChanges(); }
         function goBackToAdmin() { window.location.href = 'admin.html'; }
-
-        // Функция для добавления нового блока (заглушка)
-        function addNewBlock() {
-            visualEditor.showNotification('Функция добавления новых разделов в разработке', 'info');
-            visualEditor.hideBlockSelector();
-        }
     </script>
 </body>
 </html>
