@@ -7,220 +7,109 @@
     <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        .editor-container {
-            display: flex;
-            height: 100vh;
-            background: #f8f9fa;
-        }
-
-        .editor-preview {
-            flex: 1;
-            background: white;
-            position: relative;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-        }
-
-        .editor-sidebar {
-            width: 400px;
-            background: white;
-            border-left: 1px solid #e9ecef;
-            display: flex;
-            flex-direction: column;
-            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
-        }
-
-        .editor-header {
-            background: white;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #e9ecef;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-shrink: 0;
-        }
-
-        .page-info {
-            background: #e3f2fd;
-            padding: 1rem 2rem;
-            border-bottom: 1px solid #e9ecef;
-            border-left: 4px solid #2c5aa0;
-            flex-shrink: 0;
-        }
-
-        .preview-frame-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #page-frame {
-            width: 100%;
-            height: 100%;
-            border: none;
-            background: white;
-        }
-
-        .frame-overlay {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: transparent;
-            z-index: 1000;
-            pointer-events: none;
-            overflow: hidden;
-        }
-
-        .section-highlight {
-            position: absolute;
-            background: rgba(44, 90, 160, 0.1);
-            border: 2px dashed #2c5aa0;
-            border-radius: 8px;
-            pointer-events: auto;
-            cursor: pointer;
-            z-index: 1001;
-            transition: all 0.3s ease;
+        * {
+            margin: 0;
+            padding: 0;
             box-sizing: border-box;
         }
 
-        .section-highlight:hover {
-            background: rgba(44, 90, 160, 0.2);
-            border: 2px solid #2c5aa0;
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .section-highlight.active {
-            background: rgba(44, 90, 160, 0.3);
-            border: 2px solid #2c5aa0;
-            box-shadow: 0 0 0 2px #2c5aa0;
+        .editor-container {
+            display: flex;
+            height: 100vh;
         }
 
-        .edit-tooltip {
-            position: absolute;
-            top: -35px;
-            left: 50%;
-            transform: translateX(-50%);
+        .preview-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-panel {
+            width: 400px;
+            background: white;
+            border-left: 2px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
             background: #2c5aa0;
             color: white;
-            padding: 5px 10px;
-            border-radius: 15px;
-            font-size: 0.8rem;
-            white-space: nowrap;
-            z-index: 1002;
-            pointer-events: none;
-            opacity: 0;
-            transition: opacity 0.3s ease;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
         }
 
-        .section-highlight:hover .edit-tooltip {
-            opacity: 1;
-        }
-
-        .sidebar-header {
-            padding: 1.5rem;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .sidebar-content {
+        .panel-content {
             flex: 1;
             overflow-y: auto;
-            padding: 1.5rem;
+            padding: 20px;
         }
 
-        .sidebar-footer {
-            padding: 1rem 1.5rem;
-            border-top: 1px solid #e9ecef;
-            background: #f8f9fa;
-        }
-
-        .add-block-btn {
-            width: 100%;
-            background: #28a745;
-            color: white;
+        .preview-frame {
+            flex: 1;
             border: none;
-            padding: 12px;
+            width: 100%;
+            height: 100%;
+        }
+
+        .section-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
             border-radius: 8px;
             cursor: pointer;
-            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .section-item:hover {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .section-item.active {
+            border-color: #2c5aa0;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .section-title {
             font-weight: 600;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-            transition: background 0.3s ease;
+            margin-bottom: 5px;
         }
 
-        .add-block-btn:hover {
-            background: #218838;
+        .section-desc {
+            font-size: 0.9em;
+            color: #666;
         }
 
-        .empty-state {
-            text-align: center;
-            padding: 3rem;
-            color: #6c757d;
-        }
-
-        .form-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 1rem;
-        }
-
-        .nav-back {
-            background: #6c757d;
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 5px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.9rem;
-        }
-
-        .notification {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 15px 20px;
-            border-radius: 5px;
-            z-index: 10000;
-            animation: slideInRight 0.3s ease;
-            max-width: 300px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-            color: white;
-        }
-        .notification.success { background: #28a745; }
-        .notification.error { background: #dc3545; }
-        .notification.warning { background: #ffc107; color: #000; }
-        .notification.info { background: #007bff; }
-        
-        @keyframes slideInRight {
-            from { transform: translateX(100%); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .save-status {
-            background: #d4edda;
-            border: 1px solid #c3e6cb;
-            border-radius: 5px;
-            padding: 10px 15px;
-            margin: 10px 0;
-            font-size: 0.9rem;
-            color: #155724;
+        .section-item.active .section-desc {
+            color: #e0e0e0;
         }
 
         .form-group {
-            margin-bottom: 1.5rem;
+            margin-bottom: 20px;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 0.5rem;
-            font-weight: 500;
+            margin-bottom: 5px;
+            font-weight: 600;
             color: #333;
         }
 
@@ -229,491 +118,321 @@
             padding: 10px 12px;
             border: 1px solid #ddd;
             border-radius: 5px;
-            font-size: 1rem;
-            transition: border-color 0.3s ease;
+            font-size: 14px;
         }
 
         .form-control:focus {
             outline: none;
             border-color: #2c5aa0;
-            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
         }
 
         textarea.form-control {
             resize: vertical;
-            min-height: 100px;
+            min-height: 80px;
         }
 
-        .btn-admin {
-            background: #2c5aa0;
-            color: white;
-            border: none;
+        .btn {
             padding: 10px 20px;
+            border: none;
             border-radius: 5px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 14px;
             transition: background 0.3s ease;
         }
 
-        .btn-admin:hover {
+        .btn-primary {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .btn-primary:hover {
             background: #1e3d6f;
         }
 
-        .btn-admin.secondary {
+        .btn-secondary {
             background: #6c757d;
+            color: white;
         }
 
-        .btn-admin.secondary:hover {
+        .btn-secondary:hover {
             background: #545b62;
         }
 
-        .frame-controls {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            background: #f8f9fa;
-            padding: 10px 20px;
-            border-bottom: 1px solid #e9ecef;
-            flex-shrink: 0;
-        }
-
-        .scroll-hint {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
-            border-radius: 5px;
-            padding: 8px 12px;
-            font-size: 0.8rem;
-            color: #856404;
-        }
-
-        .stat-editor {
+        .stats-editor {
             background: #f8f9fa;
             border-radius: 8px;
             padding: 15px;
             margin: 10px 0;
         }
 
-        .stat-item {
+        .stat-row {
             display: flex;
             gap: 10px;
             margin-bottom: 10px;
             align-items: center;
         }
 
-        .stat-item input {
+        .stat-row input {
             flex: 1;
         }
 
-        .sub-element {
-            background: #e9ecef;
+        .empty-state {
+            text-align: center;
+            padding: 40px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
             border-radius: 5px;
-            padding: 10px;
-            margin: 5px 0;
-            cursor: pointer;
-            transition: background 0.3s ease;
-        }
-
-        .sub-element:hover {
-            background: #dee2e6;
-        }
-
-        .sub-element.active {
-            background: #2c5aa0;
+            background: #28a745;
             color: white;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+        }
+
+        .tab-button.active {
+            border-bottom-color: #2c5aa0;
+            background: white;
         }
     </style>
 </head>
 <body>
     <div class="editor-container">
-        <!-- Основная область предпросмотра -->
-        <div class="editor-preview">
-            <div class="editor-header">
+        <!-- Левая панель - предпросмотр -->
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
                 <div>
-                    <button class="nav-back" onclick="goBackToAdmin()">
-                        <i class="fas fa-arrow-left"></i> Назад в админку
+                    <button class="btn btn-secondary" onclick="refreshPreview()">
+                        <i class="fas fa-sync"></i> Обновить
                     </button>
-                    <h2 style="margin-top: 10px;">Редактор главной страницы</h2>
-                </div>
-                <div class="editor-actions">
-                    <button class="btn-admin secondary" onclick="refreshFrame()">
-                        <i class="fas fa-sync-alt"></i> Обновить
-                    </button>
-                    <button class="btn-admin" onclick="saveAndExit()">
-                        <i class="fas fa-save"></i> Сохранить и выйти
+                    <button class="btn btn-primary" onclick="saveAndExit()" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить
                     </button>
                 </div>
             </div>
-
-            <!-- Информация о странице -->
-            <div class="page-info">
-                <h3>Редактирование в реальном времени</h3>
-                <p>Кликните на любой раздел страницы для редактирования. Для редактирования внутренних элементов (статистики, карточек) выберите основной блок.</p>
-                <div id="save-status" class="save-status" style="display: none;">
-                    <i class="fas fa-check-circle"></i> <span id="status-message">Изменения сохранены</span>
-                </div>
-            </div>
-
-            <!-- Контролы для фрейма -->
-            <div class="frame-controls">
-                <div class="scroll-hint">
-                    <i class="fas fa-mouse-pointer"></i> Кликните на блок для редактирования
-                </div>
-            </div>
-
-            <!-- Контейнер для фрейма с реальной страницей -->
-            <div class="preview-frame-container">
-                <iframe id="page-frame" src="index.html?editor=true"></iframe>
-                <div class="frame-overlay" id="frame-overlay"></div>
-            </div>
+            <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true"></iframe>
         </div>
 
-        <!-- Боковая панель редактора -->
-        <div class="editor-sidebar">
-            <div class="sidebar-header">
-                <h3 id="sidebar-title">Редактор контента</h3>
-                <p id="sidebar-subtitle" style="color: #666; margin-top: 0.5rem; font-size: 0.9rem;">
-                    Выберите раздел для редактирования
-                </p>
+        <!-- Правая панель - редактор -->
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" onclick="showTab('sections')">Секции</button>
+                <button class="tab-button" onclick="showTab('content')">Контент</button>
             </div>
 
-            <div class="sidebar-content" id="sidebar-content">
-                <div class="empty-state">
-                    <i class="fas fa-mouse-pointer"></i>
-                    <p>Кликните на раздел страницы</p>
-                    <small>Выберите любой элемент на предпросмотре для редактирования</small>
+            <div class="panel-content" id="sections-tab">
+                <h3 style="margin-bottom: 15px;">Доступные секции</h3>
+                <div class="section-list" id="section-list">
+                    <!-- Секции будут загружены через JS -->
                 </div>
             </div>
 
-            <div class="sidebar-footer">
-                <button class="add-block-btn" onclick="addNewBlock()">
-                    <i class="fas fa-plus"></i> Добавить новый блок
-                </button>
+            <div class="panel-content" id="content-tab" style="display: none;">
+                <div id="content-editor">
+                    <div class="empty-state">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Выберите секцию для редактирования</p>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        class VisualEditor {
+        class SimplePageEditor {
             constructor() {
-                this.currentFrame = null;
-                this.selectedSection = null;
-                this.selectedElement = null;
-                this.sections = [];
-                this.isFrameReady = false;
+                this.currentSection = null;
+                this.sections = [
+                    {
+                        id: 'hero',
+                        name: 'Главный баннер',
+                        description: 'Заголовок и описание на главной странице',
+                        fields: [
+                            { id: 'title', type: 'text', label: 'Заголовок', selector: '#home h1, .hero h1' },
+                            { id: 'subtitle', type: 'textarea', label: 'Описание', selector: '#home p, .hero p' }
+                        ]
+                    },
+                    {
+                        id: 'about',
+                        name: 'О компании',
+                        description: 'Информация о компании и статистика',
+                        fields: [
+                            { id: 'title', type: 'text', label: 'Заголовок', selector: '#about .section-title, .about .section-title' },
+                            { id: 'description', type: 'textarea', label: 'Описание', selector: '.about-text p' },
+                            { id: 'stats', type: 'stats', label: 'Статистика' }
+                        ]
+                    },
+                    {
+                        id: 'services',
+                        name: 'Услуги',
+                        description: 'Список услуг компании',
+                        fields: [
+                            { id: 'title', type: 'text', label: 'Заголовок', selector: '#services .section-title, .services .section-title' }
+                        ]
+                    },
+                    {
+                        id: 'destinations',
+                        name: 'Направления',
+                        description: 'Популярные направления',
+                        fields: [
+                            { id: 'title', type: 'text', label: 'Заголовок', selector: '#destinations .section-title, .destinations .section-title' },
+                            { id: 'subtitle', type: 'textarea', label: 'Подзаголовок', selector: '.destinations .section-subtitle' }
+                        ]
+                    },
+                    {
+                        id: 'contact',
+                        name: 'Контакты',
+                        description: 'Контактная информация',
+                        fields: [
+                            { id: 'title', type: 'text', label: 'Заголовок', selector: '#contact .section-title, .contact .section-title' },
+                            { id: 'phone', type: 'text', label: 'Телефон', selector: '.contact-info .contact-item:nth-child(1) p' },
+                            { id: 'email', type: 'text', label: 'Email', selector: '.contact-info .contact-item:nth-child(2) p' },
+                            { id: 'address', type: 'text', label: 'Адрес', selector: '.contact-info .contact-item:nth-child(3) p' },
+                            { id: 'hours', type: 'text', label: 'Часы работы', selector: '.contact-info .contact-item:nth-child(4) p' }
+                        ]
+                    }
+                ];
+                
                 this.init();
             }
 
             init() {
-                this.setupFrame();
-                this.setupAutoRefresh();
+                this.loadSectionsList();
+                this.setupFrameListener();
             }
 
-            setupFrame() {
-                this.currentFrame = document.getElementById('page-frame');
-                this.currentFrame.onload = () => {
-                    console.log('Frame loaded');
-                    this.disablePageFunctionality();
-                    setTimeout(() => {
-                        this.setupSections();
-                        this.isFrameReady = true;
-                    }, 1500);
+            loadSectionsList() {
+                const container = document.getElementById('section-list');
+                container.innerHTML = this.sections.map(section => `
+                    <div class="section-item" onclick="editor.selectSection('${section.id}')">
+                        <div class="section-title">${section.name}</div>
+                        <div class="section-desc">${section.description}</div>
+                    </div>
+                `).join('');
+            }
+
+            setupFrameListener() {
+                const frame = document.getElementById('preview-frame');
+                frame.onload = () => {
+                    console.log('Preview frame loaded');
+                    // Можно добавить дополнительную инициализацию здесь
                 };
             }
 
-            setupAutoRefresh() {
-                // Авто-обновление позиций каждые 100мс
-                setInterval(() => {
-                    if (this.isFrameReady) {
-                        this.updateHighlightsPosition();
-                    }
-                }, 100);
-            }
+            selectSection(sectionId) {
+                // Убираем активный класс у всех секций
+                document.querySelectorAll('.section-item').forEach(item => {
+                    item.classList.remove('active');
+                });
 
-            disablePageFunctionality() {
-                try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    
-                    // Отключаем навигацию
-                    const navLinks = frameDoc.querySelectorAll('a[href^="#"]');
-                    navLinks.forEach(link => {
-                        link.onclick = (e) => e.preventDefault();
-                    });
-
-                    // Отключаем формы
-                    const forms = frameDoc.querySelectorAll('form');
-                    forms.forEach(form => {
-                        form.onsubmit = (e) => e.preventDefault();
-                    });
-
-                    // Отключаем кнопки админки
-                    const adminLinks = frameDoc.querySelectorAll('a[href*="admin"]');
-                    adminLinks.forEach(link => {
-                        link.onclick = (e) => e.preventDefault();
-                    });
-
-                    // Отключаем бургер меню
-                    const hamburger = frameDoc.querySelector('.hamburger');
-                    if (hamburger) {
-                        hamburger.onclick = (e) => e.preventDefault();
-                    }
-
-                    // Отключаем скролл по клику
-                    frameDoc.body.style.overflow = 'hidden';
-                    frameDoc.documentElement.style.overflow = 'hidden';
-
-                    // Добавляем класс для редактора
-                    frameDoc.body.classList.add('editor-mode');
-
-                } catch (error) {
-                    console.log('Не удалось отключить функционал:', error);
+                // Добавляем активный класс выбранной секции
+                const selectedItem = document.querySelector(`[onclick="editor.selectSection('${sectionId}')"]`);
+                if (selectedItem) {
+                    selectedItem.classList.add('active');
                 }
+
+                this.currentSection = this.sections.find(s => s.id === sectionId);
+                this.showContentEditor();
+                this.showTab('content');
             }
 
-            setupSections() {
-                try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    
-                    // Получаем ВСЕ доступные блоки на странице
-                    this.sections = [
-                        {
-                            id: 'hero',
-                            name: 'Герой-секция',
-                            selector: '#home, .hero, section:first-of-type',
-                            elements: {
-                                title: frameDoc.querySelector('#home h1, .hero h1, section:first-of-type h1'),
-                                content: frameDoc.querySelector('#home p, .hero p, section:first-of-type p')
-                            }
-                        },
-                        {
-                            id: 'about',
-                            name: 'О компании',
-                            selector: '#about, .about, section:nth-of-type(2)',
-                            elements: {
-                                title: frameDoc.querySelector('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title'),
-                                description: frameDoc.querySelector('.about-text p, section:nth-of-type(2) p'),
-                                stats: {
-                                    container: frameDoc.querySelector('.stats, .about .stats'),
-                                    items: frameDoc.querySelectorAll('.stat, .about .stat')
+            showContentEditor() {
+                if (!this.currentSection) return;
+
+                const editor = document.getElementById('content-editor');
+                const frame = document.getElementById('preview-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+
+                let editorHTML = `<h3 style="margin-bottom: 20px;">${this.currentSection.name}</h3>`;
+
+                this.currentSection.fields.forEach(field => {
+                    if (field.type === 'stats') {
+                        editorHTML += this.getStatsEditor();
+                    } else {
+                        const currentValue = this.getCurrentValue(frameDoc, field.selector);
+                        editorHTML += `
+                            <div class="form-group">
+                                <label>${field.label}:</label>
+                                ${field.type === 'textarea' ? 
+                                    `<textarea class="form-control" data-field="${field.id}" data-selector="${field.selector}">${currentValue}</textarea>` :
+                                    `<input type="text" class="form-control" data-field="${field.id}" data-selector="${field.selector}" value="${currentValue}">`
                                 }
-                            }
-                        },
-                        {
-                            id: 'services',
-                            name: 'Услуги',
-                            selector: '#services, .services, section:nth-of-type(3)',
-                            elements: {
-                                title: frameDoc.querySelector('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title'),
-                                cards: frameDoc.querySelectorAll('.service-card, .services-grid .service-card')
-                            }
-                        },
-                        {
-                            id: 'destinations',
-                            name: 'Направления',
-                            selector: '#destinations, .destinations, section:nth-of-type(4)',
-                            elements: {
-                                title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title'),
-                                subtitle: frameDoc.querySelector('.destinations .section-subtitle, section:nth-of-type(4) .section-subtitle')
-                            }
-                        },
-                        {
-                            id: 'contact',
-                            name: 'Контакты',
-                            selector: '#contact, .contact, section:nth-of-type(5)',
-                            elements: {
-                                title: frameDoc.querySelector('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title'),
-                                phone: frameDoc.querySelector('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p'),
-                                email: frameDoc.querySelector('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p'),
-                                address: frameDoc.querySelector('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p'),
-                                hours: frameDoc.querySelector('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p')
-                            }
-                        }
-                    ];
-
-                    this.setupSectionHighlights();
-                    console.log('Все секции загружены:', this.sections);
-                    
-                } catch (error) {
-                    console.log('Не удалось настроить разделы:', error);
-                    this.showNotification('Ошибка загрузки страницы. Попробуйте обновить.', 'error');
-                }
-            }
-
-            setupSectionHighlights() {
-                const overlay = document.getElementById('frame-overlay');
-                overlay.innerHTML = '';
-
-                this.sections.forEach(section => {
-                    try {
-                        const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                        const elements = frameDoc.querySelectorAll(section.selector);
-                        
-                        elements.forEach((element, index) => {
-                            if (element && this.isElementVisible(element)) {
-                                this.createHighlightForSection(section, element, index);
-                            }
-                        });
-                    } catch (error) {
-                        console.log('Ошибка создания хайлайта для:', section.id, error);
+                            </div>
+                        `;
                     }
                 });
 
-                this.updateHighlightsPosition();
-            }
-
-            isElementVisible(element) {
-                if (!element) return false;
-                const rect = element.getBoundingClientRect();
-                return rect.width > 0 && rect.height > 0;
-            }
-
-            createHighlightForSection(section, element, index = 0) {
-                const overlay = document.getElementById('frame-overlay');
-                
-                const highlight = document.createElement('div');
-                highlight.className = 'section-highlight';
-                highlight.dataset.sectionId = section.id;
-                highlight.dataset.index = index;
-                
-                const tooltip = document.createElement('div');
-                tooltip.className = 'edit-tooltip';
-                tooltip.textContent = section.name;
-                highlight.appendChild(tooltip);
-                
-                highlight.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    this.selectSection(section, element);
-                });
-                
-                overlay.appendChild(highlight);
-            }
-
-            updateHighlightsPosition() {
-                const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                const frameContainer = document.querySelector('.preview-frame-container');
-                
-                if (!frameDoc || !frameContainer) return;
-
-                this.sections.forEach(section => {
-                    try {
-                        const elements = frameDoc.querySelectorAll(section.selector);
-                        const highlights = document.querySelectorAll(`[data-section-id="${section.id}"]`);
-                        
-                        elements.forEach((element, index) => {
-                            const highlight = highlights[index];
-                            if (element && highlight && this.isElementVisible(element)) {
-                                const rect = element.getBoundingClientRect();
-                                const frameRect = frameContainer.getBoundingClientRect();
-                                
-                                highlight.style.left = '0px';
-                                highlight.style.top = (rect.top + frameContainer.scrollTop) + 'px';
-                                highlight.style.width = '100%';
-                                highlight.style.height = rect.height + 'px';
-                                highlight.style.display = 'block';
-                            }
-                        });
-                    } catch (error) {
-                        // Игнорируем ошибки позиционирования
-                    }
-                });
-            }
-
-            selectSection(section, element) {
-                this.selectedSection = section;
-                this.selectedElement = element;
-                
-                // Убираем выделение у всех разделов
-                document.querySelectorAll('.section-highlight').forEach(h => {
-                    h.classList.remove('active');
-                });
-                
-                // Выделяем выбранный раздел
-                const highlights = document.querySelectorAll(`[data-section-id="${section.id}"]`);
-                const elementIndex = this.getElementIndex(section, element);
-                if (highlights[elementIndex]) {
-                    highlights[elementIndex].classList.add('active');
-                }
-                
-                this.showEditor(section);
-            }
-
-            getElementIndex(section, element) {
-                const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                const elements = frameDoc.querySelectorAll(section.selector);
-                return Array.from(elements).indexOf(element);
-            }
-
-            showEditor(section) {
-                const sidebarContent = document.getElementById('sidebar-content');
-                const sidebarTitle = document.getElementById('sidebar-title');
-                const sidebarSubtitle = document.getElementById('sidebar-subtitle');
-
-                sidebarTitle.textContent = section.name;
-                sidebarSubtitle.textContent = 'Редактирование содержимого';
-
-                let editorHTML = '';
-
-                switch(section.id) {
-                    case 'hero':
-                        editorHTML = this.getHeroEditor(section);
-                        break;
-                    case 'about':
-                        editorHTML = this.getAboutEditor(section);
-                        break;
-                    case 'services':
-                        editorHTML = this.getServicesEditor(section);
-                        break;
-                    case 'destinations':
-                        editorHTML = this.getDestinationsEditor(section);
-                        break;
-                    case 'contact':
-                        editorHTML = this.getContactEditor(section);
-                        break;
-                    default:
-                        editorHTML = this.getDefaultEditor(section);
-                }
-
-                sidebarContent.innerHTML = editorHTML;
-            }
-
-            getHeroEditor(section) {
-                const title = section.elements.title ? section.elements.title.textContent : '';
-                const content = section.elements.content ? section.elements.content.textContent : '';
-                
-                return `
-                    <div class="form-group">
-                        <label>Основной заголовок:</label>
-                        <input type="text" class="form-control" id="edit-hero-title" value="${this.escapeHtml(title)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Описание под заголовком:</label>
-                        <textarea class="form-control" id="edit-hero-content" rows="4">${this.escapeHtml(content)}</textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
+                editorHTML += `
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" onclick="editor.saveChanges()">
                             <i class="fas fa-save"></i> Применить изменения
+                        </button>
+                        <button class="btn btn-secondary" onclick="showTab('sections')">
+                            <i class="fas fa-arrow-left"></i> Назад к списку
                         </button>
                     </div>
                 `;
+
+                editor.innerHTML = editorHTML;
             }
 
-            getAboutEditor(section) {
-                const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                const title = section.elements.title ? section.elements.title.textContent : '';
-                const description = section.elements.description ? section.elements.description.textContent : '';
+            getStatsEditor() {
+                const frame = document.getElementById('preview-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
                 
                 // Получаем текущую статистику
                 const stats = [];
-                if (section.elements.stats && section.elements.stats.items) {
-                    section.elements.stats.items.forEach(stat => {
+                const statElements = frameDoc.querySelectorAll('.stat, .about .stat');
+                
+                if (statElements.length > 0) {
+                    statElements.forEach(stat => {
                         const value = stat.querySelector('h3')?.textContent || '';
                         const label = stat.querySelector('p')?.textContent || '';
                         stats.push({ value, label });
                     });
-                }
-
-                // Если статистики нет, используем стандартную
-                if (stats.length === 0) {
+                } else {
+                    // Стандартная статистика
                     stats.push(
                         { value: '5000', label: 'Довольных клиентов' },
                         { value: '50', label: 'Стран мира' },
@@ -721,211 +440,89 @@
                     );
                 }
 
-                return `
-                    <div class="form-group">
-                        <label>Заголовок "О компании":</label>
-                        <input type="text" class="form-control" id="edit-about-title" value="${this.escapeHtml(title)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Описание компании:</label>
-                        <textarea class="form-control" id="edit-about-description" rows="4">${this.escapeHtml(description)}</textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label>Статистика:</label>
-                        <div class="stat-editor">
-                            ${stats.map((stat, index) => `
-                                <div class="stat-item">
-                                    <input type="text" class="form-control" id="edit-stat-value-${index}" 
-                                           value="${this.escapeHtml(stat.value)}" placeholder="Значение">
-                                    <input type="text" class="form-control" id="edit-stat-label-${index}" 
-                                           value="${this.escapeHtml(stat.label)}" placeholder="Подпись">
-                                </div>
-                            `).join('')}
+                let statsHTML = '<div class="form-group"><label>Статистика:</label><div class="stats-editor">';
+                
+                stats.forEach((stat, index) => {
+                    statsHTML += `
+                        <div class="stat-row">
+                            <input type="text" class="form-control" data-stat-value="${index}" 
+                                   value="${stat.value}" placeholder="Значение">
+                            <input type="text" class="form-control" data-stat-label="${index}" 
+                                   value="${stat.label}" placeholder="Подпись">
                         </div>
-                    </div>
-                    
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                `;
+                    `;
+                });
+
+                statsHTML += '</div></div>';
+                return statsHTML;
             }
 
-            getServicesEditor(section) {
-                const title = section.elements.title ? section.elements.title.textContent : '';
-                
-                return `
-                    <div class="form-group">
-                        <label>Заголовок "Наши услуги":</label>
-                        <input type="text" class="form-control" id="edit-services-title" value="${this.escapeHtml(title)}">
-                    </div>
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-bottom: 1rem;">
-                        <small style="color: #856404;">
-                            <i class="fas fa-info-circle"></i> Для редактирования карточек услуг используйте основную админ-панель
-                        </small>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                `;
-            }
-
-            getDestinationsEditor(section) {
-                const title = section.elements.title ? section.elements.title.textContent : '';
-                const subtitle = section.elements.subtitle ? section.elements.subtitle.textContent : '';
-                
-                return `
-                    <div class="form-group">
-                        <label>Заголовок "Популярные направления":</label>
-                        <input type="text" class="form-control" id="edit-destinations-title" value="${this.escapeHtml(title)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Подзаголовок:</label>
-                        <textarea class="form-control" id="edit-destinations-subtitle" rows="3">${this.escapeHtml(subtitle)}</textarea>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                `;
-            }
-
-            getContactEditor(section) {
-                const title = section.elements.title ? section.elements.title.textContent : '';
-                const phone = section.elements.phone ? section.elements.phone.textContent : '';
-                const email = section.elements.email ? section.elements.email.textContent : '';
-                const address = section.elements.address ? section.elements.address.textContent : '';
-                const hours = section.elements.hours ? section.elements.hours.textContent : '';
-                
-                return `
-                    <div class="form-group">
-                        <label>Заголовок "Контакты":</label>
-                        <input type="text" class="form-control" id="edit-contact-title" value="${this.escapeHtml(title)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Телефон:</label>
-                        <input type="text" class="form-control" id="edit-contact-phone" value="${this.escapeHtml(phone)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Email:</label>
-                        <input type="text" class="form-control" id="edit-contact-email" value="${this.escapeHtml(email)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Адрес:</label>
-                        <input type="text" class="form-control" id="edit-contact-address" value="${this.escapeHtml(address)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Часы работы:</label>
-                        <input type="text" class="form-control" id="edit-contact-hours" value="${this.escapeHtml(hours)}">
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                `;
-            }
-
-            getDefaultEditor(section) {
-                return `
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px;">
-                        <p style="color: #856404; margin: 0;">
-                            <i class="fas fa-info-circle"></i> Редактор для этого раздела в разработке
-                        </p>
-                    </div>
-                `;
-            }
-
-            escapeHtml(text) {
-                if (!text) return '';
-                const div = document.createElement('div');
-                div.textContent = text;
-                return div.innerHTML;
-            }
-
-            saveSectionChanges() {
-                if (!this.selectedSection) {
-                    this.showNotification('Сначала выберите раздел для редактирования', 'error');
-                    return;
+            getCurrentValue(frameDoc, selector) {
+                try {
+                    const element = frameDoc.querySelector(selector);
+                    return element ? element.textContent : '';
+                } catch (error) {
+                    return '';
                 }
+            }
+
+            saveChanges() {
+                if (!this.currentSection) return;
+
+                const frame = document.getElementById('preview-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
 
                 try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    
-                    switch(this.selectedSection.id) {
-                        case 'hero':
-                            this.saveHeroChanges(frameDoc);
-                            break;
-                        case 'about':
-                            this.saveAboutChanges(frameDoc);
-                            break;
-                        case 'services':
-                            this.saveServicesChanges(frameDoc);
-                            break;
-                        case 'destinations':
-                            this.saveDestinationsChanges(frameDoc);
-                            break;
-                        case 'contact':
-                            this.saveContactChanges(frameDoc);
-                            break;
-                    }
-                    
-                    this.saveChangesToStorage();
-                    this.showNotification('Изменения применены!', 'success');
+                    // Сохраняем обычные поля
+                    this.currentSection.fields.forEach(field => {
+                        if (field.type !== 'stats') {
+                            const input = document.querySelector(`[data-field="${field.id}"]`);
+                            if (input && field.selector) {
+                                const element = frameDoc.querySelector(field.selector);
+                                if (element) {
+                                    element.textContent = input.value;
+                                }
+                            }
+                        }
+                    });
+
+                    // Сохраняем статистику
+                    this.saveStatsChanges(frameDoc);
+
+                    // Сохраняем в dataManager
+                    this.saveToDataManager();
+
+                    this.showNotification('Изменения успешно применены!');
                     
                 } catch (error) {
-                    console.error('Ошибка сохранения:', error);
-                    this.showNotification('Ошибка применения изменений', 'error');
+                    console.error('Error saving changes:', error);
+                    this.showNotification('Ошибка при сохранении изменений', 'error');
                 }
             }
 
-            saveHeroChanges(frameDoc) {
-                const title = document.getElementById('edit-hero-title')?.value;
-                const content = document.getElementById('edit-hero-content')?.value;
-                
-                if (title && this.selectedSection.elements.title) {
-                    this.selectedSection.elements.title.textContent = title;
-                }
-                if (content && this.selectedSection.elements.content) {
-                    this.selectedSection.elements.content.textContent = content;
-                }
-            }
-
-            saveAboutChanges(frameDoc) {
-                const title = document.getElementById('edit-about-title')?.value;
-                const description = document.getElementById('edit-about-description')?.value;
-                
-                if (title && this.selectedSection.elements.title) {
-                    this.selectedSection.elements.title.textContent = title;
-                }
-                if (description && this.selectedSection.elements.description) {
-                    this.selectedSection.elements.description.textContent = description;
-                }
-
-                // Сохраняем статистику
+            saveStatsChanges(frameDoc) {
                 const stats = [];
                 for (let i = 0; i < 3; i++) {
-                    const value = document.getElementById(`edit-stat-value-${i}`)?.value;
-                    const label = document.getElementById(`edit-stat-label-${i}`)?.value;
-                    if (value && label) {
-                        stats.push({ value, label });
+                    const valueInput = document.querySelector(`[data-stat-value="${i}"]`);
+                    const labelInput = document.querySelector(`[data-stat-label="${i}"]`);
+                    
+                    if (valueInput && labelInput && valueInput.value && labelInput.value) {
+                        stats.push({
+                            value: valueInput.value,
+                            label: labelInput.value
+                        });
                     }
                 }
 
                 // Обновляем статистику на странице
-                if (this.selectedSection.elements.stats && this.selectedSection.elements.stats.items) {
-                    this.selectedSection.elements.stats.items.forEach((stat, index) => {
-                        const valueEl = stat.querySelector('h3');
-                        const labelEl = stat.querySelector('p');
-                        if (valueEl && stats[index]) valueEl.textContent = stats[index].value;
-                        if (labelEl && stats[index]) labelEl.textContent = stats[index].label;
-                    });
-                }
+                const statElements = frameDoc.querySelectorAll('.stat, .about .stat');
+                statElements.forEach((stat, index) => {
+                    const valueEl = stat.querySelector('h3');
+                    const labelEl = stat.querySelector('p');
+                    
+                    if (valueEl && stats[index]) valueEl.textContent = stats[index].value;
+                    if (labelEl && stats[index]) labelEl.textContent = stats[index].label;
+                });
 
                 // Сохраняем в dataManager
                 if (window.dataManager) {
@@ -933,154 +530,86 @@
                 }
             }
 
-            saveServicesChanges(frameDoc) {
-                const title = document.getElementById('edit-services-title')?.value;
-                
-                if (title && this.selectedSection.elements.title) {
-                    this.selectedSection.elements.title.textContent = title;
+            saveToDataManager() {
+                if (!window.dataManager) return;
+
+                const frame = document.getElementById('preview-frame');
+                const frameDoc = frame.contentDocument || frame.contentWindow.document;
+                const content = window.dataManager.getContent() || {};
+
+                // Обновляем контент на основе текущих значений
+                if (this.currentSection.id === 'hero') {
+                    content.hero = {
+                        title: frameDoc.querySelector('#home h1, .hero h1')?.textContent || '',
+                        subtitle: frameDoc.querySelector('#home p, .hero p')?.textContent || ''
+                    };
+                } else if (this.currentSection.id === 'about') {
+                    content.about = {
+                        title: frameDoc.querySelector('#about .section-title')?.textContent || '',
+                        description: frameDoc.querySelector('.about-text p')?.textContent || ''
+                    };
                 }
+
+                window.dataManager.updateContent(this.currentSection.id, content[this.currentSection.id]);
             }
 
-            saveDestinationsChanges(frameDoc) {
-                const title = document.getElementById('edit-destinations-title')?.value;
-                const subtitle = document.getElementById('edit-destinations-subtitle')?.value;
-                
-                if (title && this.selectedSection.elements.title) {
-                    this.selectedSection.elements.title.textContent = title;
-                }
-                if (subtitle && this.selectedSection.elements.subtitle) {
-                    this.selectedSection.elements.subtitle.textContent = subtitle;
-                }
-            }
-
-            saveContactChanges(frameDoc) {
-                const title = document.getElementById('edit-contact-title')?.value;
-                const phone = document.getElementById('edit-contact-phone')?.value;
-                const email = document.getElementById('edit-contact-email')?.value;
-                const address = document.getElementById('edit-contact-address')?.value;
-                const hours = document.getElementById('edit-contact-hours')?.value;
-                
-                if (title && this.selectedSection.elements.title) {
-                    this.selectedSection.elements.title.textContent = title;
-                }
-                if (phone && this.selectedSection.elements.phone) {
-                    this.selectedSection.elements.phone.textContent = phone;
-                }
-                if (email && this.selectedSection.elements.email) {
-                    this.selectedSection.elements.email.textContent = email;
-                }
-                if (address && this.selectedSection.elements.address) {
-                    this.selectedSection.elements.address.textContent = address;
-                }
-                if (hours && this.selectedSection.elements.hours) {
-                    this.selectedSection.elements.hours.textContent = hours;
-                }
-            }
-
-            saveChangesToStorage() {
-                try {
-                    const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    
-                    // Сохраняем изменения в dataManager
-                    if (window.dataManager) {
-                        const content = window.dataManager.getContent() || {};
-                        
-                        // Обновляем контент на основе текущих значений
-                        if (this.selectedSection.id === 'hero') {
-                            content.hero = {
-                                title: frameDoc.querySelector('#home h1, .hero h1')?.textContent || '',
-                                subtitle: frameDoc.querySelector('#home p, .hero p')?.textContent || ''
-                            };
-                        } else if (this.selectedSection.id === 'about') {
-                            content.about = {
-                                title: frameDoc.querySelector('#about .section-title')?.textContent || '',
-                                description: frameDoc.querySelector('.about-text p')?.textContent || '',
-                                stats: this.getCurrentStats()
-                            };
-                        }
-                        
-                        window.dataManager.updateContent(this.selectedSection.id, content[this.selectedSection.id]);
-                    }
-                    
-                    this.showSaveStatus('Все изменения сохранены');
-                    
-                } catch (error) {
-                    console.error('Ошибка сохранения:', error);
-                }
-            }
-
-            getCurrentStats() {
-                const stats = [];
-                for (let i = 0; i < 3; i++) {
-                    const value = document.getElementById(`edit-stat-value-${i}`)?.value;
-                    const label = document.getElementById(`edit-stat-label-${i}`)?.value;
-                    if (value && label) {
-                        stats.push({ value, label });
-                    }
-                }
-                return stats;
-            }
-
-            refreshFrame() {
-                this.currentFrame.src = this.currentFrame.src;
-                this.isFrameReady = false;
-                this.showNotification('Страница обновлена', 'info');
-            }
-
-            addNewBlock() {
-                this.showNotification('Для добавления новых блоков используйте основную админ-панель', 'info');
-            }
-
-            saveAndExit() {
-                this.saveChangesToStorage();
-                this.showNotification('Все изменения сохранены! Переход в админ-панель...', 'success');
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 1500);
-            }
-
-            showSaveStatus(message) {
-                const statusElement = document.getElementById('save-status');
-                const messageElement = document.getElementById('status-message');
-                
-                if (statusElement && messageElement) {
-                    messageElement.textContent = message;
-                    statusElement.style.display = 'block';
-                    
-                    setTimeout(() => {
-                        statusElement.style.display = 'none';
-                    }, 3000);
-                }
-            }
-
-            showNotification(message, type = 'info') {
+            showNotification(message, type = 'success') {
                 const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                notification.innerHTML = `
-                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
-                    ${message}
-                `;
+                notification.className = 'notification';
+                notification.style.background = type === 'error' ? '#dc3545' : '#28a745';
+                notification.textContent = message;
+                
                 document.body.appendChild(notification);
+                
                 setTimeout(() => {
                     if (notification.parentElement) {
                         notification.remove();
                     }
-                }, 4000);
+                }, 3000);
             }
+        }
+
+        // Глобальные функции
+        function showTab(tabName) {
+            // Скрываем все вкладки
+            document.querySelectorAll('.panel-content').forEach(tab => {
+                tab.style.display = 'none';
+            });
+            
+            // Показываем выбранную вкладку
+            document.getElementById(tabName + '-tab').style.display = 'block';
+            
+            // Обновляем активные кнопки
+            document.querySelectorAll('.tab-button').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            event.target.classList.add('active');
+        }
+
+        function refreshPreview() {
+            const frame = document.getElementById('preview-frame');
+            frame.src = frame.src;
+        }
+
+        function saveAndExit() {
+            if (editor.currentSection) {
+                editor.saveChanges();
+            }
+            setTimeout(() => {
+                window.location.href = 'admin.html';
+            }, 1000);
         }
 
         // Инициализация редактора
-        const visualEditor = new VisualEditor();
+        const editor = new SimplePageEditor();
 
-        // Глобальные функции
-        function refreshFrame() { visualEditor.refreshFrame(); }
-        function addNewBlock() { visualEditor.addNewBlock(); }
-        function saveAndExit() { visualEditor.saveAndExit(); }
-        function goBackToAdmin() { 
-            if (confirm('Все несохраненные изменения будут потеряны. Продолжить?')) {
-                window.location.href = 'admin.html'; 
+        // Авто-фокус на первую секцию
+        setTimeout(() => {
+            const firstSection = document.querySelector('.section-item');
+            if (firstSection) {
+                firstSection.click();
             }
-        }
+        }, 1000);
     </script>
 </body>
 </html>
