@@ -52,13 +52,12 @@
         .preview-frame-container {
             flex: 1;
             position: relative;
-            overflow: auto;
+            overflow: hidden;
         }
 
         #page-frame {
             width: 100%;
-            height: auto;
-            min-height: 100%;
+            height: 100%;
             border: none;
             background: white;
         }
@@ -72,6 +71,7 @@
             background: transparent;
             z-index: 1000;
             pointer-events: none;
+            overflow: hidden;
         }
 
         .section-highlight {
@@ -83,6 +83,7 @@
             cursor: pointer;
             z-index: 1001;
             transition: all 0.3s ease;
+            box-sizing: border-box;
         }
 
         .section-highlight:hover {
@@ -161,12 +162,6 @@
             color: #6c757d;
         }
 
-        .empty-state i {
-            font-size: 3rem;
-            margin-bottom: 1rem;
-            color: #dee2e6;
-        }
-
         .form-actions {
             display: flex;
             gap: 10px;
@@ -184,10 +179,6 @@
             align-items: center;
             gap: 8px;
             font-size: 0.9rem;
-        }
-
-        .nav-back:hover {
-            background: #545b62;
         }
 
         .notification {
@@ -293,13 +284,42 @@
             padding: 8px 12px;
             font-size: 0.8rem;
             color: #856404;
-            margin-left: auto;
         }
 
-        .section-loading {
-            text-align: center;
-            padding: 2rem;
-            color: #666;
+        .stat-editor {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+
+        .stat-item {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        .stat-item input {
+            flex: 1;
+        }
+
+        .sub-element {
+            background: #e9ecef;
+            border-radius: 5px;
+            padding: 10px;
+            margin: 5px 0;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .sub-element:hover {
+            background: #dee2e6;
+        }
+
+        .sub-element.active {
+            background: #2c5aa0;
+            color: white;
         }
     </style>
 </head>
@@ -327,7 +347,7 @@
             <!-- Информация о странице -->
             <div class="page-info">
                 <h3>Редактирование в реальном времени</h3>
-                <p>Кликните на любой раздел страницы для редактирования. Используйте скролл чтобы увидеть все блоки.</p>
+                <p>Кликните на любой раздел страницы для редактирования. Для редактирования внутренних элементов (статистики, карточек) выберите основной блок.</p>
                 <div id="save-status" class="save-status" style="display: none;">
                     <i class="fas fa-check-circle"></i> <span id="status-message">Изменения сохранены</span>
                 </div>
@@ -336,7 +356,7 @@
             <!-- Контролы для фрейма -->
             <div class="frame-controls">
                 <div class="scroll-hint">
-                    <i class="fas fa-mouse-pointer"></i> Скролл для просмотра всех блоков
+                    <i class="fas fa-mouse-pointer"></i> Кликните на блок для редактирования
                 </div>
             </div>
 
@@ -377,40 +397,36 @@
             constructor() {
                 this.currentFrame = null;
                 this.selectedSection = null;
+                this.selectedElement = null;
                 this.sections = [];
+                this.isFrameReady = false;
                 this.init();
             }
 
             init() {
                 this.setupFrame();
+                this.setupAutoRefresh();
             }
 
             setupFrame() {
                 this.currentFrame = document.getElementById('page-frame');
                 this.currentFrame.onload = () => {
+                    console.log('Frame loaded');
                     this.disablePageFunctionality();
                     setTimeout(() => {
                         this.setupSections();
-                        this.setupScrollHandling();
-                    }, 1000);
+                        this.isFrameReady = true;
+                    }, 1500);
                 };
             }
 
-            setupScrollHandling() {
-                const frameContainer = document.querySelector('.preview-frame-container');
-                
-                frameContainer.addEventListener('scroll', () => {
-                    this.updateHighlightsPosition();
-                });
-
-                window.addEventListener('resize', () => {
-                    this.updateHighlightsPosition();
-                });
-
-                // Авто-обновление позиций каждые 500мс для надежности
+            setupAutoRefresh() {
+                // Авто-обновление позиций каждые 100мс
                 setInterval(() => {
-                    this.updateHighlightsPosition();
-                }, 500);
+                    if (this.isFrameReady) {
+                        this.updateHighlightsPosition();
+                    }
+                }, 100);
             }
 
             disablePageFunctionality() {
@@ -441,6 +457,10 @@
                         hamburger.onclick = (e) => e.preventDefault();
                     }
 
+                    // Отключаем скролл по клику
+                    frameDoc.body.style.overflow = 'hidden';
+                    frameDoc.documentElement.style.overflow = 'hidden';
+
                     // Добавляем класс для редактора
                     frameDoc.body.classList.add('editor-mode');
 
@@ -453,7 +473,7 @@
                 try {
                     const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                     
-                    // Получаем ВСЕ доступные блоки на странице с улучшенными селекторами
+                    // Получаем ВСЕ доступные блоки на странице
                     this.sections = [
                         {
                             id: 'hero',
@@ -470,8 +490,11 @@
                             selector: '#about, .about, section:nth-of-type(2)',
                             elements: {
                                 title: frameDoc.querySelector('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title'),
-                                content: frameDoc.querySelector('.about-text p, section:nth-of-type(2) p'),
-                                stats: frameDoc.querySelectorAll('.about .stat h3, section:nth-of-type(2) .stat h3')
+                                description: frameDoc.querySelector('.about-text p, section:nth-of-type(2) p'),
+                                stats: {
+                                    container: frameDoc.querySelector('.stats, .about .stats'),
+                                    items: frameDoc.querySelectorAll('.stat, .about .stat')
+                                }
                             }
                         },
                         {
@@ -480,7 +503,7 @@
                             selector: '#services, .services, section:nth-of-type(3)',
                             elements: {
                                 title: frameDoc.querySelector('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title'),
-                                serviceCards: frameDoc.querySelectorAll('.service-card, .services-grid .service-card')
+                                cards: frameDoc.querySelectorAll('.service-card, .services-grid .service-card')
                             }
                         },
                         {
@@ -489,9 +512,7 @@
                             selector: '#destinations, .destinations, section:nth-of-type(4)',
                             elements: {
                                 title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title'),
-                                subtitle: frameDoc.querySelector('.destinations .section-subtitle, section:nth-of-type(4) .section-subtitle'),
-                                searchInput: frameDoc.querySelector('.search-input'),
-                                grid: frameDoc.querySelector('.destinations-grid')
+                                subtitle: frameDoc.querySelector('.destinations .section-subtitle, section:nth-of-type(4) .section-subtitle')
                             }
                         },
                         {
@@ -505,24 +526,6 @@
                                 address: frameDoc.querySelector('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p'),
                                 hours: frameDoc.querySelector('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p')
                             }
-                        },
-                        {
-                            id: 'header',
-                            name: 'Шапка сайта',
-                            selector: 'header, .header',
-                            elements: {
-                                logo: frameDoc.querySelector('.logo h2'),
-                                navLinks: frameDoc.querySelectorAll('.nav-links a')
-                            }
-                        },
-                        {
-                            id: 'footer',
-                            name: 'Подвал сайта',
-                            selector: 'footer, .footer',
-                            elements: {
-                                companyName: frameDoc.querySelector('.footer-section h3'),
-                                copyright: frameDoc.querySelector('.footer-bottom p')
-                            }
                         }
                     ];
 
@@ -532,7 +535,6 @@
                 } catch (error) {
                     console.log('Не удалось настроить разделы:', error);
                     this.showNotification('Ошибка загрузки страницы. Попробуйте обновить.', 'error');
-                    setTimeout(() => this.setupSections(), 2000);
                 }
             }
 
@@ -540,41 +542,28 @@
                 const overlay = document.getElementById('frame-overlay');
                 overlay.innerHTML = '';
 
-                let sectionsFound = 0;
-
                 this.sections.forEach(section => {
                     try {
                         const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                         const elements = frameDoc.querySelectorAll(section.selector);
                         
-                        if (elements.length > 0) {
-                            elements.forEach((element, index) => {
-                                if (this.isElementVisible(element)) {
-                                    this.createHighlightForSection(section, element, index);
-                                    sectionsFound++;
-                                }
-                            });
-                        }
+                        elements.forEach((element, index) => {
+                            if (element && this.isElementVisible(element)) {
+                                this.createHighlightForSection(section, element, index);
+                            }
+                        });
                     } catch (error) {
                         console.log('Ошибка создания хайлайта для:', section.id, error);
                     }
                 });
 
-                // Обновляем позиции после создания
                 this.updateHighlightsPosition();
-
-                if (sectionsFound === 0) {
-                    this.showNotification('Блоки не найдены. Страница еще загружается...', 'warning');
-                    setTimeout(() => this.setupSectionHighlights(), 1000);
-                } else {
-                    this.showNotification(`Загружено ${sectionsFound} блоков для редактирования`, 'success');
-                }
             }
 
             isElementVisible(element) {
                 if (!element) return false;
                 const rect = element.getBoundingClientRect();
-                return rect.width > 0 && rect.height > 0 && element.offsetParent !== null;
+                return rect.width > 0 && rect.height > 0;
             }
 
             createHighlightForSection(section, element, index = 0) {
@@ -585,7 +574,6 @@
                 highlight.dataset.sectionId = section.id;
                 highlight.dataset.index = index;
                 
-                // Добавляем подсказку
                 const tooltip = document.createElement('div');
                 tooltip.className = 'edit-tooltip';
                 tooltip.textContent = section.name;
@@ -593,6 +581,7 @@
                 
                 highlight.addEventListener('click', (e) => {
                     e.stopPropagation();
+                    e.preventDefault();
                     this.selectSection(section, element);
                 });
                 
@@ -603,6 +592,8 @@
                 const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                 const frameContainer = document.querySelector('.preview-frame-container');
                 
+                if (!frameDoc || !frameContainer) return;
+
                 this.sections.forEach(section => {
                     try {
                         const elements = frameDoc.querySelectorAll(section.selector);
@@ -615,12 +606,10 @@
                                 const frameRect = frameContainer.getBoundingClientRect();
                                 
                                 highlight.style.left = '0px';
-                                highlight.style.top = (rect.top + frameContainer.scrollTop - frameRect.top) + 'px';
+                                highlight.style.top = (rect.top + frameContainer.scrollTop) + 'px';
                                 highlight.style.width = '100%';
                                 highlight.style.height = rect.height + 'px';
                                 highlight.style.display = 'block';
-                            } else if (highlight) {
-                                highlight.style.display = 'none';
                             }
                         });
                     } catch (error) {
@@ -639,15 +628,16 @@
                 });
                 
                 // Выделяем выбранный раздел
-                const highlight = document.querySelector(`[data-section-id="${section.id}"][data-index="${this.getSectionIndex(section, element)}"]`);
-                if (highlight) {
-                    highlight.classList.add('active');
+                const highlights = document.querySelectorAll(`[data-section-id="${section.id}"]`);
+                const elementIndex = this.getElementIndex(section, element);
+                if (highlights[elementIndex]) {
+                    highlights[elementIndex].classList.add('active');
                 }
                 
                 this.showEditor(section);
             }
 
-            getSectionIndex(section, element) {
+            getElementIndex(section, element) {
                 const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                 const elements = frameDoc.querySelectorAll(section.selector);
                 return Array.from(elements).indexOf(element);
@@ -679,12 +669,6 @@
                     case 'contact':
                         editorHTML = this.getContactEditor(section);
                         break;
-                    case 'header':
-                        editorHTML = this.getHeaderEditor(section);
-                        break;
-                    case 'footer':
-                        editorHTML = this.getFooterEditor(section);
-                        break;
                     default:
                         editorHTML = this.getDefaultEditor(section);
                 }
@@ -714,9 +698,29 @@
             }
 
             getAboutEditor(section) {
+                const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                 const title = section.elements.title ? section.elements.title.textContent : '';
-                const content = section.elements.content ? section.elements.content.textContent : '';
+                const description = section.elements.description ? section.elements.description.textContent : '';
                 
+                // Получаем текущую статистику
+                const stats = [];
+                if (section.elements.stats && section.elements.stats.items) {
+                    section.elements.stats.items.forEach(stat => {
+                        const value = stat.querySelector('h3')?.textContent || '';
+                        const label = stat.querySelector('p')?.textContent || '';
+                        stats.push({ value, label });
+                    });
+                }
+
+                // Если статистики нет, используем стандартную
+                if (stats.length === 0) {
+                    stats.push(
+                        { value: '5000', label: 'Довольных клиентов' },
+                        { value: '50', label: 'Стран мира' },
+                        { value: '10 лет', label: 'Опыта работы' }
+                    );
+                }
+
                 return `
                     <div class="form-group">
                         <label>Заголовок "О компании":</label>
@@ -724,8 +728,23 @@
                     </div>
                     <div class="form-group">
                         <label>Описание компании:</label>
-                        <textarea class="form-control" id="edit-about-content" rows="4">${this.escapeHtml(content)}</textarea>
+                        <textarea class="form-control" id="edit-about-description" rows="4">${this.escapeHtml(description)}</textarea>
                     </div>
+                    
+                    <div class="form-group">
+                        <label>Статистика:</label>
+                        <div class="stat-editor">
+                            ${stats.map((stat, index) => `
+                                <div class="stat-item">
+                                    <input type="text" class="form-control" id="edit-stat-value-${index}" 
+                                           value="${this.escapeHtml(stat.value)}" placeholder="Значение">
+                                    <input type="text" class="form-control" id="edit-stat-label-${index}" 
+                                           value="${this.escapeHtml(stat.label)}" placeholder="Подпись">
+                                </div>
+                            `).join('')}
+                        </div>
+                    </div>
+                    
                     <div class="form-actions">
                         <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
                             <i class="fas fa-save"></i> Применить изменения
@@ -812,48 +831,6 @@
                 `;
             }
 
-            getHeaderEditor(section) {
-                const logo = section.elements.logo ? section.elements.logo.textContent : '';
-                
-                return `
-                    <div class="form-group">
-                        <label>Название компании в шапке:</label>
-                        <input type="text" class="form-control" id="edit-header-logo" value="${this.escapeHtml(logo)}">
-                    </div>
-                    <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 10px; margin-bottom: 1rem;">
-                        <small style="color: #856404;">
-                            <i class="fas fa-info-circle"></i> Навигационные ссылки редактируются в настройках
-                        </small>
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                `;
-            }
-
-            getFooterEditor(section) {
-                const companyName = section.elements.companyName ? section.elements.companyName.textContent : '';
-                const copyright = section.elements.copyright ? section.elements.copyright.textContent : '';
-                
-                return `
-                    <div class="form-group">
-                        <label>Название компании в подвале:</label>
-                        <input type="text" class="form-control" id="edit-footer-company" value="${this.escapeHtml(companyName)}">
-                    </div>
-                    <div class="form-group">
-                        <label>Текст копирайта:</label>
-                        <input type="text" class="form-control" id="edit-footer-copyright" value="${this.escapeHtml(copyright)}">
-                    </div>
-                    <div class="form-actions">
-                        <button class="btn-admin" onclick="visualEditor.saveSectionChanges()">
-                            <i class="fas fa-save"></i> Применить изменения
-                        </button>
-                    </div>
-                `;
-            }
-
             getDefaultEditor(section) {
                 return `
                     <div style="background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 5px; padding: 15px;">
@@ -896,15 +873,9 @@
                         case 'contact':
                             this.saveContactChanges(frameDoc);
                             break;
-                        case 'header':
-                            this.saveHeaderChanges(frameDoc);
-                            break;
-                        case 'footer':
-                            this.saveFooterChanges(frameDoc);
-                            break;
                     }
                     
-                    this.saveChanges();
+                    this.saveChangesToStorage();
                     this.showNotification('Изменения применены!', 'success');
                     
                 } catch (error) {
@@ -927,13 +898,38 @@
 
             saveAboutChanges(frameDoc) {
                 const title = document.getElementById('edit-about-title')?.value;
-                const content = document.getElementById('edit-about-content')?.value;
+                const description = document.getElementById('edit-about-description')?.value;
                 
                 if (title && this.selectedSection.elements.title) {
                     this.selectedSection.elements.title.textContent = title;
                 }
-                if (content && this.selectedSection.elements.content) {
-                    this.selectedSection.elements.content.textContent = content;
+                if (description && this.selectedSection.elements.description) {
+                    this.selectedSection.elements.description.textContent = description;
+                }
+
+                // Сохраняем статистику
+                const stats = [];
+                for (let i = 0; i < 3; i++) {
+                    const value = document.getElementById(`edit-stat-value-${i}`)?.value;
+                    const label = document.getElementById(`edit-stat-label-${i}`)?.value;
+                    if (value && label) {
+                        stats.push({ value, label });
+                    }
+                }
+
+                // Обновляем статистику на странице
+                if (this.selectedSection.elements.stats && this.selectedSection.elements.stats.items) {
+                    this.selectedSection.elements.stats.items.forEach((stat, index) => {
+                        const valueEl = stat.querySelector('h3');
+                        const labelEl = stat.querySelector('p');
+                        if (valueEl && stats[index]) valueEl.textContent = stats[index].value;
+                        if (labelEl && stats[index]) labelEl.textContent = stats[index].label;
+                    });
+                }
+
+                // Сохраняем в dataManager
+                if (window.dataManager) {
+                    window.dataManager.updateStats(stats);
                 }
             }
 
@@ -981,86 +977,54 @@
                 }
             }
 
-            saveHeaderChanges(frameDoc) {
-                const logo = document.getElementById('edit-header-logo')?.value;
-                
-                if (logo && this.selectedSection.elements.logo) {
-                    this.selectedSection.elements.logo.textContent = logo;
-                }
-            }
-
-            saveFooterChanges(frameDoc) {
-                const companyName = document.getElementById('edit-footer-company')?.value;
-                const copyright = document.getElementById('edit-footer-copyright')?.value;
-                
-                if (companyName && this.selectedSection.elements.companyName) {
-                    this.selectedSection.elements.companyName.textContent = companyName;
-                }
-                if (copyright && this.selectedSection.elements.copyright) {
-                    this.selectedSection.elements.copyright.textContent = copyright;
-                }
-            }
-
-            saveChanges() {
+            saveChangesToStorage() {
                 try {
                     const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
                     
-                    // Сохраняем ВСЕ изменения в localStorage
-                    const changes = {
-                        hero: {
-                            title: frameDoc.querySelector('#home h1, .hero h1, section:first-of-type h1')?.textContent,
-                            content: frameDoc.querySelector('#home p, .hero p, section:first-of-type p')?.textContent
-                        },
-                        about: {
-                            title: frameDoc.querySelector('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title')?.textContent,
-                            content: frameDoc.querySelector('.about-text p, section:nth-of-type(2) p')?.textContent
-                        },
-                        services: {
-                            title: frameDoc.querySelector('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title')?.textContent
-                        },
-                        destinations: {
-                            title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title')?.textContent,
-                            subtitle: frameDoc.querySelector('.destinations .section-subtitle, section:nth-of-type(4) .section-subtitle')?.textContent
-                        },
-                        contact: {
-                            title: frameDoc.querySelector('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title')?.textContent,
-                            phone: frameDoc.querySelector('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p')?.textContent,
-                            email: frameDoc.querySelector('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p')?.textContent,
-                            address: frameDoc.querySelector('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p')?.textContent,
-                            hours: frameDoc.querySelector('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p')?.textContent
-                        },
-                        header: {
-                            logo: frameDoc.querySelector('.logo h2')?.textContent
-                        },
-                        footer: {
-                            companyName: frameDoc.querySelector('.footer-section h3')?.textContent,
-                            copyright: frameDoc.querySelector('.footer-bottom p')?.textContent
-                        },
-                        timestamp: new Date().toISOString()
-                    };
-                    
-                    localStorage.setItem('worldtravel_page_changes', JSON.stringify(changes));
-                    this.showSaveStatus('Все изменения сохранены');
-                    
-                    // Также сохраняем в dataManager для синхронизации
+                    // Сохраняем изменения в dataManager
                     if (window.dataManager) {
-                        const currentData = window.dataManager.getData() || {};
-                        currentData.pageContent = changes;
-                        window.dataManager.setData(currentData);
+                        const content = window.dataManager.getContent() || {};
+                        
+                        // Обновляем контент на основе текущих значений
+                        if (this.selectedSection.id === 'hero') {
+                            content.hero = {
+                                title: frameDoc.querySelector('#home h1, .hero h1')?.textContent || '',
+                                subtitle: frameDoc.querySelector('#home p, .hero p')?.textContent || ''
+                            };
+                        } else if (this.selectedSection.id === 'about') {
+                            content.about = {
+                                title: frameDoc.querySelector('#about .section-title')?.textContent || '',
+                                description: frameDoc.querySelector('.about-text p')?.textContent || '',
+                                stats: this.getCurrentStats()
+                            };
+                        }
+                        
+                        window.dataManager.updateContent(this.selectedSection.id, content[this.selectedSection.id]);
                     }
+                    
+                    this.showSaveStatus('Все изменения сохранены');
                     
                 } catch (error) {
                     console.error('Ошибка сохранения:', error);
-                    this.showNotification('Ошибка сохранения изменений', 'error');
                 }
+            }
+
+            getCurrentStats() {
+                const stats = [];
+                for (let i = 0; i < 3; i++) {
+                    const value = document.getElementById(`edit-stat-value-${i}`)?.value;
+                    const label = document.getElementById(`edit-stat-label-${i}`)?.value;
+                    if (value && label) {
+                        stats.push({ value, label });
+                    }
+                }
+                return stats;
             }
 
             refreshFrame() {
                 this.currentFrame.src = this.currentFrame.src;
+                this.isFrameReady = false;
                 this.showNotification('Страница обновлена', 'info');
-                setTimeout(() => {
-                    this.setupSections();
-                }, 1000);
             }
 
             addNewBlock() {
@@ -1068,8 +1032,8 @@
             }
 
             saveAndExit() {
-                this.saveChanges();
-                this.showNotification('Все изменения сохранены! Переход на главную страницу...', 'success');
+                this.saveChangesToStorage();
+                this.showNotification('Все изменения сохранены! Переход в админ-панель...', 'success');
                 setTimeout(() => {
                     window.location.href = 'admin.html';
                 }, 1500);
@@ -1117,21 +1081,6 @@
                 window.location.href = 'admin.html'; 
             }
         }
-
-        // Загрузка сохраненных изменений при старте
-        window.addEventListener('load', function() {
-            setTimeout(() => {
-                try {
-                    const savedChanges = localStorage.getItem('worldtravel_page_changes');
-                    if (savedChanges) {
-                        const changes = JSON.parse(savedChanges);
-                        console.log('Загружены сохраненные изменения:', changes);
-                    }
-                } catch (error) {
-                    console.error('Ошибка загрузки сохраненных изменений:', error);
-                }
-            }, 2000);
-        });
     </script>
 </body>
 </html>
