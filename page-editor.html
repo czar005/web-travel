@@ -52,12 +52,13 @@
         .preview-frame-container {
             flex: 1;
             position: relative;
-            overflow: hidden;
+            overflow: auto;
         }
 
         #page-frame {
             width: 100%;
-            height: 100%;
+            height: auto;
+            min-height: 100%;
             border: none;
             background: white;
         }
@@ -66,8 +67,8 @@
             position: absolute;
             top: 0;
             left: 0;
-            right: 0;
-            bottom: 0;
+            width: 100%;
+            height: 100%;
             background: transparent;
             z-index: 1000;
             pointer-events: none;
@@ -297,29 +298,14 @@
             flex-shrink: 0;
         }
 
-        .zoom-controls {
-            display: flex;
-            gap: 5px;
-            align-items: center;
-        }
-
-        .zoom-btn {
-            background: white;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            padding: 5px 10px;
-            cursor: pointer;
-            font-size: 0.9rem;
-        }
-
-        .zoom-btn:hover {
-            background: #e9ecef;
-        }
-
-        .zoom-btn.active {
-            background: #e3f2fd;
-            border-color: #2c5aa0;
-            color: #2c5aa0;
+        .scroll-hint {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 5px;
+            padding: 8px 12px;
+            font-size: 0.8rem;
+            color: #856404;
+            margin-left: auto;
         }
     </style>
 </head>
@@ -347,7 +333,7 @@
             <!-- Информация о странице -->
             <div class="page-info">
                 <h3>Редактирование в реальном времени</h3>
-                <p>Кликните на любой раздел страницы для редактирования. Изменения сохраняются автоматически.</p>
+                <p>Кликните на любой раздел страницы для редактирования. Используйте скролл чтобы увидеть все блоки.</p>
                 <div id="save-status" class="save-status" style="display: none;">
                     <i class="fas fa-check-circle"></i> <span id="status-message">Изменения сохранены</span>
                 </div>
@@ -355,10 +341,8 @@
 
             <!-- Контролы для фрейма -->
             <div class="frame-controls">
-                <div class="zoom-controls">
-                    <button class="zoom-btn active" onclick="changeZoom(1)">100%</button>
-                    <button class="zoom-btn" onclick="changeZoom(0.75)">75%</button>
-                    <button class="zoom-btn" onclick="changeZoom(0.5)">50%</button>
+                <div class="scroll-hint">
+                    <i class="fas fa-mouse-pointer"></i> Скролл для просмотра всех блоков
                 </div>
             </div>
 
@@ -399,24 +383,33 @@
             constructor() {
                 this.currentFrame = null;
                 this.selectedSection = null;
-                this.currentZoom = 1;
                 this.sections = [];
                 this.init();
             }
 
             init() {
                 this.setupFrame();
-                setTimeout(() => {
-                    this.setupSections();
-                }, 2000);
+                this.setupScrollSync();
             }
 
             setupFrame() {
                 this.currentFrame = document.getElementById('page-frame');
                 this.currentFrame.onload = () => {
                     this.disablePageFunctionality();
-                    this.setupSections();
+                    setTimeout(() => {
+                        this.setupSections();
+                    }, 1000);
                 };
+            }
+
+            setupScrollSync() {
+                const frameContainer = document.querySelector('.preview-frame-container');
+                const overlay = document.getElementById('frame-overlay');
+                
+                frameContainer.addEventListener('scroll', () => {
+                    // Синхронизируем позицию оверлея с фреймом
+                    overlay.scrollTop = frameContainer.scrollTop;
+                });
             }
 
             disablePageFunctionality() {
@@ -511,20 +504,22 @@
                         if (element) {
                             const rect = element.getBoundingClientRect();
                             const frameRect = this.currentFrame.getBoundingClientRect();
+                            const containerRect = this.currentFrame.parentElement.getBoundingClientRect();
                             
                             const highlight = document.createElement('div');
                             highlight.className = 'section-highlight';
                             highlight.dataset.sectionId = section.id;
                             
-                            highlight.style.left = (rect.left) + 'px';
-                            highlight.style.top = (rect.top) + 'px';
-                            highlight.style.width = rect.width + 'px';
+                            // Правильно позиционируем относительно контейнера
+                            highlight.style.left = '0px';
+                            highlight.style.top = (rect.top + this.currentFrame.contentWindow.scrollY - containerRect.top) + 'px';
+                            highlight.style.width = '100%';
                             highlight.style.height = rect.height + 'px';
                             
                             // Добавляем подсказку
                             const tooltip = document.createElement('div');
                             tooltip.className = 'edit-tooltip';
-                            tooltip.textContent = 'Кликните для редактирования';
+                            tooltip.textContent = section.name;
                             highlight.appendChild(tooltip);
                             
                             highlight.addEventListener('click', (e) => {
@@ -536,6 +531,31 @@
                         }
                     } catch (error) {
                         console.log('Ошибка создания хайлайта:', section.id, error);
+                    }
+                });
+
+                // Обновляем хайлайты при скролле
+                this.currentFrame.contentWindow.addEventListener('scroll', () => {
+                    this.updateHighlightsPosition();
+                });
+            }
+
+            updateHighlightsPosition() {
+                const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
+                const containerRect = this.currentFrame.parentElement.getBoundingClientRect();
+                
+                this.sections.forEach(section => {
+                    try {
+                        const element = frameDoc.querySelector(section.selector);
+                        const highlight = document.querySelector(`[data-section-id="${section.id}"]`);
+                        
+                        if (element && highlight) {
+                            const rect = element.getBoundingClientRect();
+                            highlight.style.top = (rect.top + this.currentFrame.contentWindow.scrollY - containerRect.top) + 'px';
+                            highlight.style.height = rect.height + 'px';
+                        }
+                    } catch (error) {
+                        console.log('Ошибка обновления позиции:', error);
                     }
                 });
             }
@@ -625,47 +645,36 @@
             saveChanges() {
                 try {
                     const frameDoc = this.currentFrame.contentDocument || this.currentFrame.contentWindow.document;
-                    const htmlContent = frameDoc.documentElement.outerHTML;
                     
-                    // Сохраняем измененный HTML в localStorage
-                    localStorage.setItem('worldtravel_edited_page', htmlContent);
-                    localStorage.setItem('worldtravel_edit_timestamp', new Date().toISOString());
+                    // Сохраняем конкретные изменения в localStorage
+                    const changes = {
+                        hero: {
+                            title: frameDoc.querySelector('#home h1, .hero h1')?.textContent,
+                            content: frameDoc.querySelector('#home p, .hero p')?.textContent
+                        },
+                        about: {
+                            title: frameDoc.querySelector('#about .section-title, .about .section-title')?.textContent,
+                            content: frameDoc.querySelector('.about-text p')?.textContent
+                        },
+                        services: {
+                            title: frameDoc.querySelector('#services .section-title, .services .section-title')?.textContent
+                        },
+                        destinations: {
+                            title: frameDoc.querySelector('#destinations .section-title, .destinations .section-title')?.textContent,
+                            content: frameDoc.querySelector('.destinations .section-subtitle')?.textContent
+                        },
+                        contact: {
+                            title: frameDoc.querySelector('#contact .section-title, .contact .section-title')?.textContent
+                        },
+                        timestamp: new Date().toISOString()
+                    };
                     
+                    localStorage.setItem('worldtravel_page_changes', JSON.stringify(changes));
                     this.showSaveStatus('Изменения сохранены');
                     
                 } catch (error) {
-                    console.error('Ошибка сохранения HTML:', error);
+                    console.error('Ошибка сохранения:', error);
                 }
-            }
-
-            changeZoom(zoomLevel) {
-                this.currentZoom = zoomLevel;
-                const frameContainer = document.querySelector('.preview-frame-container');
-                
-                // Сбрасываем трансформации
-                frameContainer.style.transform = '';
-                frameContainer.style.transformOrigin = '';
-                
-                if (zoomLevel !== 1) {
-                    frameContainer.style.transform = `scale(${zoomLevel})`;
-                    frameContainer.style.transformOrigin = 'top left';
-                    frameContainer.style.width = `${100/zoomLevel}%`;
-                    frameContainer.style.height = `${100/zoomLevel}%`;
-                } else {
-                    frameContainer.style.width = '100%';
-                    frameContainer.style.height = '100%';
-                }
-                
-                // Обновляем активную кнопку зума
-                document.querySelectorAll('.zoom-btn').forEach(btn => {
-                    btn.classList.remove('active');
-                });
-                event.target.classList.add('active');
-                
-                // Пересчитываем хайлайты
-                setTimeout(() => {
-                    this.setupSectionHighlights();
-                }, 100);
             }
 
             refreshFrame() {
@@ -679,9 +688,10 @@
 
             saveAndExit() {
                 this.saveChanges();
+                this.showNotification('Изменения сохранены! Переход на главную страницу...', 'success');
                 setTimeout(() => {
                     window.location.href = 'index.html';
-                }, 1000);
+                }, 1500);
             }
 
             showSaveStatus(message) {
@@ -718,7 +728,6 @@
         const visualEditor = new VisualEditor();
 
         // Глобальные функции
-        function changeZoom(level) { visualEditor.changeZoom(level); }
         function refreshFrame() { visualEditor.refreshFrame(); }
         function addNewBlock() { visualEditor.addNewBlock(); }
         function saveAndExit() { visualEditor.saveAndExit(); }

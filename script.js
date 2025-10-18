@@ -4,43 +4,51 @@ console.log('WorldTravel script loaded');
 // Функция для загрузки изменений из редактора
 function loadEditorChanges() {
     try {
-        const savedHTML = localStorage.getItem('worldtravel_edited_page');
-        const timestamp = localStorage.getItem('worldtravel_edit_timestamp');
+        const savedChanges = localStorage.getItem('worldtravel_page_changes');
         
-        if (savedHTML && timestamp) {
-            console.log('Загружены изменения из редактора от:', timestamp);
+        if (savedChanges) {
+            const changes = JSON.parse(savedChanges);
+            console.log('Загружены изменения из редактора от:', changes.timestamp);
             
-            // Создаем временный div для парсинга HTML
-            const tempDiv = document.createElement('div');
-            tempDiv.innerHTML = savedHTML;
+            // Применяем изменения к соответствующим разделам
+            if (changes.hero) {
+                applyChange('#home h1, .hero h1', changes.hero.title);
+                applyChange('#home p, .hero p', changes.hero.content);
+            }
+            if (changes.about) {
+                applyChange('#about .section-title, .about .section-title', changes.about.title);
+                applyChange('.about-text p', changes.about.content);
+            }
+            if (changes.services) {
+                applyChange('#services .section-title, .services .section-title', changes.services.title);
+            }
+            if (changes.destinations) {
+                applyChange('#destinations .section-title, .destinations .section-title', changes.destinations.title);
+                applyChange('.destinations .section-subtitle', changes.destinations.content);
+            }
+            if (changes.contact) {
+                applyChange('#contact .section-title, .contact .section-title', changes.contact.title);
+            }
             
-            // Обновляем основные разделы
-            updateSectionFromEditor(tempDiv, '#home h1', '#home h1');
-            updateSectionFromEditor(tempDiv, '#home p', '#home p');
-            updateSectionFromEditor(tempDiv, '#about .section-title', '#about .section-title');
-            updateSectionFromEditor(tempDiv, '.about-text p', '.about-text p');
-            updateSectionFromEditor(tempDiv, '#services .section-title', '#services .section-title');
-            updateSectionFromEditor(tempDiv, '#destinations .section-title', '#destinations .section-title');
-            updateSectionFromEditor(tempDiv, '.destinations .section-subtitle', '.destinations .section-subtitle');
-            updateSectionFromEditor(tempDiv, '#contact .section-title', '#contact .section-title');
-            
-            console.log('Изменения из редактора применены');
+            console.log('Все изменения из редактора применены');
         }
     } catch (error) {
         console.error('Ошибка загрузки изменений из редактора:', error);
     }
 }
 
-function updateSectionFromEditor(sourceDoc, sourceSelector, targetSelector) {
+function applyChange(selector, newValue) {
+    if (!newValue) return;
+    
     try {
-        const sourceElement = sourceDoc.querySelector(sourceSelector);
-        const targetElement = document.querySelector(targetSelector);
-        
-        if (sourceElement && targetElement && sourceElement.textContent !== targetElement.textContent) {
-            targetElement.textContent = sourceElement.textContent;
-        }
+        const elements = document.querySelectorAll(selector);
+        elements.forEach(element => {
+            if (element && element.textContent !== newValue) {
+                element.textContent = newValue;
+            }
+        });
     } catch (error) {
-        console.error('Ошибка обновления секции:', error);
+        console.error('Ошибка применения изменения для', selector, error);
     }
 }
 
@@ -48,10 +56,8 @@ function updateSectionFromEditor(sourceDoc, sourceSelector, targetSelector) {
 document.addEventListener('DOMContentLoaded', function() {
     console.log('DOM loaded');
     
-    // Загружаем изменения из редактора
-    setTimeout(() => {
-        loadEditorChanges();
-    }, 100);
+    // Загружаем изменения из редактора ПЕРВЫМ делом
+    loadEditorChanges();
     
     // Остальной существующий код...
     if (typeof loadCountriesData === 'function') {
