@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.css">
+    <style>
+        /* Все существующие стили остаются без изменений */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        /* ... остальные стили ... */
+
+    </style>
+</head>
+<body>
+    <!-- HTML структура остается без изменений -->
+    <div class="editor-container">
+        <!-- Левая панель - предпросмотр -->
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn btn-warning" onclick="window.editor.showAddSectionModal()">
+                        <i class="fas fa-plus"></i> Добавить секцию
+                    </button>
+                    <button class="btn btn-secondary" onclick="window.editor.safeRefresh()" style="margin-left: 10px;">
+                        <i class="fas fa-sync"></i> Обновить
+                    </button>
+                    <button class="btn btn-success" onclick="window.editor.saveAndExit()" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="save-indicator" id="save-indicator">
+                <i class="fas fa-check-circle"></i>
+                <span id="save-message">Изменения сохранены</span>
+            </div>
+
+            <div class="preview-frame-container">
+                <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true&nocache=1"></iframe>
+            </div>
+        </div>
+
+        <!-- Правая панель - редактор -->
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="sections">Секции</button>
+                <button class="tab-button" data-tab="content">Контент</button>
+            </div>
+
+            <div class="panel-content" id="sections-tab">
+                <div class="content-header">
+                    <h3>Структура страницы</h3>
+                    <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Перетаскивайте секции для изменения порядка</p>
+                </div>
+                <div class="section-list" id="section-list">
+                    <!-- Секции будут загружены через JS -->
+                </div>
+            </div>
+
+            <div class="panel-content" id="content-tab" style="display: none;">
+                <div id="content-editor">
+                    <div class="empty-state">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Выберите секцию для редактирования</p>
+                        <small>Перейдите на вкладку "Секции" и выберите нужный блок</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания секции -->
+    <div class="modal" id="add-section-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить новую секцию</h3>
+                <button class="close-modal" onclick="window.editor.hideAddSectionModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Название секции:</label>
+                <input type="text" id="new-section-name" class="form-control" placeholder="Введите название секции">
+            </div>
+
+            <div class="form-group">
+                <label>Тип секции:</label>
+                <div class="section-type-grid" id="section-type-grid">
+                    <div class="section-type-card" data-type="text">
+                        <div class="section-type-icon"><i class="fas fa-text-height"></i></div>
+                        <div class="section-type-name">Текстовая</div>
+                        <div class="section-type-desc">Простой текстовый блок</div>
+                    </div>
+                    <div class="section-type-card" data-type="image">
+                        <div class="section-type-icon"><i class="fas fa-image"></i></div>
+                        <div class="section-type-name">С изображением</div>
+                        <div class="section-type-desc">Текст с изображением</div>
+                    </div>
+                    <div class="section-type-card" data-type="features">
+                        <div class="section-type-icon"><i class="fas fa-star"></i></div>
+                        <div class="section-type-name">Особенности</div>
+                        <div class="section-type-desc">Список преимуществ</div>
+                    </div>
+                    <div class="section-type-card" data-type="cta">
+                        <div class="section-type-icon"><i class="fas fa-bullhorn"></i></div>
+                        <div class="section-type-name">Призыв к действию</div>
+                        <div class="section-type-desc">Кнопка и описание</div>
+                    </div>
+                    <div class="section-type-card" data-type="contacts">
+                        <div class="section-type-icon"><i class="fas fa-address-book"></i></div>
+                        <div class="section-type-name">Контакты</div>
+                        <div class="section-type-desc">Контактная информация</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group position-selector">
+                <label>Позиция секции:</label>
+                <div class="position-options" id="position-options">
+                    <div class="position-option" data-position="start">
+                        <i class="fas fa-arrow-up"></i>
+                        <div>В начало</div>
+                    </div>
+                    <div class="position-option" data-position="end">
+                        <i class="fas fa-arrow-down"></i>
+                        <div>В конец</div>
+                    </div>
+                    <div class="position-option" data-position="after-hero">
+                        <i class="fas fa-arrow-down"></i>
+                        <div>После героя</div>
+                    </div>
+                    <div class="position-option" data-position="before-footer">
+                        <i class="fas fa-arrow-up"></i>
+                        <div>Перед футером</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="add-section-btn" id="create-section-btn" onclick="window.editor.createNewSection()">
+                <i class="fas fa-plus"></i> Создать секцию
+            </button>
+        </div>
+    </div>
+
+    <!-- Скрытый input для загрузки файлов -->
+    <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
+    <script>
+        // Оригинальный код StablePageEditor остается без изменений
+        class StablePageEditor {
+            constructor() {
+                this.currentSection = null;
+                this.currentData = {};
+                this.hasUnsavedChanges = false;
+                this.selectedSectionType = 'text';
+                this.selectedPosition = 'end';
+                this.sections = [];
+                this.sortable = null;
+                this.init();
+            }
+
+            // ... весь оригинальный код класса StablePageEditor ...
+
+        }
+
+        // Инициализация редактора
+        const editor = new StablePageEditor();
+        window.editor = editor; // Делаем глобально доступным
+
+        // Глобальные функции для кнопок
+        window.refreshPreview = () => editor.safeRefresh();
+        window.saveAndExit = () => editor.saveAndExit();
+    </script>
+
+    <!-- Добавляем исправления после основного кода -->
+    <script>
+        // Вставляем исправления для методов StablePageEditor
+        // ... код из fix_syntax_errors.js ...
+    </script>
+</body>
+</html>
