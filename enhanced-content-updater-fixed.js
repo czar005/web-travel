@@ -1,4 +1,4 @@
-// Fixed Enhanced Content Updater с улучшенной обработкой статистики и услуг
+// Fixed Enhanced Content Updater с исправленными контактами и футером
 function EnhancedContentUpdaterFixed() {
     this.appliedChanges = new Set();
     this.init();
@@ -38,6 +38,7 @@ EnhancedContentUpdaterFixed.prototype.applyAllChanges = function() {
     const changeHash = JSON.stringify({
         content: data.content,
         contacts: data.contacts,
+        footer: data.footer,
         timestamp: Date.now()
     });
     
@@ -50,7 +51,7 @@ EnhancedContentUpdaterFixed.prototype.applyAllChanges = function() {
     try {
         this.updateContent(data.content);
         this.updateNavigation(data.content);
-        this.updateFooter(data.content);
+        this.updateFooter(data.footer);
         this.updateContacts(data.contacts);
         this.updateStats(data.content?.about?.stats);
         this.updateServices(data.content?.services?.services);
@@ -97,6 +98,7 @@ EnhancedContentUpdaterFixed.prototype.updateContent = function(content) {
         this.updateText('#home h1, .hero h1', content.hero.title);
         this.updateText('#home p, .hero p', content.hero.subtitle);
         this.updateImage('.hero-image img', content.hero.image);
+        this.updateImage('.hero .image-placeholder img', content.hero.image);
     }
     
     // About section
@@ -104,6 +106,7 @@ EnhancedContentUpdaterFixed.prototype.updateContent = function(content) {
         this.updateText('#about .section-title', content.about.title);
         this.updateText('.about-text p', content.about.description);
         this.updateImage('.about-image img', content.about.image);
+        this.updateImage('.about .image-placeholder img', content.about.image);
     }
     
     // Services section
@@ -120,12 +123,6 @@ EnhancedContentUpdaterFixed.prototype.updateContent = function(content) {
     // Contact section
     if (content.contact) {
         this.updateText('#contact .section-title', content.contact.title);
-    }
-    
-    // Footer
-    if (content.footer) {
-        this.updateText('.footer-section:first-child p', content.footer.description);
-        this.updateHTML('.footer-bottom p', content.footer.copyright);
     }
 };
 
@@ -150,24 +147,28 @@ EnhancedContentUpdaterFixed.prototype.updateNavigation = function(content) {
     });
 };
 
-EnhancedContentUpdaterFixed.prototype.updateFooter = function(content) {
-    if (!content) return;
+EnhancedContentUpdaterFixed.prototype.updateFooter = function(footer) {
+    if (!footer) return;
     
-    console.log('🦶 Updating footer...');
+    console.log('🦶 Updating footer...', footer);
     
-    // Update footer links
+    // Update footer description
+    if (footer.description) {
+        this.updateText('.footer-section:first-child p', footer.description);
+    }
+    
+    // Update footer copyright
+    if (footer.copyright) {
+        this.updateHTML('.footer-bottom p', footer.copyright);
+    }
+    
+    // Update footer links based on content (если нужно)
     const footerLinks = document.querySelectorAll('.footer-section:nth-child(2) a');
     footerLinks.forEach(link => {
         const href = link.getAttribute('href');
         if (href && href.startsWith('#')) {
             const sectionId = href.substring(1);
-            if (content[sectionId] && content[sectionId].title) {
-                const newTitle = content[sectionId].title;
-                if (link.textContent !== newTitle) {
-                    link.textContent = newTitle;
-                    console.log(`✅ Footer link updated: ${sectionId} -> ${newTitle}`);
-                }
-            }
+            // Здесь можно обновить текст ссылок если нужно
         }
     });
 };
@@ -177,20 +178,24 @@ EnhancedContentUpdaterFixed.prototype.updateContacts = function(contacts) {
     
     console.log('📞 Updating contacts...', contacts);
     
-    // Update contact section
+    // Update contact section - ПРАВИЛЬНЫЙ ПОРЯДОК
     if (contacts.phone) {
+        // Телефон - первый элемент
         this.updateText('.contact-info .contact-item:nth-child(1) p', contacts.phone);
         this.updateText('.footer-section:nth-child(3) p:nth-child(1)', contacts.phone);
     }
     if (contacts.email) {
+        // Email - второй элемент  
         this.updateText('.contact-info .contact-item:nth-child(2) p', contacts.email);
         this.updateText('.footer-section:nth-child(3) p:nth-child(2)', contacts.email);
     }
     if (contacts.address) {
+        // Адрес - третий элемент
         this.updateText('.contact-info .contact-item:nth-child(3) p', contacts.address);
         this.updateText('.footer-section:nth-child(3) p:nth-child(3)', contacts.address);
     }
     if (contacts.hours) {
+        // График работы - четвертый элемент
         this.updateText('.contact-info .contact-item:nth-child(4) p', contacts.hours);
         this.updateText('.footer-section:nth-child(3) p:nth-child(4)', contacts.hours);
     }
@@ -226,10 +231,14 @@ EnhancedContentUpdaterFixed.prototype.updateStats = function(stats) {
             
             if (valueEl && stat.value) {
                 valueEl.textContent = stat.value;
+                // Обновляем атрибут для анимации счетчика
+                valueEl.setAttribute('data-target', stat.value);
             }
             if (labelEl && stat.label) {
                 labelEl.textContent = stat.label;
             }
+            
+            statElements[index].style.display = 'block';
         }
     });
     
@@ -351,15 +360,18 @@ EnhancedContentUpdaterFixed.prototype.updateHTML = function(selector, html) {
 EnhancedContentUpdaterFixed.prototype.updateImage = function(selector, src) {
     if (!src) return;
     
-    const element = document.querySelector(selector);
-    if (element && element.src !== src) {
-        element.src = src;
-        // Добавляем обработчик ошибок загрузки изображения
-        element.onerror = function() {
-            console.error('❌ Failed to load image:', src);
-            this.src = 'images/travel-placeholder.svg';
-        };
-    }
+    const elements = document.querySelectorAll(selector);
+    elements.forEach(element => {
+        if (element.src !== src) {
+            element.src = src;
+            // Добавляем обработчик ошибок загрузки изображения
+            element.onerror = function() {
+                console.error('❌ Failed to load image:', src);
+                // Можно установить изображение-заглушку
+                this.src = 'images/travel-placeholder.svg';
+            };
+        }
+    });
 };
 
 // Initialize fixed content updater
