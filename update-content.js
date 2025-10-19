@@ -73,15 +73,31 @@ ContentUpdater.prototype.applyLocalChanges = function() {
 };
 
 ContentUpdater.prototype.applyStatsChanges = function(content) {
-    if (!content?.about?.stats) return;
+    if (!content?.about?.stats) {
+        // Если статистики нет, скрываем блок
+        this.hideStatsSection();
+        return;
+    }
 
     var stats = content.about.stats;
+    
+    // Фильтруем только валидные статистики
+    var validStats = stats.filter(stat => stat.value && stat.label);
+    
+    if (validStats.length === 0) {
+        this.hideStatsSection();
+        return;
+    }
+    
+    console.log('📊 Applying stats changes:', validStats.length, 'valid items');
+    
     var statElements = document.querySelectorAll('.stat');
     
-    console.log('📊 Applying stats changes:', stats.length, 'items');
+    // Показываем блок статистики
+    this.showStatsSection();
     
-    if (statElements.length >= stats.length) {
-        stats.forEach(function(stat, index) {
+    if (statElements.length >= validStats.length) {
+        validStats.forEach(function(stat, index) {
             if (statElements[index]) {
                 var valueElement = statElements[index].querySelector('h3');
                 var labelElement = statElements[index].querySelector('p');
@@ -96,21 +112,59 @@ ContentUpdater.prototype.applyStatsChanges = function(content) {
                 if (labelElement) {
                     labelElement.textContent = stat.label;
                 }
+                
+                // Показываем элемент
+                statElements[index].style.display = 'block';
             }
         });
+        
+        // Скрываем лишние элементы
+        for (var i = validStats.length; i < statElements.length; i++) {
+            statElements[i].style.display = 'none';
+        }
+    }
+};
+
+ContentUpdater.prototype.hideStatsSection = function() {
+    var statsContainer = document.querySelector('.stats');
+    if (statsContainer) {
+        statsContainer.style.display = 'none';
+    }
+};
+
+ContentUpdater.prototype.showStatsSection = function() {
+    var statsContainer = document.querySelector('.stats');
+    if (statsContainer) {
+        statsContainer.style.display = 'flex';
     }
 };
 
 ContentUpdater.prototype.applyServicesChanges = function(content) {
-    if (!content?.services?.services) return;
+    if (!content?.services?.services) {
+        // Если услуг нет, скрываем блок
+        this.hideServicesSection();
+        return;
+    }
 
     var services = content.services.services;
+    
+    // Фильтруем только валидные услуги
+    var validServices = services.filter(service => service.title && service.description);
+    
+    if (validServices.length === 0) {
+        this.hideServicesSection();
+        return;
+    }
+    
+    console.log('🎯 Applying services changes:', validServices.length, 'valid items');
+    
     var serviceCards = document.querySelectorAll('.service-card');
     
-    console.log('🎯 Applying services changes:', services.length, 'items');
+    // Показываем блок услуг
+    this.showServicesSection();
     
-    if (serviceCards.length >= services.length) {
-        services.forEach(function(service, index) {
+    if (serviceCards.length >= validServices.length) {
+        validServices.forEach(function(service, index) {
             if (serviceCards[index]) {
                 var titleElement = serviceCards[index].querySelector('h3');
                 var descElement = serviceCards[index].querySelector('p');
@@ -121,8 +175,30 @@ ContentUpdater.prototype.applyServicesChanges = function(content) {
                 if (iconElement && service.icon) {
                     iconElement.className = service.icon;
                 }
+                
+                // Показываем карточку
+                serviceCards[index].style.display = 'block';
             }
         });
+        
+        // Скрываем лишние карточки
+        for (var i = validServices.length; i < serviceCards.length; i++) {
+            serviceCards[i].style.display = 'none';
+        }
+    }
+};
+
+ContentUpdater.prototype.hideServicesSection = function() {
+    var servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid) {
+        servicesGrid.style.display = 'none';
+    }
+};
+
+ContentUpdater.prototype.showServicesSection = function() {
+    var servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid) {
+        servicesGrid.style.display = 'grid';
     }
 };
 

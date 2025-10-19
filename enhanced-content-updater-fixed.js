@@ -1,4 +1,4 @@
-// Fixed Enhanced Content Updater
+// Fixed Enhanced Content Updater с улучшенной обработкой статистики и услуг
 function EnhancedContentUpdaterFixed() {
     this.appliedChanges = new Set();
     this.init();
@@ -197,14 +197,29 @@ EnhancedContentUpdaterFixed.prototype.updateContacts = function(contacts) {
 };
 
 EnhancedContentUpdaterFixed.prototype.updateStats = function(stats) {
-    if (!stats || !Array.isArray(stats)) return;
+    if (!stats || !Array.isArray(stats)) {
+        // Если статистики нет или она пустая, скрываем блок статистики
+        this.hideStatsSection();
+        return;
+    }
     
-    console.log('📊 Updating stats...', stats);
+    // Фильтруем пустые значения
+    const validStats = stats.filter(stat => stat && stat.value && stat.label);
+    
+    if (validStats.length === 0) {
+        this.hideStatsSection();
+        return;
+    }
+    
+    console.log('📊 Updating stats...', validStats);
     
     const statElements = document.querySelectorAll('.stat');
     if (statElements.length === 0) return;
     
-    stats.forEach((stat, index) => {
+    // Показываем блок статистики
+    this.showStatsSection();
+    
+    validStats.forEach((stat, index) => {
         if (statElements[index]) {
             const valueEl = statElements[index].querySelector('h3');
             const labelEl = statElements[index].querySelector('p');
@@ -217,17 +232,58 @@ EnhancedContentUpdaterFixed.prototype.updateStats = function(stats) {
             }
         }
     });
+    
+    // Скрываем лишние элементы статистики если их больше чем данных
+    for (let i = validStats.length; i < statElements.length; i++) {
+        statElements[i].style.display = 'none';
+    }
+};
+
+EnhancedContentUpdaterFixed.prototype.hideStatsSection = function() {
+    const statsContainer = document.querySelector('.stats');
+    if (statsContainer) {
+        statsContainer.style.display = 'none';
+    }
+};
+
+EnhancedContentUpdaterFixed.prototype.showStatsSection = function() {
+    const statsContainer = document.querySelector('.stats');
+    if (statsContainer) {
+        statsContainer.style.display = 'flex';
+        // Показываем все элементы статистики
+        const statElements = statsContainer.querySelectorAll('.stat');
+        statElements.forEach(stat => {
+            stat.style.display = 'block';
+        });
+    }
 };
 
 EnhancedContentUpdaterFixed.prototype.updateServices = function(services) {
-    if (!services || !Array.isArray(services)) return;
+    if (!services || !Array.isArray(services)) {
+        // Если услуг нет или они пустые, скрываем блок услуг
+        this.hideServicesSection();
+        return;
+    }
     
-    console.log('🎯 Updating services...', services);
+    // Фильтруем пустые значения
+    const validServices = services.filter(service => 
+        service && service.title && service.description
+    );
+    
+    if (validServices.length === 0) {
+        this.hideServicesSection();
+        return;
+    }
+    
+    console.log('🎯 Updating services...', validServices);
     
     const serviceCards = document.querySelectorAll('.service-card');
     if (serviceCards.length === 0) return;
     
-    services.forEach((service, index) => {
+    // Показываем блок услуг
+    this.showServicesSection();
+    
+    validServices.forEach((service, index) => {
         if (serviceCards[index]) {
             const titleEl = serviceCards[index].querySelector('h3');
             const descEl = serviceCards[index].querySelector('p');
@@ -242,8 +298,34 @@ EnhancedContentUpdaterFixed.prototype.updateServices = function(services) {
             if (iconEl && service.icon) {
                 iconEl.className = service.icon;
             }
+            
+            serviceCards[index].style.display = 'block';
         }
     });
+    
+    // Скрываем лишние карточки услуг если их больше чем данных
+    for (let i = validServices.length; i < serviceCards.length; i++) {
+        serviceCards[i].style.display = 'none';
+    }
+};
+
+EnhancedContentUpdaterFixed.prototype.hideServicesSection = function() {
+    const servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid) {
+        servicesGrid.style.display = 'none';
+    }
+};
+
+EnhancedContentUpdaterFixed.prototype.showServicesSection = function() {
+    const servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid) {
+        servicesGrid.style.display = 'grid';
+        // Показываем все карточки услуг
+        const serviceCards = servicesGrid.querySelectorAll('.service-card');
+        serviceCards.forEach(card => {
+            card.style.display = 'block';
+        });
+    }
 };
 
 EnhancedContentUpdaterFixed.prototype.updateText = function(selector, text) {
@@ -272,6 +354,11 @@ EnhancedContentUpdaterFixed.prototype.updateImage = function(selector, src) {
     const element = document.querySelector(selector);
     if (element && element.src !== src) {
         element.src = src;
+        // Добавляем обработчик ошибок загрузки изображения
+        element.onerror = function() {
+            console.error('❌ Failed to load image:', src);
+            this.src = 'images/travel-placeholder.svg';
+        };
     }
 };
 
