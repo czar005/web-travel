@@ -6,7 +6,7 @@
     <title>Редактор страниц - WorldTravel</title>
     <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.css">
+    <style>.sortable-ghost{opacity:0.4;background:#c8ebfb}.sortable-chosen{transform:rotate(5deg)}.sortable-drag{opacity:0.8;background:#e3f2fd;border:2px dashed #2c5aa0}</style>
     <style>
         /* Все существующие стили остаются без изменений */
         * {
@@ -797,7 +797,7 @@
                 this.selectedPosition = 'end';
                 this.sections = [];
                 this.sortable = null;
-                this.temporaryUrls = new Map(); // Для отслеживания временных URL
+                this.temporaryUrls = new Map(); // Хранилище для временных blob URL // Для отслеживания временных URL
                 this.init();
             }
 
@@ -821,7 +821,19 @@
                 });
                 this.initSortable();
                 
-                // Авто-выбор первой секции
+                // Добавляем обработчики для стабильности
+                window.addEventListener('beforeunload', () => {
+                    this.cleanupTemporaryUrls();
+                });
+                
+                // Обработчик ошибок blob URL
+                window.addEventListener('error', (event) => {
+                    if (event.target && event.target.src && event.target.src.startsWith('blob:')) {
+                        console.warn('Blob URL error:', event.target.src);
+                        event.preventDefault();
+                    }
+                });
+                
                 setTimeout(() => {
                     if (this.sections.length > 0) {
                         this.selectSection(this.sections[0].id);
@@ -1612,13 +1624,43 @@
             }
 
             handleImageUpload(file) {
-                const fileInput = document.getElementById("image-file-input");
-                const fieldId = fileInput.getAttribute("data-field");
-                
-                if (!file.type.startsWith("image/")) {
-                    this.showNotification("Пожалуйста, выберите файл изображения", "error");
-                    return;
+        const fileInput = document.getElementById('image-file-input');
+        const fieldId = fileInput.getAttribute('data-field') || 'image';
+        
+        if (!file.type.startsWith('image/')) {
+            this.showNotification('Пожалуйста, выберите файл изображения', 'error');
+            return;
+        }
+
+        if (file.size > 5 * 1024 * 1024) {
+            this.showNotification('Размер файла не должен превышать 5MB', 'error');
+            return;
+        }
+
+        try {
+            // Освобождаем предыдущий временный URL для этого поля
+            if (this.temporaryUrls.has(fieldId)) {
+                const oldUrl = this.temporaryUrls.get(fieldId);
+                try {
+                    URL.revokeObjectURL(oldUrl);
+                    console.log('🗑️ Освобожден предыдущий URL для поля:', fieldId);
+                } catch (e) {
+                    console.warn('Не удалось освободить предыдущий URL:', e);
                 }
+                this.temporaryUrls.delete(fieldId);
+            }
+
+            // Создаем новый временный URL
+            const imageUrl = URL.createObjectURL(file);
+            this.temporaryUrls.set(fieldId, imageUrl);
+            this.updateImageField(imageUrl, fieldId);
+            this.showNotification('Изображение загружено для предпросмотра', 'success');
+            
+        } catch (error) {
+            console.error('Ошибка загрузки изображения:', error);
+            this.showNotification('Ошибка загрузки изображения', 'error');
+        }
+    }
 
                 if (file.size > 5 * 1024 * 1024) {
                     this.showNotification("Размер файла не должен превышать 5MB", "error");
@@ -1660,11 +1702,16 @@ this.temporaryUrls = new Map();
 
 // Добавьте этот метод
             cleanupTemporaryUrls() {
-                for (const [fieldId, url] of this.temporaryUrls) {
-                    try {
-                        URL.revokeObjectURL(url);
-                        console.log("🗑️ Освобожден URL для поля:", fieldId);
-                    } catch (e) {
+        for (const [fieldId, url] of this.temporaryUrls) {
+            try {
+                URL.revokeObjectURL(url);
+                console.log('🗑️ Освобожден URL для поля:', fieldId);
+            } catch (e) {
+                console.warn('Не удалось освободить URL:', e);
+            }
+        }
+        this.temporaryUrls.clear();
+    } catch (e) {
                         console.warn("Не удалось освободить URL:", e);
                     }
                 }
@@ -1714,6 +1761,18 @@ this.temporaryUrls = new Map();
             }
 
             updateImageField(url, fieldId = null) {
+        // Если это blob URL, добавляем обработчик ошибок
+        if (url.startsWith('blob:')) {
+            setTimeout(() => {
+                const imgs = document.querySelectorAll('img[src="' + url + '"]');
+                imgs.forEach(img => {
+                    img.onerror = () => {
+                        console.warn('Blob URL failed:', url);
+                        img.src = 'images/travel-placeholder.svg';
+                    };
+                });
+            }, 100);
+        }
                 const field = fieldId ? 
                     document.querySelector(`[data-field="${fieldId}"]`) :
                     document.querySelector('[data-field="image"]');
@@ -1912,19 +1971,19 @@ this.temporaryUrls = new Map();
             }
 
             saveAndExit() {
-                if (this.hasUnsavedChanges) {
-                    if (confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
-                        if (!this.saveChanges()) {
-                            return; // Не выходим если сохранение не удалось
-                        }
-                    }
-                }
-                
-                this.showNotification('Возврат в админ-панель...');
-                setTimeout(() => {
-                    window.location.href = 'admin.html';
-                }, 1000);
+        this.cleanupTemporaryUrls();
+        
+        if (this.hasUnsavedChanges) {
+            if (confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
+                this.saveChanges();
             }
+        }
+        
+        this.showNotification('Возврат в админ-панель...');
+        setTimeout(() => {
+            window.location.href = 'admin.html';
+        }, 500);
+    }
 
             showNotification(message, type = 'success') {
                 const notification = document.createElement('div');
