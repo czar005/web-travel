@@ -1,6 +1,7 @@
-// Fixed Enhanced Content Updater с исправленными контактами и футером
+// Fixed Enhanced Content Updater с исправлением ошибок Blob URL
 function EnhancedContentUpdaterFixed() {
     this.appliedChanges = new Set();
+    this.failedImages = new Set(); // Трекер неудачных загрузок изображений
     this.init();
 }
 
@@ -362,16 +363,92 @@ EnhancedContentUpdaterFixed.prototype.updateImage = function(selector, src) {
     
     const elements = document.querySelectorAll(selector);
     elements.forEach(element => {
+        // Проверяем, является ли src Blob URL и не была ли уже неудачная попытка загрузки
+        const isBlobUrl = src.startsWith('blob:');
+        const imageKey = selector + '|' + src;
+        
+        if (isBlobUrl && this.failedImages.has(imageKey)) {
+            console.log('⚠️ Skipping failed blob URL:', src);
+            return;
+        }
+        
         if (element.src !== src) {
             element.src = src;
-            // Добавляем обработчик ошибок загрузки изображения
-            element.onerror = function() {
+            
+            // Улучшенный обработчик ошибок загрузки изображения
+            element.onerror = () => {
                 console.error('❌ Failed to load image:', src);
-                // Можно установить изображение-заглушку
-                this.src = 'images/travel-placeholder.svg';
+                
+                // Добавляем в список неудачных загрузок
+                this.failedImages.add(imageKey);
+                
+                // Для Blob URL используем заглушку, для обычных URL оставляем как есть
+                if (isBlobUrl) {
+                    console.log('🔄 Replacing failed blob URL with placeholder');
+                    element.src = 'images/travel-placeholder.svg';
+                    
+                    // Обновляем данные, чтобы убрать неработающий Blob URL
+                    this.fixBrokenImageInData(selector, src);
+                }
+            };
+            
+            // Сбрасываем ошибку если изображение загрузилось успешно
+            element.onload = () => {
+                if (this.failedImages.has(imageKey)) {
+                    this.failedImages.delete(imageKey);
+                    console.log('✅ Image loaded successfully after previous failure:', src);
+                }
             };
         }
     });
+};
+
+// Новый метод для исправления битых изображений в данных
+EnhancedContentUpdaterFixed.prototype.fixBrokenImageInData = function(selector, brokenSrc) {
+    try {
+        const data = this.getData();
+        if (!data || !data.content) return;
+        
+        let imageFixed = false;
+        
+        // Ищем и исправляем битые изображения в разных секциях
+        Object.keys(data.content).forEach(sectionKey => {
+            const section = data.content[sectionKey];
+            if (section && section.image === brokenSrc) {
+                section.image = 'images/travel-placeholder.svg';
+                imageFixed = true;
+                console.log('🔧 Fixed broken image in section:', sectionKey);
+            }
+        });
+        
+        // Сохраняем исправленные данные
+        if (imageFixed) {
+            this.saveFixedData(data);
+        }
+    } catch (error) {
+        console.error('Error fixing broken image in data:', error);
+    }
+};
+
+// Метод для сохранения исправленных данных
+EnhancedContentUpdaterFixed.prototype.saveFixedData = function(data) {
+    try {
+        // Сохраняем в localStorage
+        localStorage.setItem('worldtravel_data', JSON.stringify(data));
+        
+        // Обновляем в DataManager если доступен
+        if (window.dataManager && window.dataManager.setData) {
+            window.dataManager.setData(data);
+        }
+        
+        console.log('💾 Fixed data saved successfully');
+        
+        // Обновляем привязки изменений
+        this.appliedChanges.clear();
+        
+    } catch (error) {
+        console.error('Error saving fixed data:', error);
+    }
 };
 
 // Initialize fixed content updater
