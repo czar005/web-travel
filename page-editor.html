@@ -1230,10 +1230,492 @@
                 this.showNotification('Секция удалена', 'success');
             }
 
-            // ... остальные методы остаются без изменений ...
-            // [Здесь должны быть все остальные методы из предыдущей версии]
-            // Для экономии места не дублирую их все, но они должны быть
+            setupFrameListener() {
+                const frame = document.getElementById('preview-frame');
+                frame.onload = () => {
+                    console.log('✅ Фрейм предпросмотра загружен');
+                    if (this.currentSection) {
+                        setTimeout(() => {
+                            this.selectSection(this.currentSection.id);
+                        }, 500);
+                    }
+                };
+            }
 
+            selectSection(sectionId) {
+                console.log('🎯 Выбор секции:', sectionId);
+                
+                document.querySelectorAll('.section-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                const selectedItem = document.querySelector(`[data-section="${sectionId}"]`);
+                if (selectedItem) {
+                    selectedItem.classList.add('active');
+                }
+
+                this.currentSection = this.sections.find(s => s.id === sectionId);
+                this.showContentEditor();
+                this.showTab('content');
+            }
+
+            showTab(tabName) {
+                console.log('📑 Переключение на вкладку:', tabName);
+                
+                document.querySelectorAll('.panel-content').forEach(tab => {
+                    tab.style.display = 'none';
+                });
+                
+                const targetTab = document.getElementById(tabName + '-tab');
+                if (targetTab) {
+                    targetTab.style.display = 'block';
+                }
+                
+                document.querySelectorAll('.tab-button').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                
+                const targetButton = document.querySelector(`[data-tab="${tabName}"]`);
+                if (targetButton) {
+                    targetButton.classList.add('active');
+                }
+            }
+
+            showContentEditor() {
+                if (!this.currentSection) {
+                    const editor = document.getElementById('content-editor');
+                    editor.innerHTML = `
+                        <div class="empty-state">
+                            <i class="fas fa-mouse-pointer"></i>
+                            <p>Выберите секцию для редактирования</p>
+                            <small>Перейдите на вкладку "Секции" и выберите нужный блок</small>
+                        </div>
+                    `;
+                    return;
+                }
+
+                const editor = document.getElementById('content-editor');
+                
+                let editorHTML = `
+                    <div class="content-header">
+                        <h3>${this.currentSection.name}</h3>
+                        <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Редактирование содержимого секции</p>
+                    </div>
+                `;
+
+                this.currentSection.fields.forEach(field => {
+                    if (field.type === 'stats') {
+                        editorHTML += this.getStatsEditor();
+                    } else if (field.type === 'services') {
+                        editorHTML += this.getServicesEditor();
+                    } else if (field.type === 'features') {
+                        editorHTML += this.getFeaturesEditor();
+                    } else if (field.type === 'image') {
+                        editorHTML += this.getImageEditor(field);
+                    } else {
+                        const currentValue = this.getCurrentValue(field);
+                        editorHTML += `
+                            <div class="form-group">
+                                <label>${field.label}:</label>
+                                ${field.type === 'textarea' ? 
+                                    `<textarea class="form-control" data-field="${field.id}" placeholder="Введите ${field.label.toLowerCase()}...">${currentValue}</textarea>` :
+                                    `<input type="text" class="form-control" data-field="${field.id}" value="${currentValue}" placeholder="Введите ${field.label.toLowerCase()}...">`
+                                }
+                            </div>
+                        `;
+                    }
+                });
+
+                editorHTML += `
+                    <div class="action-buttons">
+                        <button class="btn btn-primary" id="save-changes-btn">
+                            <i class="fas fa-save"></i> Применить изменения
+                        </button>
+                        <button class="btn btn-secondary" id="back-to-sections-btn">
+                            <i class="fas fa-arrow-left"></i> Назад к списку
+                        </button>
+                    </div>
+                    
+                    <div class="debug-info">
+                        <strong>Отладка:</strong> Секция: ${this.currentSection.id} | Тип: ${this.currentSection.type} | Поля: ${this.currentSection.fields.length}
+                    </div>
+                `;
+
+                editor.innerHTML = editorHTML;
+                
+                document.getElementById('save-changes-btn').addEventListener('click', () => {
+                    this.saveChanges();
+                });
+                
+                document.getElementById('back-to-sections-btn').addEventListener('click', () => {
+                    this.showTab('sections');
+                });
+                
+                this.hasUnsavedChanges = false;
+            }
+
+            getCurrentValue(field) {
+                // Для контактов
+                if (this.currentSection.id === 'contact' && field.id !== 'title') {
+                    if (this.currentData.contacts && this.currentData.contacts[field.id]) {
+                        return this.escapeHtml(this.currentData.contacts[field.id]);
+                    }
+                }
+                
+                // Для футера
+                if (this.currentSection.id === 'footer') {
+                    if (this.currentData.footer && this.currentData.footer[field.id]) {
+                        return this.escapeHtml(this.currentData.footer[field.id]);
+                    }
+                }
+                
+                // Для пользовательских секций
+                if (this.currentData.content && this.currentData.content[this.currentSection.id]) {
+                    const sectionData = this.currentData.content[this.currentSection.id];
+                    if (sectionData[field.id]) {
+                        return this.escapeHtml(sectionData[field.id]);
+                    }
+                }
+                
+                return '';
+            }
+
+            getStatsEditor() {
+                const stats = this.currentData.content?.about?.stats || [];
+                let html = '<div class="stats-editor"><h4>Статистика</h4>';
+                
+                stats.forEach((stat, index) => {
+                    html += `
+                        <div class="stat-row">
+                            <input type="text" class="form-control" data-stat="${index}" data-field="value" value="${stat.value}" placeholder="Значение">
+                            <input type="text" class="form-control" data-stat="${index}" data-field="label" value="${stat.label}" placeholder="Подпись">
+                            <button class="btn btn-danger btn-small" onclick="editor.removeStat(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <button class="btn btn-success btn-small" onclick="editor.addStat()">
+                        <i class="fas fa-plus"></i> Добавить статистику
+                    </button>
+                </div>`;
+                
+                return html;
+            }
+
+            getServicesEditor() {
+                const services = this.currentData.content?.services?.services || [];
+                let html = '<div class="services-editor"><h4>Услуги</h4>';
+                
+                services.forEach((service, index) => {
+                    html += `
+                        <div class="service-row">
+                            <input type="text" class="form-control" data-service="${index}" data-field="title" value="${service.title}" placeholder="Название услуги">
+                            <textarea class="form-control" data-service="${index}" data-field="description" placeholder="Описание услуги">${service.description}</textarea>
+                            <input type="text" class="form-control" data-service="${index}" data-field="icon" value="${service.icon}" placeholder="Иконка (fas fa-...)">
+                            <button class="btn btn-danger btn-small" onclick="editor.removeService(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <button class="btn btn-success btn-small" onclick="editor.addService()">
+                        <i class="fas fa-plus"></i> Добавить услугу
+                    </button>
+                </div>`;
+                
+                return html;
+            }
+
+            getFeaturesEditor() {
+                const features = this.currentData.content?.[this.currentSection.id]?.features || [];
+                let html = '<div class="stats-editor"><h4>Особенности</h4>';
+                
+                features.forEach((feature, index) => {
+                    html += `
+                        <div class="stat-row">
+                            <input type="text" class="form-control" data-feature="${index}" data-field="title" value="${feature.title}" placeholder="Название особенности">
+                            <textarea class="form-control" data-feature="${index}" data-field="description" placeholder="Описание особенности">${feature.description}</textarea>
+                            <input type="text" class="form-control" data-feature="${index}" data-field="icon" value="${feature.icon}" placeholder="Иконка">
+                            <button class="btn btn-danger btn-small" onclick="editor.removeFeature(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `;
+                });
+                
+                html += `
+                    <button class="btn btn-success btn-small" onclick="editor.addFeature()">
+                        <i class="fas fa-plus"></i> Добавить особенность
+                    </button>
+                </div>`;
+                
+                return html;
+            }
+
+            getImageEditor(field) {
+                const currentImage = this.getCurrentValue(field);
+                return `
+                    <div class="form-group image-upload-container">
+                        <label>${field.label}:</label>
+                        <div class="image-preview ${!currentImage ? 'empty' : ''}">
+                            ${currentImage ? 
+                                `<img src="${currentImage}" alt="Preview">` :
+                                `<i class="fas fa-image"></i><span>Изображение не выбрано</span>`
+                            }
+                        </div>
+                        <div class="image-actions">
+                            <button class="btn btn-primary" onclick="document.getElementById('image-file-input').click()">
+                                <i class="fas fa-upload"></i> Загрузить
+                            </button>
+                            <button class="btn btn-secondary" onclick="editor.promptImageUrl('${field.id}')">
+                                <i class="fas fa-link"></i> Указать URL
+                            </button>
+                        </div>
+                        <input type="hidden" data-field="${field.id}" value="${currentImage}">
+                    </div>
+                `;
+            }
+
+            handleImageUpload(file) {
+                // В реальном приложении здесь была бы загрузка на сервер
+                // Для демо используем Object URL
+                const imageUrl = URL.createObjectURL(file);
+                this.updateImageField(imageUrl);
+                this.showNotification('Изображение загружено (демо)');
+            }
+
+            promptImageUrl(fieldId) {
+                const url = prompt('Введите URL изображения:');
+                if (url) {
+                    this.updateImageField(url, fieldId);
+                }
+            }
+
+            updateImageField(url, fieldId = null) {
+                const field = fieldId ? 
+                    document.querySelector(`[data-field="${fieldId}"]`) :
+                    document.querySelector('[data-field="image"]');
+                
+                if (field) {
+                    field.value = url;
+                    const preview = field.closest('.image-upload-container').querySelector('.image-preview');
+                    preview.innerHTML = `<img src="${url}" alt="Preview">`;
+                    preview.classList.remove('empty');
+                    this.hasUnsavedChanges = true;
+                }
+            }
+
+            addStat() {
+                if (!this.currentData.content.about) this.currentData.content.about = {};
+                if (!this.currentData.content.about.stats) this.currentData.content.about.stats = [];
+                
+                this.currentData.content.about.stats.push({ value: '0', label: 'Новая статистика' });
+                this.showContentEditor();
+                this.hasUnsavedChanges = true;
+            }
+
+            removeStat(index) {
+                if (this.currentData.content?.about?.stats) {
+                    this.currentData.content.about.stats.splice(index, 1);
+                    this.showContentEditor();
+                    this.hasUnsavedChanges = true;
+                }
+            }
+
+            addService() {
+                if (!this.currentData.content.services) this.currentData.content.services = {};
+                if (!this.currentData.content.services.services) this.currentData.content.services.services = [];
+                
+                this.currentData.content.services.services.push({ 
+                    title: 'Новая услуга', 
+                    description: 'Описание услуги',
+                    icon: 'fas fa-star'
+                });
+                this.showContentEditor();
+                this.hasUnsavedChanges = true;
+            }
+
+            removeService(index) {
+                if (this.currentData.content?.services?.services) {
+                    this.currentData.content.services.services.splice(index, 1);
+                    this.showContentEditor();
+                    this.hasUnsavedChanges = true;
+                }
+            }
+
+            addFeature() {
+                if (!this.currentData.content[this.currentSection.id]) {
+                    this.currentData.content[this.currentSection.id] = {};
+                }
+                if (!this.currentData.content[this.currentSection.id].features) {
+                    this.currentData.content[this.currentSection.id].features = [];
+                }
+                
+                this.currentData.content[this.currentSection.id].features.push({ 
+                    title: 'Новая особенность', 
+                    description: 'Описание особенности',
+                    icon: 'fas fa-star'
+                });
+                this.showContentEditor();
+                this.hasUnsavedChanges = true;
+            }
+
+            removeFeature(index) {
+                if (this.currentData.content?.[this.currentSection.id]?.features) {
+                    this.currentData.content[this.currentSection.id].features.splice(index, 1);
+                    this.showContentEditor();
+                    this.hasUnsavedChanges = true;
+                }
+            }
+
+            saveChanges() {
+                if (!this.currentSection) return;
+
+                // Собираем данные из формы
+                const formData = {};
+                document.querySelectorAll('#content-editor [data-field]').forEach(input => {
+                    const fieldId = input.getAttribute('data-field');
+                    formData[fieldId] = input.value;
+                });
+
+                // Обрабатываем специальные поля
+                this.processSpecialFields(formData);
+
+                // Сохраняем изменения
+                this.saveLocalData(this.currentData);
+                this.hasUnsavedChanges = false;
+                this.showSaveIndicator('Изменения сохранены успешно');
+                this.showNotification('Изменения применены!', 'success');
+                
+                // Обновляем предпросмотр
+                this.safeRefresh();
+            }
+
+            processSpecialFields(formData) {
+                // Обработка статистики
+                document.querySelectorAll('[data-stat]').forEach(input => {
+                    const index = input.getAttribute('data-stat');
+                    const field = input.getAttribute('data-field');
+                    if (!this.currentData.content.about.stats[index]) {
+                        this.currentData.content.about.stats[index] = {};
+                    }
+                    this.currentData.content.about.stats[index][field] = input.value;
+                });
+
+                // Обработка услуг
+                document.querySelectorAll('[data-service]').forEach(input => {
+                    const index = input.getAttribute('data-service');
+                    const field = input.getAttribute('data-field');
+                    if (!this.currentData.content.services.services[index]) {
+                        this.currentData.content.services.services[index] = {};
+                    }
+                    this.currentData.content.services.services[index][field] = input.value;
+                });
+
+                // Обработка особенностей
+                document.querySelectorAll('[data-feature]').forEach(input => {
+                    const index = input.getAttribute('data-feature');
+                    const field = input.getAttribute('data-field');
+                    if (!this.currentData.content[this.currentSection.id].features[index]) {
+                        this.currentData.content[this.currentSection.id].features[index] = {};
+                    }
+                    this.currentData.content[this.currentSection.id].features[index][field] = input.value;
+                });
+
+                // Обновляем основные поля
+                Object.keys(formData).forEach(fieldId => {
+                    if (this.currentSection.id === 'contact' && fieldId !== 'title') {
+                        if (!this.currentData.contacts) this.currentData.contacts = {};
+                        this.currentData.contacts[fieldId] = formData[fieldId];
+                    } else if (this.currentSection.id === 'footer') {
+                        if (!this.currentData.footer) this.currentData.footer = {};
+                        this.currentData.footer[fieldId] = formData[fieldId];
+                    } else {
+                        if (!this.currentData.content[this.currentSection.id]) {
+                            this.currentData.content[this.currentSection.id] = {};
+                        }
+                        this.currentData.content[this.currentSection.id][fieldId] = formData[fieldId];
+                    }
+                });
+            }
+
+            saveLocalData(data) {
+                localStorage.setItem('worldtravel_data', JSON.stringify(data));
+                console.log('💾 Данные сохранены в localStorage');
+                
+                // Обновляем DataManager если он доступен
+                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                    window.dataManager.setData(data);
+                }
+            }
+
+            safeRefresh() {
+                if (this.hasUnsavedChanges) {
+                    if (!confirm('У вас есть несохраненные изменения. Обновить предпросмотр?')) {
+                        return;
+                    }
+                }
+                
+                const frame = document.getElementById('preview-frame');
+                frame.src = frame.src.split('&t=')[0] + '&t=' + Date.now();
+                this.showNotification('Предпросмотр обновлен');
+            }
+
+            saveAndExit() {
+                if (this.hasUnsavedChanges) {
+                    if (confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
+                        this.saveChanges();
+                    }
+                }
+                
+                this.showNotification('Возврат в админ-панель...');
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 1000);
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
+                    ${message}
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 4000);
+            }
+
+            showSaveIndicator(message) {
+                const indicator = document.getElementById('save-indicator');
+                const messageEl = document.getElementById('save-message');
+                
+                if (indicator && messageEl) {
+                    messageEl.textContent = message;
+                    indicator.classList.add('show');
+                    
+                    setTimeout(() => {
+                        indicator.classList.remove('show');
+                    }, 3000);
+                }
+            }
+
+            escapeHtml(text) {
+                if (!text) return '';
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            }
         }
 
         // Инициализация редактора
