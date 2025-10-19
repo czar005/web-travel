@@ -35,7 +35,6 @@ class ContentUpdater {
     applyAllChanges() {
         if (!window.dataManager) {
             console.log('⏳ Waiting for DataManager...');
-            // Пробуем загрузить данные из localStorage как fallback
             this.applyLocalChanges();
             return;
         }
@@ -63,7 +62,7 @@ class ContentUpdater {
     }
 
     applyLocalChanges() {
-        const localData = localStorage.getItem('worldtravel_editor_data');
+        const localData = localStorage.getItem('worldtravel_data');
         if (localData) {
             try {
                 const data = JSON.parse(localData);
@@ -110,6 +109,10 @@ class ContentUpdater {
         // Services section
         if (content.services) {
             this.updateElement('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title', content.services.title);
+            
+            if (content.services.services) {
+                this.updateServices(content.services.services);
+            }
         }
 
         // Destinations section
@@ -122,6 +125,12 @@ class ContentUpdater {
         if (content.contact) {
             this.updateElement('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title', content.contact.title);
         }
+
+        // Footer section
+        if (content.footer) {
+            this.updateElement('.footer-section p:first-child', content.footer.description);
+            this.updateElement('.footer-bottom p', content.footer.copyright, true);
+        }
     }
 
     applyContactChanges(contacts) {
@@ -129,7 +138,7 @@ class ContentUpdater {
 
         console.log('📞 Applying contact changes:', contacts);
 
-        // Контакты в секции контактов
+        // Контакты в секции контактов - исправлен порядок
         this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p', contacts.phone);
         this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p', contacts.email);
         this.updateElement('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p', contacts.address);
@@ -158,15 +167,24 @@ class ContentUpdater {
         }
     }
 
-    updateElement(selector, newValue) {
+    updateElement(selector, newValue, isHtml = false) {
         if (newValue === undefined || newValue === null) return;
         
         try {
             const elements = document.querySelectorAll(selector);
             elements.forEach(element => {
-                if (element && element.textContent !== newValue) {
-                    console.log(`✏️ Updating ${selector}: "${element.textContent}" -> "${newValue}"`);
-                    element.textContent = newValue;
+                if (element) {
+                    if (isHtml) {
+                        if (element.innerHTML !== newValue) {
+                            console.log(`✏️ Updating HTML ${selector}: "${element.innerHTML}" -> "${newValue}"`);
+                            element.innerHTML = newValue;
+                        }
+                    } else {
+                        if (element.textContent !== newValue) {
+                            console.log(`✏️ Updating ${selector}: "${element.textContent}" -> "${newValue}"`);
+                            element.textContent = newValue;
+                        }
+                    }
                 }
             });
         } catch (error) {
@@ -179,59 +197,87 @@ class ContentUpdater {
 
         console.log('📊 Updating stats:', stats);
 
-        const statContainers = document.querySelectorAll('.stat, .about .stat, .stats .stat, .about-stats .stat');
+        const statsContainer = document.querySelector('.stats, .about-stats');
+        if (!statsContainer) return;
+
+        // Очищаем существующие статы
+        statsContainer.innerHTML = '';
+
+        // Создаем новые статы
+        stats.forEach(stat => {
+            const statElement = document.createElement('div');
+            statElement.className = 'stat animate-counter';
+            if (stat.value && !isNaN(parseInt(stat.value))) {
+                statElement.setAttribute('data-target', stat.value);
+            }
+            statElement.innerHTML = `
+                <h3>${stat.value || ''}</h3>
+                <p>${stat.label || ''}</p>
+            `;
+            statsContainer.appendChild(statElement);
+        });
+
+        // Запускаем анимацию счетчиков
+        this.animateCounters();
+    }
+
+    updateServices(services) {
+        if (!services || !Array.isArray(services)) return;
+
+        console.log('🛠️ Updating services:', services);
+
+        const servicesGrid = document.querySelector('.services-grid');
+        if (!servicesGrid) return;
+
+        // Очищаем существующие услуги
+        servicesGrid.innerHTML = '';
+
+        // Создаем новые услуги
+        services.forEach((service, index) => {
+            const serviceCard = document.createElement('div');
+            serviceCard.className = 'service-card';
+            
+            // Добавляем классы анимации
+            const animationClasses = ['slide-in-left', 'slide-in-bottom', 'slide-in-right', 'slide-in-top'];
+            serviceCard.classList.add(animationClasses[index % animationClasses.length]);
+            
+            serviceCard.innerHTML = `
+                <div class="service-icon">
+                    <i class="${service.icon || 'fas fa-star'}"></i>
+                </div>
+                <h3>${service.title || ''}</h3>
+                <p>${service.description || ''}</p>
+            `;
+            servicesGrid.appendChild(serviceCard);
+        });
+    }
+
+    animateCounters() {
+        const counters = document.querySelectorAll('.animate-counter');
         
-        stats.forEach((stat, index) => {
-            if (statContainers[index]) {
-                const valueElement = statContainers[index].querySelector('h3, .stat-value, h4');
-                const labelElement = statContainers[index].querySelector('p, .stat-label');
-                
-                if (valueElement && stat.value !== undefined) {
-                    valueElement.textContent = stat.value;
+        counters.forEach(counter => {
+            const target = parseInt(counter.getAttribute('data-target'));
+            if (!isNaN(target)) {
+                const count = parseInt(counter.querySelector('h3').textContent);
+                if (!isNaN(count) && count !== target) {
+                    this.animateValue(counter.querySelector('h3'), count, target, 1000);
                 }
-                if (labelElement && stat.label !== undefined) {
-                    labelElement.textContent = stat.label;
-                }
-            } else if (index < 3) {
-                // Create stat if doesn't exist (for first 3 stats)
-                this.createStatElement(index, stat);
             }
         });
     }
 
-    createStatElement(index, stat) {
-        const aboutSection = document.querySelector('#about, .about');
-        if (!aboutSection) return;
-
-        let statsContainer = aboutSection.querySelector('.stats, .about-stats');
-        if (!statsContainer) {
-            const aboutText = aboutSection.querySelector('.about-text');
-            if (aboutText) {
-                statsContainer = document.createElement('div');
-                statsContainer.className = 'stats';
-                aboutText.parentNode.insertBefore(statsContainer, aboutText.nextSibling);
+    animateValue(element, start, end, duration) {
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            const value = Math.floor(progress * (end - start) + start);
+            element.textContent = value.toLocaleString();
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
             }
-        }
-
-        if (statsContainer) {
-            const statElements = statsContainer.querySelectorAll('.stat');
-            if (statElements[index]) {
-                // Update existing stat
-                const valueElement = statElements[index].querySelector('h3, .stat-value');
-                const labelElement = statElements[index].querySelector('p, .stat-label');
-                if (valueElement) valueElement.textContent = stat.value;
-                if (labelElement) labelElement.textContent = stat.label;
-            } else {
-                // Create new stat
-                const statElement = document.createElement('div');
-                statElement.className = 'stat';
-                statElement.innerHTML = `
-                    <h3>${stat.value || ''}</h3>
-                    <p>${stat.label || ''}</p>
-                `;
-                statsContainer.appendChild(statElement);
-            }
-        }
+        };
+        window.requestAnimationFrame(step);
     }
 }
 
