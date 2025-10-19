@@ -1,0 +1,45 @@
+--- a/index.html
++++ b/index.html
+@@ -178,22 +178,22 @@
+             <div class="contact-content">
+                 <div class="contact-info">
+                     <h3>Наши контакты</h3>
+                     <div class="contact-item">
+                         <i class="fas fa-phone"></i>
+                         <div>
+                             <strong>Телефон:</strong>
+-                            <p>+7 (999) 123-45-67</p>
++                            <p id="contact-phone">+7 (999) 123-45-67</p>
+                         </div>
+                     </div>
+                     <div class="contact-item">
+                         <i class="fas fa-envelope"></i>
+                         <div>
+                             <strong>Email:</strong>
+-                            <p>info@worldtravel.com</p>
++                            <p id="contact-email">info@worldtravel.com</p>
+                         </div>
+                     </div>
+                     <div class="contact-item">
+                         <i class="fas fa-map-marker-alt"></i>
+                         <div>
+                             <strong>Адрес:</strong>
+                             <p>Москва, ул. Туристическая, 15</p>
+@@ -228,15 +228,15 @@
+                 <div class="footer-section">
+                     <h4>Контакты</h4>
+                     <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                     <p><i class="fas fa-envelope"></i> info@worldtravel.com</p>
+                     <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Туристическая, 15</p>
+-                    <p><i class="fas fa-clock"></i> Пн-Пт: 9:00-18:00</p>
++                    <p><i class="fas fa-clock"></i> <span id="footer-hours">Пн-Пт: 9:00-18:00</span></p>
+                 </div>
+             </div>
+             <div class="footer-bottom">
+-                <p>&copy; 2024 WorldTravel. Все права защищены.</p>
++                <p id="footer-copyright">&copy; 2024 WorldTravel. Все права защищены.</p>
+             </div>
+         </div>
+     </footer>
+ 
+     <!-- Scripts in correct order -->
