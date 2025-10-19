@@ -223,10 +223,11 @@ class ContentUpdater {
         }
     }
 
-    // Обновление навигационных ссылок
+    // Обновление навигационных ссылок и быстрых ссылок в футере
     updateNavigation(sectionId, newTitle) {
         if (!newTitle) return;
         
+        // Обновляем навигационные ссылки в хедере
         const navLinks = document.querySelectorAll('.nav-links a');
         navLinks.forEach(link => {
             const href = link.getAttribute('href');
@@ -234,6 +235,34 @@ class ContentUpdater {
                 console.log(`🔄 Updating navigation for ${sectionId}: "${link.textContent}" -> "${newTitle}"`);
                 link.textContent = newTitle;
             }
+        });
+
+        // Обновляем быстрые ссылки в футере
+        this.updateFooterQuickLinks(sectionId, newTitle);
+    }
+
+    // Обновление быстрых ссылок в футере
+    updateFooterQuickLinks(sectionId, newTitle) {
+        const footerLinks = document.querySelectorAll('.footer-section a');
+        footerLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === `#${sectionId}`) {
+                console.log(`🔄 Updating footer quick link for ${sectionId}: "${link.textContent}" -> "${newTitle}"`);
+                link.textContent = newTitle;
+            }
+        });
+
+        // Также обновляем заголовки в списках быстрых ссылок
+        const footerLists = document.querySelectorAll('.footer-section ul');
+        footerLists.forEach(list => {
+            const listItems = list.querySelectorAll('li a');
+            listItems.forEach(link => {
+                const href = link.getAttribute('href');
+                if (href === `#${sectionId}`) {
+                    console.log(`🔄 Updating footer list link for ${sectionId}: "${link.textContent}" -> "${newTitle}"`);
+                    link.textContent = newTitle;
+                }
+            });
         });
     }
 
