@@ -1,0 +1,14 @@
+.sortable-ghost {
+    opacity: 0.4;
+    background: #c8ebfb;
+}
+
+.sortable-chosen {
+    transform: rotate(5deg);
+}
+
+.sortable-drag {
+    opacity: 0.8;
+    background: #e3f2fd;
+    border: 2px dashed #2c5aa0;
+}

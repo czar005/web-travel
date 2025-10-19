@@ -6,7 +6,7 @@
     <title>Редактор страниц - WorldTravel</title>
     <link rel="stylesheet" href="admin-style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sortablejs@1.14.0/Sortable.min.css">
     <style>
         /* Все существующие стили остаются без изменений */
         * {
@@ -784,7 +784,7 @@
     </div>
 
     <!-- Скрытый input для загрузки файлов -->
-    <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+    <input type="file" id="image-file-input" accept="image/*" style="display: none;" data-field="">
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <script>
@@ -797,6 +797,7 @@
                 this.selectedPosition = 'end';
                 this.sections = [];
                 this.sortable = null;
+                this.temporaryUrls = new Map(); // Для отслеживания временных URL
                 this.init();
             }
 
@@ -808,6 +809,16 @@
                 this.setupImageUpload();
                 this.setupSectionModal();
                 this.loadSectionsList();
+                window.addEventListener("beforeunload", () => { this.cleanupTemporaryUrls(); });
+                window.addEventListener("error", (event) => {
+                    if (event.target && event.target.src && event.target.src.startsWith("blob:")) {
+                        console.warn("Ошибка загрузки blob URL:", event.target.src);
+                        if (event.target.tagName === "IMG") {
+                            event.target.src = "images/travel-placeholder.svg";
+                        }
+                        event.preventDefault();
+                    }
+                });
                 this.initSortable();
                 
                 // Авто-выбор первой секции
@@ -1588,7 +1599,7 @@
                             }
                         </div>
                         <div class="image-actions">
-                            <button class="btn btn-primary" onclick="document.getElementById('image-file-input').click()">
+                            <button class="btn btn-primary" onclick="document.getElementById('image-file-input').setAttribute('data-field', '${field.id}'); document.getElementById('image-file-input').click()">
                                 <i class="fas fa-upload"></i> Загрузить
                             </button>
                             <button class="btn btn-secondary" onclick="editor.promptImageUrl('${field.id}')">
@@ -1601,31 +1612,40 @@
             }
 
             handleImageUpload(file) {
-    const fieldId = document.getElementById('image-file-input').getAttribute('data-field');
-    
-    // Валидация типа файла
-    if (!file.type.startsWith('image/')) {
-        this.showNotification('Пожалуйста, выберите файл изображения', 'error');
-        return;
-    }
+                const fileInput = document.getElementById("image-file-input");
+                const fieldId = fileInput.getAttribute("data-field");
+                
+                if (!file.type.startsWith("image/")) {
+                    this.showNotification("Пожалуйста, выберите файл изображения", "error");
+                    return;
+                }
 
-    // Валидация размера файла (максимум 5MB)
-    if (file.size > 5 * 1024 * 1024) {
-        this.showNotification('Размер файла не должен превышать 5MB', 'error');
-        return;
-    }
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification("Размер файла не должен превышать 5MB", "error");
+                    return;
+                }
 
-    try {
-        // Создаем временный URL для предпросмотра
-        const imageUrl = URL.createObjectURL(file);
-        this.updateImageField(imageUrl, fieldId);
-        this.showNotification('Изображение загружено для предпросмотра', 'success');
-        
-        // Освобождаем память через 30 секунд
-        setTimeout(() => {
-            try {
-                URL.revokeObjectURL(imageUrl);
-            } catch (e) {
+                try {
+                    if (this.temporaryUrls.has(fieldId)) {
+                        const oldUrl = this.temporaryUrls.get(fieldId);
+                        try {
+                            URL.revokeObjectURL(oldUrl);
+                        } catch (e) {
+                            console.warn("Не удалось освободить URL:", e);
+                        }
+                        this.temporaryUrls.delete(fieldId);
+                    }
+
+                    const imageUrl = URL.createObjectURL(file);
+                    this.temporaryUrls.set(fieldId, imageUrl);
+                    this.updateImageField(imageUrl, fieldId);
+                    this.showNotification("Изображение загружено для предпросмотра", "success");
+                    
+                } catch (error) {
+                    console.error("Ошибка загрузки изображения:", error);
+                    this.showNotification("Ошибка загрузки изображения", "error");
+                }
+            }
                 console.warn('Не удалось освободить URL:', e);
             }
         }, 30000);
@@ -1636,14 +1656,20 @@
     }
 }
     // Добавьте это свойство в конструктор
-this.temporaryUrls = new Set();
+this.temporaryUrls = new Map();
 
 // Добавьте этот метод
-cleanupTemporaryUrls() {
-    this.temporaryUrls.forEach(url => {
-        try {
-            URL.revokeObjectURL(url);
-        } catch (e) {
+            cleanupTemporaryUrls() {
+                for (const [fieldId, url] of this.temporaryUrls) {
+                    try {
+                        URL.revokeObjectURL(url);
+                        console.log("🗑️ Освобожден URL для поля:", fieldId);
+                    } catch (e) {
+                        console.warn("Не удалось освободить URL:", e);
+                    }
+                }
+                this.temporaryUrls.clear();
+            }
             console.warn('Не удалось освободить URL:', e);
         }
     });
@@ -1651,34 +1677,39 @@ cleanupTemporaryUrls() {
 }
 
 // Обновите handleImageUpload
-handleImageUpload(file) {
-    const fieldId = document.getElementById('image-file-input').getAttribute('data-field');
-    
-    if (!file.type.startsWith('image/')) {
-        this.showNotification('Пожалуйста, выберите файл изображения', 'error');
-        return;
-    }
+            handleImageUpload(file) {
+                const fileInput = document.getElementById("image-file-input");
+                const fieldId = fileInput.getAttribute("data-field");
+                
+                if (!file.type.startsWith("image/")) {
+                    this.showNotification("Пожалуйста, выберите файл изображения", "error");
+                    return;
+                }
 
-    if (file.size > 5 * 1024 * 1024) {
-        this.showNotification('Размер файла не должен превышать 5MB', 'error');
-        return;
-    }
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification("Размер файла не должен превышать 5MB", "error");
+                    return;
+                }
 
-    try {
-        const imageUrl = URL.createObjectURL(file);
-        this.temporaryUrls.add(imageUrl);
-        this.updateImageField(imageUrl, fieldId);
-        this.showNotification('Изображение загружено для предпросмотра', 'success');
-        
-    } catch (error) {
-        console.error('Ошибка загрузки изображения:', error);
-        this.showNotification('Ошибка загрузки изображения', 'error');
-    }
-}
-            promptImageUrl(fieldId) {
-                const url = prompt('Введите URL изображения:');
-                if (url) {
-                    this.updateImageField(url, fieldId);
+                try {
+                    if (this.temporaryUrls.has(fieldId)) {
+                        const oldUrl = this.temporaryUrls.get(fieldId);
+                        try {
+                            URL.revokeObjectURL(oldUrl);
+                        } catch (e) {
+                            console.warn("Не удалось освободить URL:", e);
+                        }
+                        this.temporaryUrls.delete(fieldId);
+                    }
+
+                    const imageUrl = URL.createObjectURL(file);
+                    this.temporaryUrls.set(fieldId, imageUrl);
+                    this.updateImageField(imageUrl, fieldId);
+                    this.showNotification("Изображение загружено для предпросмотра", "success");
+                    
+                } catch (error) {
+                    console.error("Ошибка загрузки изображения:", error);
+                    this.showNotification("Ошибка загрузки изображения", "error");
                 }
             }
 
