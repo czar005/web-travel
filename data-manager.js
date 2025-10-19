@@ -2,7 +2,7 @@
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
-        this.version = '3.1';
+        this.version = '4.0';
         this.updateCallbacks = [];
         this.init();
     }
@@ -10,7 +10,7 @@ class DataManager {
     init() {
         console.log('🔄 DataManager initialized version', this.version);
         if (!this.getData()) {
-            console.log('�� Initializing default data...');
+            console.log('📝 Initializing default data...');
             this.setDefaultData();
         }
         
@@ -32,7 +32,13 @@ class DataManager {
                 console.log('📭 No data found in localStorage');
                 return null;
             }
-            return JSON.parse(data);
+            const parsed = JSON.parse(data);
+            console.log('📁 Data loaded from localStorage:', {
+                countries: parsed?.countries?.length || 0,
+                content: Object.keys(parsed?.content || {}).length,
+                pageStructure: parsed?.pageStructure?.length || 0
+            });
+            return parsed;
         } catch (error) {
             console.error('❌ Error reading data:', error);
             return null;
@@ -43,8 +49,15 @@ class DataManager {
         try {
             data.version = this.version;
             data.lastUpdate = new Date().toISOString();
+            
+            console.log('💾 Saving data to localStorage:', {
+                countries: data?.countries?.length || 0,
+                content: Object.keys(data?.content || {}).length,
+                pageStructure: data?.pageStructure?.length || 0
+            });
+            
             localStorage.setItem(this.storageKey, JSON.stringify(data));
-            console.log('💾 Data saved successfully');
+            console.log('✅ Data saved successfully');
             
             this.triggerDataUpdate();
             return true;
@@ -112,12 +125,20 @@ class DataManager {
             },
             content: {
                 hero: {
+                    id: 'hero',
+                    type: 'hero',
+                    name: 'Главный баннер',
                     title: 'Откройте мир с WorldTravel',
-                    subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.'
+                    subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                    image: 'images/travel-placeholder.svg'
                 },
                 about: {
+                    id: 'about',
+                    type: 'about',
+                    name: 'О компании',
                     title: 'О нашей компании',
                     description: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.',
+                    image: 'images/travel-placeholder.svg',
                     stats: [
                         { value: "5000", label: "Довольных клиентов" },
                         { value: "50", label: "Стран мира" },
@@ -125,20 +146,39 @@ class DataManager {
                     ]
                 },
                 services: {
-                    title: 'Наши услуги'
+                    id: 'services',
+                    type: 'services',
+                    name: 'Услуги',
+                    title: 'Наши услуги',
+                    services: [
+                        { title: 'Авиабилеты', description: 'Подбор и бронирование лучших авиаперелетов по выгодным ценам', icon: 'fas fa-plane' },
+                        { title: 'Отели', description: 'Бронирование отелей любого уровня комфорта по всему миру', icon: 'fas fa-hotel' },
+                        { title: 'Туры', description: 'Индивидуальные и групповые туры с профессиональными гидами', icon: 'fas fa-map-marked-alt' },
+                        { title: 'Страхование', description: 'Полное страховое сопровождение вашего путешествия', icon: 'fas fa-shield-alt' }
+                    ]
                 },
                 destinations: {
+                    id: 'destinations',
+                    type: 'destinations',
+                    name: 'Направления',
                     title: 'Популярные направления',
                     subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'
                 },
                 contact: {
+                    id: 'contact',
+                    type: 'contact',
+                    name: 'Контакты',
                     title: 'Свяжитесь с нами'
-                },
-                footer: {
-                    description: 'Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.',
-                    copyright: '&copy; 2024 WorldTravel. Все права защищены.'
                 }
             },
+            footer: {
+                id: 'footer',
+                type: 'footer',
+                name: 'Футер',
+                description: 'Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.',
+                copyright: '&copy; 2024 WorldTravel. Все права защищены.'
+            },
+            pageStructure: ['hero', 'about', 'services', 'destinations', 'contact'],
             lastUpdate: new Date().toISOString()
         };
         return this.setData(defaultData);
@@ -193,6 +233,21 @@ class DataManager {
         
         data.settings = { ...data.settings, ...updates };
         console.log('⚙️ Updating settings:', updates);
+        return this.setData(data);
+    }
+
+    // Page structure management
+    getPageStructure() {
+        const data = this.getData();
+        return data?.pageStructure || [];
+    }
+
+    updatePageStructure(structure) {
+        const data = this.getData();
+        if (!data) return false;
+        
+        data.pageStructure = structure;
+        console.log('🏗️ Updating page structure:', structure);
         return this.setData(data);
     }
 
@@ -310,13 +365,19 @@ class DataManager {
         });
         
         // Method 3: Storage event for other tabs
-        window.dispatchEvent(new StorageEvent('storage', {
+        const event = new StorageEvent('storage', {
             key: this.storageKey,
             newValue: localStorage.getItem(this.storageKey),
             oldValue: localStorage.getItem(this.storageKey),
             storageArea: localStorage,
             url: window.location.href
-        }));
+        });
+        window.dispatchEvent(event);
+
+        // Method 4: Force page content update
+        if (typeof window.updatePageContent === 'function') {
+            setTimeout(() => window.updatePageContent(), 100);
+        }
     }
 
     onUpdate(callback) {
@@ -336,9 +397,10 @@ class DataManager {
         console.log('🔍 DataManager Debug:', {
             countries: data?.countries?.length || 0,
             tours: this.getAllTours().length,
-            content: data?.content ? '✓' : '✗',
+            content: data?.content ? Object.keys(data.content).length + ' sections' : '✗',
             contacts: data?.contacts ? '✓' : '✗',
             settings: data?.settings ? '✓' : '✗',
+            pageStructure: data?.pageStructure?.length || 0,
             lastUpdate: data?.lastUpdate || 'never',
             version: data?.version || 'unknown'
         });
