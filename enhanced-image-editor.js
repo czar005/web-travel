@@ -1,5 +1,5 @@
-// Редактор изображений для всех секций
-class ImageEditor {
+// Simple Image Editor for all sections
+class SimpleImageEditor {
     constructor() {
         this.init();
     }
@@ -40,19 +40,16 @@ class ImageEditor {
             const currentValue = this.getCurrentValue('image') || '';
             
             const html = '<div class="form-group">' +
-                '<label>🖼️ Изображение для "' + sectionName + '":</label>' +
+                '<label>Изображение для ' + sectionName + ':</label>' +
                 '<div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">' +
                 '<input type="text" data-field="image" class="form-control" placeholder="URL изображения..." ' +
                 'value="' + currentValue + '">' +
                 '<button type="button" class="btn-admin" onclick="editor.uploadImage(\'image\')">' +
-                '<i class="fas fa-upload"></i>' +
+                'Загрузить' +
                 '</button>' +
                 '<button type="button" class="btn-admin secondary" onclick="editor.setImageUrl(\'image\')">' +
-                '<i class="fas fa-link"></i>' +
+                'URL' +
                 '</button>' +
-                '</div>' +
-                '<div style="font-size: 12px; color: #666; margin-top: 5px;">' +
-                'Можно указать URL или загрузить файл' +
                 '</div>' +
                 '</div>';
 
@@ -73,7 +70,9 @@ class ImageEditor {
                     reader.onload = function(e) {
                         document.querySelector('[data-field="' + fieldId + '"]').value = e.target.result;
                         window.editor.hasUnsavedChanges = true;
-                        window.editor.showNotification('Изображение загружено', 'success');
+                        if (window.editor.showNotification) {
+                            window.editor.showNotification('Изображение загружено', 'success');
+                        }
                     };
                     reader.readAsDataURL(file);
                 }
@@ -87,10 +86,12 @@ class ImageEditor {
             if (url !== null) {
                 document.querySelector('[data-field="' + fieldId + '"]').value = url;
                 this.hasUnsavedChanges = true;
-                this.showNotification('URL установлен', 'success');
+                if (this.showNotification) {
+                    this.showNotification('URL установлен', 'success');
+                }
             }
         };
     }
 }
 
-new ImageEditor();
+new SimpleImageEditor();
