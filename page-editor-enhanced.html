@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <style>
+        .image-manager {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 10px;
+            margin: 15px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .image-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 10px 0;
+            overflow: hidden;
+            background: white;
+        }
+        
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+        
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .unified-editor {
+            background: #f8f9fa;
+            padding: 25px;
+            border-radius: 10px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Остальная структура остается без изменений -->
+        
+        <script>
+            // Расширяем функциональность редактора
+            if (window.editor) {
+                // Добавляем метод для управления изображениями
+                window.editor.addImageManagers = function() {
+                    const sectionsWithImages = [
+                        { id: 'hero', name: 'Главный баннер', field: 'image' },
+                        { id: 'about', name: 'О компании', field: 'image' },
+                        { id: 'services', name: 'Услуги', field: 'image' },
+                        { id: 'destinations', name: 'Направления', field: 'image' },
+                        { id: 'contact', name: 'Контакты', field: 'image' }
+                    ];
+                    
+                    sectionsWithImages.forEach(section => {
+                        this.addImageManagerToSection(section.id, section.name, section.field);
+                    });
+                };
+                
+                window.editor.addImageManagerToSection = function(sectionId, sectionName, fieldId) {
+                    if (this.currentSection?.id !== sectionId) return;
+                    
+                    const contentEditor = document.getElementById('content-editor');
+                    if (!contentEditor) return;
+                    
+                    const currentImage = this.getCurrentValue(fieldId) || '';
+                    
+                    const imageManagerHTML = `
+                        <div class="image-manager">
+                            <h4>🖼️ Управление изображением для "${sectionName}"</h4>
+                            <div class="image-preview">
+                                ${currentImage ? 
+                                    `<img src="${currentImage}" alt="Preview" onerror="this.style.display='none'">` :
+                                    `<div style="text-align: center; color: #666;">
+                                        <i class="fas fa-image" style="font-size: 3em; margin-bottom: 10px;"></i>
+                                        <div>Изображение не выбрано</div>
+                                    </div>`
+                                }
+                            </div>
+                            <div class="image-actions">
+                                <button class="btn-admin" onclick="editor.uploadImage('${fieldId}')">
+                                    <i class="fas fa-upload"></i> Загрузить
+                                </button>
+                                <button class="btn-admin secondary" onclick="editor.setImageUrl('${fieldId}')">
+                                    <i class="fas fa-link"></i> Указать URL
+                                </button>
+                                ${currentImage ? `
+                                <button class="btn-admin danger" onclick="editor.removeImage('${fieldId}')">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                                ` : ''}
+                            </div>
+                            <input type="hidden" data-field="${fieldId}" value="${currentImage}">
+                        </div>
+                    `;
+                    
+                    // Вставляем после заголовка
+                    const titleField = contentEditor.querySelector('[data-field="title"]');
+                    if (titleField) {
+                        titleField.closest('.form-group').insertAdjacentHTML('afterend', imageManagerHTML);
+                    }
+                };
+                
+                // Методы для работы с изображениями
+                window.editor.uploadImage = function(fieldId) {
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.onchange = (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
+                            const reader = new FileReader();
+                            reader.onload = (e) => {
+                                this.updateImageField(fieldId, e.target.result);
+                            };
+                            reader.readAsDataURL(file);
+                        }
+                    };
+                    input.click();
+                };
+                
+                window.editor.setImageUrl = function(fieldId) {
+                    const currentValue = this.getCurrentValue(fieldId);
+                    const url = prompt('Введите URL изображения:', currentValue || '');
+                    if (url !== null) {
+                        this.updateImageField(fieldId, url);
+                    }
+                };
+                
+                window.editor.removeImage = function(fieldId) {
+                    if (confirm('Удалить изображение?')) {
+                        this.updateImageField(fieldId, '');
+                    }
+                };
+                
+                window.editor.updateImageField = function(fieldId, url) {
+                    const field = document.querySelector(`[data-field="${fieldId}"]`);
+                    if (field) {
+                        field.value = url;
+                        
+                        // Обновляем превью
+                        const preview = document.querySelector(`[data-field="${fieldId}"]`).closest('.image-manager').querySelector('.image-preview');
+                        if (preview) {
+                            if (url) {
+                                preview.innerHTML = `<img src="${url}" alt="Preview" onerror="this.style.display='none'">`;
+                            } else {
+                                preview.innerHTML = `
+                                    <div style="text-align: center; color: #666;">
+                                        <i class="fas fa-image" style="font-size: 3em; margin-bottom: 10px;"></i>
+                                        <div>Изображение не выбрано</div>
+                                    </div>
+                                `;
+                            }
+                        }
+                        
+                        this.hasUnsavedChanges = true;
+                    }
+                };
+                
+                // Объединенный редактор для статистики
+                window.editor.addUnifiedStatsEditor = function() {
+                    if (this.currentSection?.id !== 'about') return;
+                    
+                    const contentEditor = document.getElementById('content-editor');
+                    if (!contentEditor) return;
+                    
+                    // Удаляем старые редакторы
+                    const oldEditors = contentEditor.querySelectorAll('[class*="stats"]');
+                    oldEditors.forEach(editor => {
+                        if (!editor.closest('.action-buttons')) {
+                            editor.remove();
+                        }
+                    });
+                    
+                    const stats = this.currentData.content?.about?.stats || [];
+                    
+                    const statsHTML = `
+                        <div class="unified-editor">
+                            <h4>📊 Управление статистикой</h4>
+                            <div id="stats-list">
+                                ${stats.map((stat, index) => `
+                                    <div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center;">
+                                        <input type="text" class="form-control" value="${stat.value}" placeholder="Значение" 
+                                               onchange="editor.updateStat(${index}, 'value', this.value)">
+                                        <input type="text" class="form-control" value="${stat.label}" placeholder="Подпись" 
+                                               onchange="editor.updateStat(${index}, 'label', this.value)">
+                                        <button class="btn-small danger" onclick="editor.removeStat(${index})">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="btn-admin" onclick="editor.addStat()">
+                                <i class="fas fa-plus"></i> Добавить статистику
+                            </button>
+                        </div>
+                    `;
+                    
+                    const descriptionField = contentEditor.querySelector('[data-field="description"]');
+                    if (descriptionField) {
+                        descriptionField.closest('.form-group').insertAdjacentHTML('afterend', statsHTML);
+                    }
+                };
+                
+                // Объединенный редактор для услуг
+                window.editor.addUnifiedServicesEditor = function() {
+                    if (this.currentSection?.id !== 'services') return;
+                    
+                    const contentEditor = document.getElementById('content-editor');
+                    if (!contentEditor) return;
+                    
+                    // Удаляем старые редакторы
+                    const oldEditors = contentEditor.querySelectorAll('[class*="services"]');
+                    oldEditors.forEach(editor => {
+                        if (!editor.closest('.action-buttons')) {
+                            editor.remove();
+                        }
+                    });
+                    
+                    const services = this.currentData.content?.services?.services || [];
+                    
+                    const servicesHTML = `
+                        <div class="unified-editor">
+                            <h4>🎯 Управление услугами</h4>
+                            <div id="services-list">
+                                ${services.map((service, index) => `
+                                    <div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px;">
+                                        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+                                            <input type="text" class="form-control" value="${service.title}" placeholder="Название услуги" 
+                                                   onchange="editor.updateService(${index}, 'title', this.value)">
+                                            <input type="text" class="form-control" value="${service.icon}" placeholder="Иконка" 
+                                                   onchange="editor.updateService(${index}, 'icon', this.value)">
+                                        </div>
+                                        <textarea class="form-control" placeholder="Описание услуги" 
+                                                  onchange="editor.updateService(${index}, 'description', this.value)">${service.description}</textarea>
+                                        <button class="btn-small danger" onclick="editor.removeService(${index})" style="margin-top: 10px;">
+                                            <i class="fas fa-trash"></i> Удалить услугу
+                                        </button>
+                                    </div>
+                                `).join('')}
+                            </div>
+                            <button class="btn-admin" onclick="editor.addService()">
+                                <i class="fas fa-plus"></i> Добавить услугу
+                            </button>
+                        </div>
+                    `;
+                    
+                    const titleField = contentEditor.querySelector('[data-field="title"]');
+                    if (titleField) {
+                        titleField.closest('.form-group').insertAdjacentHTML('afterend', servicesHTML);
+                    }
+                };
+                
+                // Патчим основной метод показа контента
+                const originalShowContentEditor = window.editor.showContentEditor;
+                window.editor.showContentEditor = function() {
+                    originalShowContentEditor.call(this);
+                    
+                    setTimeout(() => {
+                        this.addImageManagers();
+                        this.addUnifiedStatsEditor();
+                        this.addUnifiedServicesEditor();
+                    }, 100);
+                };
+            }
+        </script>
+    </div>
+</body>
+</html>
