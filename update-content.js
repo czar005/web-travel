@@ -138,15 +138,15 @@ class ContentUpdater {
 
         console.log('📞 Applying contact changes:', contacts);
 
-        // Контакты в секции контактов - исправлен порядок
-        this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p', contacts.phone);
-        this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p', contacts.email);
+        // Контакты в секции контактов - правильный порядок: Email, Телефон, Адрес, Часы работы
+        this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p', contacts.email);
+        this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p', contacts.phone);
         this.updateElement('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p', contacts.address);
         this.updateElement('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p', contacts.hours);
 
-        // Контакты в футере
-        this.updateElement('.footer-section p:nth-child(2)', contacts.phone);
-        this.updateElement('.footer-section p:nth-child(3)', contacts.email);
+        // Контакты в футере - правильный порядок
+        this.updateElement('.footer-section p:nth-child(2)', contacts.email);
+        this.updateElement('.footer-section p:nth-child(3)', contacts.phone);
         this.updateElement('.footer-section p:nth-child(4)', contacts.address);
     }
 
@@ -195,7 +195,7 @@ class ContentUpdater {
     updateStats(stats) {
         if (!stats || !Array.isArray(stats)) return;
 
-        console.log('📊 Updating stats:', stats);
+        console.log('�� Updating stats:', stats);
 
         const statsContainer = document.querySelector('.stats, .about-stats');
         if (!statsContainer) return;
