@@ -94,12 +94,20 @@ class ContentUpdater {
         if (content.hero) {
             this.updateElement('#home h1, .hero h1, section:first-of-type h1', content.hero.title);
             this.updateElement('#home p, .hero p, section:first-of-type p', content.hero.subtitle);
+            if (content.hero.image) {
+                this.updateImages('.hero-image img, .image-placeholder img', content.hero.image);
+            }
         }
 
         // About section
         if (content.about) {
             this.updateElement('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title', content.about.title);
             this.updateElement('.about-text p, #about p, .about p, section:nth-of-type(2) p', content.about.description);
+            
+            // Обновляем изображение
+            if (content.about.image) {
+                this.updateImages('.about-image img, .image-placeholder img', content.about.image);
+            }
             
             // Обновляем навигацию для секции "О нас"
             this.updateNavigation('about', content.about.title);
@@ -138,7 +146,7 @@ class ContentUpdater {
             this.updateNavigation('contact', content.contact.title);
         }
 
-        // Footer section - ИСПРАВЛЕННЫЙ СЕЛЕКТОР для описания компании
+        // Footer section
         if (content.footer) {
             // Исправленный селектор: первый параграф в первом footer-section
             this.updateElement('.footer-section:first-child p:first-child', content.footer.description);
@@ -264,6 +272,27 @@ class ContentUpdater {
                 }
             });
         });
+    }
+
+    // Обновление изображений
+    updateImages(selector, imageUrl) {
+        if (!imageUrl) return;
+        
+        try {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(element => {
+                if (element && element.src !== imageUrl) {
+                    console.log(`🖼️ Updating image ${selector}: "${element.src}" -> "${imageUrl}"`);
+                    element.src = imageUrl;
+                    // Добавляем обработчик ошибок
+                    element.onerror = () => {
+                        console.warn(`❌ Failed to load image: ${imageUrl}`);
+                    };
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error updating image:', selector, error);
+        }
     }
 
     updateElement(selector, newValue, isHtml = false) {

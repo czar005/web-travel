@@ -333,6 +333,82 @@
             gap: 10px;
             margin-bottom: 15px;
         }
+
+        /* Стили для загрузки изображений */
+        .image-upload-container {
+            margin: 15px 0;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview.empty {
+            flex-direction: column;
+            color: #666;
+        }
+
+        .image-preview.empty i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .upload-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #138496;
+        }
+
+        .image-url-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-url-input input {
+            flex: 1;
+        }
+
+        .current-image-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -394,6 +470,9 @@
         </div>
     </div>
 
+    <!-- Скрытый input для загрузки файлов -->
+    <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+
     <script>
         class StablePageEditor {
             constructor() {
@@ -404,19 +483,21 @@
                     {
                         id: 'hero',
                         name: 'Главный баннер',
-                        description: 'Заголовок и описание на главной странице',
+                        description: 'Заголовок, описание и изображение на главной странице',
                         fields: [
                             { id: 'title', type: 'text', label: 'Заголовок', selector: '#home h1, .hero h1, section:first-of-type h1' },
-                            { id: 'subtitle', type: 'textarea', label: 'Описание', selector: '#home p, .hero p, section:first-of-type p' }
+                            { id: 'subtitle', type: 'textarea', label: 'Описание', selector: '#home p, .hero p, section:first-of-type p' },
+                            { id: 'image', type: 'image', label: 'Фоновое изображение', selector: '.hero-image img, .image-placeholder img' }
                         ]
                     },
                     {
                         id: 'about',
                         name: 'О компании',
-                        description: 'Информация о компании и статистика',
+                        description: 'Информация о компании, статистика и изображение',
                         fields: [
                             { id: 'title', type: 'text', label: 'Заголовок', selector: '#about .section-title, .about .section-title, section:nth-of-type(2) .section-title' },
                             { id: 'description', type: 'textarea', label: 'Описание', selector: '.about-text p, #about p, .about p, section:nth-of-type(2) p' },
+                            { id: 'image', type: 'image', label: 'Изображение компании', selector: '.about-image img, .image-placeholder img' },
                             { id: 'stats', type: 'stats', label: 'Статистика' }
                         ]
                     },
@@ -432,7 +513,7 @@
                     {
                         id: 'destinations',
                         name: 'Направления',
-                        description: 'Популярные направления',
+                        description: 'Популярные направления и изображения стран',
                         fields: [
                             { id: 'title', type: 'text', label: 'Заголовок', selector: '#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title' },
                             { id: 'subtitle', type: 'textarea', label: 'Подзаголовок', selector: '.destinations .section-subtitle, .section-subtitle, section:nth-of-type(4) .section-subtitle' }
@@ -470,6 +551,7 @@
                 this.setupFrameListener();
                 this.loadCurrentData();
                 this.setupTabHandlers();
+                this.setupImageUpload();
                 
                 // Авто-выбор первой секции
                 setTimeout(() => {
@@ -486,6 +568,16 @@
                             this.showTab(tabName);
                         }
                     });
+                });
+            }
+
+            setupImageUpload() {
+                const fileInput = document.getElementById('image-file-input');
+                fileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        this.handleImageUpload(file);
+                    }
                 });
             }
 
@@ -535,10 +627,15 @@
                 }
                 return {
                     content: {
-                        hero: { title: 'Откройте мир с WorldTravel', subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.' },
+                        hero: { 
+                            title: 'Откройте мир с WorldTravel', 
+                            subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                            image: 'images/travel-placeholder.svg'
+                        },
                         about: { 
                             title: 'О нашей компании', 
                             description: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.',
+                            image: 'images/travel-placeholder.svg',
                             stats: [
                                 { value: '5000', label: 'Довольных клиентов' },
                                 { value: '50', label: 'Стран мира' },
@@ -571,6 +668,7 @@
                         siteTitle: 'WorldTravel - Туристическая компания',
                         companyName: 'WorldTravel'
                     },
+                    images: {},
                     lastUpdate: new Date().toISOString()
                 };
             }
@@ -636,6 +734,8 @@
                         editorHTML += this.getStatsEditor();
                     } else if (field.type === 'services') {
                         editorHTML += this.getServicesEditor();
+                    } else if (field.type === 'image') {
+                        editorHTML += this.getImageEditor(field);
                     } else {
                         const currentValue = this.getCurrentValue(field);
                         editorHTML += `
@@ -676,6 +776,126 @@
                 });
                 
                 this.hasUnsavedChanges = false;
+            }
+
+            getImageEditor(field) {
+                const currentValue = this.getCurrentValue(field);
+                const imageUrl = currentValue || 'images/travel-placeholder.svg';
+                
+                return `
+                    <div class="form-group">
+                        <label>${field.label}:</label>
+                        <div class="image-upload-container">
+                            <div class="current-image-info">
+                                <strong>Текущее изображение:</strong> ${currentValue || 'Не установлено'}
+                            </div>
+                            <div class="image-preview ${!currentValue ? 'empty' : ''}" id="preview-${field.id}">
+                                ${currentValue ? 
+                                    `<img src="${imageUrl}" alt="Предпросмотр" onerror="this.style.display='none'; this.parentElement.classList.add('empty'); this.parentElement.innerHTML='<i class=\\'fas fa-image\\'></i><span>Ошибка загрузки изображения</span>';" />` :
+                                    '<i class="fas fa-image"></i><span>Изображение не выбрано</span>'
+                                }
+                            </div>
+                            <div class="image-actions">
+                                <button type="button" class="upload-btn" onclick="editor.triggerImageUpload('${field.id}')">
+                                    <i class="fas fa-upload"></i> Загрузить изображение
+                                </button>
+                                <button type="button" class="btn btn-warning btn-small" onclick="editor.clearImage('${field.id}')">
+                                    <i class="fas fa-trash"></i> Удалить
+                                </button>
+                            </div>
+                            <div class="image-url-input">
+                                <input type="text" class="form-control" id="image-url-${field.id}" 
+                                       value="${currentValue || ''}" placeholder="Или введите URL изображения">
+                                <button type="button" class="btn btn-success btn-small" onclick="editor.updateImageFromUrl('${field.id}')">
+                                    <i class="fas fa-check"></i>
+                                </button>
+                            </div>
+                            <input type="hidden" id="image-${field.id}" value="${currentValue || ''}">
+                        </div>
+                    </div>
+                `;
+            }
+
+            triggerImageUpload(fieldId) {
+                const fileInput = document.getElementById('image-file-input');
+                fileInput.setAttribute('data-field', fieldId);
+                fileInput.click();
+            }
+
+            handleImageUpload(file) {
+                const fieldId = document.getElementById('image-file-input').getAttribute('data-field');
+                if (!fieldId) return;
+
+                // Проверяем тип файла
+                if (!file.type.startsWith('image/')) {
+                    this.showNotification('Пожалуйста, выберите файл изображения', 'error');
+                    return;
+                }
+
+                // Проверяем размер файла (максимум 5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    this.showNotification('Размер файла не должен превышать 5MB', 'error');
+                    return;
+                }
+
+                // Создаем временный URL для предпросмотра
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const preview = document.getElementById(`preview-${fieldId}`);
+                    preview.innerHTML = `<img src="${e.target.result}" alt="Предпросмотр">`;
+                    preview.classList.remove('empty');
+                    
+                    // Сохраняем данные изображения
+                    document.getElementById(`image-${fieldId}`).value = e.target.result;
+                    document.getElementById(`image-url-${fieldId}`).value = e.target.result;
+                    
+                    this.hasUnsavedChanges = true;
+                    this.showNotification('Изображение загружено для предпросмотра', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+
+            updateImageFromUrl(fieldId) {
+                const urlInput = document.getElementById(`image-url-${fieldId}`);
+                const url = urlInput.value.trim();
+                
+                if (!url) {
+                    this.showNotification('Введите URL изображения', 'error');
+                    return;
+                }
+
+                // Проверяем, является ли URL валидным
+                try {
+                    new URL(url);
+                } catch (e) {
+                    this.showNotification('Введите корректный URL', 'error');
+                    return;
+                }
+
+                // Обновляем предпросмотр
+                const preview = document.getElementById(`preview-${fieldId}`);
+                const img = new Image();
+                img.onload = () => {
+                    preview.innerHTML = `<img src="${url}" alt="Предпросмотр">`;
+                    preview.classList.remove('empty');
+                    document.getElementById(`image-${fieldId}`).value = url;
+                    this.hasUnsavedChanges = true;
+                    this.showNotification('Изображение обновлено', 'success');
+                };
+                img.onerror = () => {
+                    this.showNotification('Не удалось загрузить изображение по указанному URL', 'error');
+                };
+                img.src = url;
+            }
+
+            clearImage(fieldId) {
+                const preview = document.getElementById(`preview-${fieldId}`);
+                preview.innerHTML = '<i class="fas fa-image"></i><span>Изображение не выбрано</span>';
+                preview.classList.add('empty');
+                document.getElementById(`image-${fieldId}`).value = '';
+                document.getElementById(`image-url-${fieldId}`).value = '';
+                this.hasUnsavedChanges = true;
+                this.showNotification('Изображение удалено', 'success');
             }
 
             getCurrentValue(field) {
@@ -971,7 +1191,12 @@
                 const updates = {};
                 
                 this.currentSection.fields.forEach(field => {
-                    if (field.type !== 'stats') {
+                    if (field.type === 'image') {
+                        const imageInput = document.getElementById(`image-${field.id}`);
+                        if (imageInput && imageInput.value) {
+                            updates[field.id] = imageInput.value;
+                        }
+                    } else if (field.type !== 'stats') {
                         const input = document.querySelector(`[data-field="${field.id}"]`);
                         if (input && input.value) {
                             updates[field.id] = input.value;
@@ -1085,9 +1310,16 @@
                 const updates = {};
                 
                 this.currentSection.fields.forEach(field => {
-                    const input = document.querySelector(`[data-field="${field.id}"]`);
-                    if (input && input.value) {
-                        updates[field.id] = input.value;
+                    if (field.type === 'image') {
+                        const imageInput = document.getElementById(`image-${field.id}`);
+                        if (imageInput && imageInput.value) {
+                            updates[field.id] = imageInput.value;
+                        }
+                    } else {
+                        const input = document.querySelector(`[data-field="${field.id}"]`);
+                        if (input && input.value) {
+                            updates[field.id] = input.value;
+                        }
                     }
                 });
 
