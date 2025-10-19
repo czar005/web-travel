@@ -2,7 +2,7 @@
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
-        this.version = '3.0';
+        this.version = '3.1';
         this.updateCallbacks = [];
         this.init();
     }
@@ -10,7 +10,7 @@ class DataManager {
     init() {
         console.log('🔄 DataManager initialized version', this.version);
         if (!this.getData()) {
-            console.log('📝 Initializing default data...');
+            console.log('�� Initializing default data...');
             this.setDefaultData();
         }
         

@@ -126,7 +126,7 @@ class ContentUpdater {
             this.updateElement('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title', content.contact.title);
         }
 
-        // Footer section
+        // Footer section - ВАЖНО: исправлены селекторы для футера
         if (content.footer) {
             this.updateElement('.footer-section p:first-child', content.footer.description);
             this.updateElement('.footer-bottom p', content.footer.copyright, true);
@@ -138,16 +138,59 @@ class ContentUpdater {
 
         console.log('📞 Applying contact changes:', contacts);
 
-        // Контакты в секции контактов - правильный порядок: Email, Телефон, Адрес, Часы работы
-        this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p', contacts.email);
-        this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p', contacts.phone);
-        this.updateElement('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p', contacts.address);
-        this.updateElement('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p', contacts.hours);
-
+        // Контакты в секции контактов - правильный порядок
+        this.updateContactSection(contacts);
+        
         // Контакты в футере - правильный порядок
-        this.updateElement('.footer-section p:nth-child(2)', contacts.email);
-        this.updateElement('.footer-section p:nth-child(3)', contacts.phone);
-        this.updateElement('.footer-section p:nth-child(4)', contacts.address);
+        this.updateFooterContacts(contacts);
+    }
+
+    updateContactSection(contacts) {
+        // Находим все контактные элементы в секции контактов
+        const contactItems = document.querySelectorAll('.contact-item');
+        
+        contactItems.forEach((item, index) => {
+            const strong = item.querySelector('strong');
+            if (strong) {
+                const label = strong.textContent.toLowerCase();
+                let value = '';
+                
+                if (label.includes('email')) {
+                    value = contacts.email || '';
+                } else if (label.includes('телефон') || label.includes('phone')) {
+                    value = contacts.phone || '';
+                } else if (label.includes('адрес') || label.includes('address')) {
+                    value = contacts.address || '';
+                } else if (label.includes('часы') || label.includes('hours')) {
+                    value = contacts.hours || '';
+                }
+                
+                const p = item.querySelector('p');
+                if (p && value) {
+                    p.textContent = value;
+                }
+            }
+        });
+    }
+
+    updateFooterContacts(contacts) {
+        // Находим все параграфы в футере с контактами
+        const footerSections = document.querySelectorAll('.footer-section');
+        
+        footerSections.forEach(section => {
+            const paragraphs = section.querySelectorAll('p');
+            paragraphs.forEach(p => {
+                const text = p.textContent.toLowerCase();
+                
+                if (text.includes('@') || text.includes('email')) {
+                    p.textContent = contacts.email || p.textContent;
+                } else if (text.includes('+7') || text.includes('телефон') || text.includes('phone')) {
+                    p.textContent = contacts.phone || p.textContent;
+                } else if (text.includes('москва') || text.includes('ул.') || text.includes('address')) {
+                    p.textContent = contacts.address || p.textContent;
+                }
+            });
+        });
     }
 
     applySettingsChanges(settings) {
@@ -195,7 +238,7 @@ class ContentUpdater {
     updateStats(stats) {
         if (!stats || !Array.isArray(stats)) return;
 
-        console.log('�� Updating stats:', stats);
+        console.log('📊 Updating stats:', stats);
 
         const statsContainer = document.querySelector('.stats, .about-stats');
         if (!statsContainer) return;
