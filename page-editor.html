@@ -7,189 +7,59 @@
     <link rel="stylesheet" href="admin-style.css">
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: 'Inter', Arial, sans-serif; background: #f5f7fa; height: 100vh; overflow: hidden; }
+        body { font-family: Arial, sans-serif; background: #f5f7fa; height: 100vh; overflow: hidden; }
         .editor-container { display: flex; height: 100vh; }
         .preview-panel { flex: 1; background: white; display: flex; flex-direction: column; }
         .editor-panel { width: 400px; background: white; border-left: 2px solid #e1e5e9; display: flex; flex-direction: column; }
         .panel-header { padding: 20px; background: #2c5aa0; color: white; }
-        .preview-frame-container { flex: 1; position: relative; background: #f8f9fa; }
-        .preview-frame { width: 100%; height: 100%; border: none; background: white; }
+        .preview-frame { width: 100%; height: 100%; border: none; }
         .section-list { padding: 20px; flex: 1; overflow-y: auto; }
-        .section-item { padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; margin-bottom: 10px; cursor: pointer; transition: all 0.3s ease; }
-        .section-item:hover { border-color: #2c5aa0; background: #e3f2fd; }
-        .section-title { font-weight: 600; margin-bottom: 5px; color: #333; }
+        .section-item { padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; margin-bottom: 10px; }
+        .section-title { font-weight: bold; margin-bottom: 5px; }
         .section-desc { color: #666; font-size: 0.9em; }
-        .btn { background: #28a745; color: white; padding: 12px 20px; border: none; border-radius: 6px; cursor: pointer; font-size: 14px; margin: 5px; transition: background 0.3s; }
-        .btn:hover { background: #218838; }
-        .btn-secondary { background: #6c757d; }
-        .btn-secondary:hover { background: #545b62; }
-        .safe-badge { background: #dc3545; color: white; padding: 4px 8px; border-radius: 4px; font-size: 0.8em; margin-left: 10px; }
+        .btn { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; text-decoration: none; display: inline-block; }
     </style>
 </head>
 <body>
     <div class="editor-container">
-        <!-- Левая панель - предпросмотр -->
         <div class="preview-panel">
             <div class="panel-header">
-                <h2 style="margin: 0 0 10px 0;">Предпросмотр страницы <span class="safe-badge">BLOB SAFE</span></h2>
-                <div>
-                    <button class="btn btn-secondary" onclick="refreshPreview()">
-                        Обновить
-                    </button>
-                    <button class="btn" onclick="saveAndExit()">
-                        Сохранить и выйти
-                    </button>
-                </div>
+                <h2 style="margin: 0;">Предпросмотр страницы</h2>
+                <a href="admin.html" class="btn" style="margin-top: 10px;">
+                    Назад в админку
+                </a>
             </div>
-            <div class="preview-frame-container">
-                <iframe class="preview-frame" id="preview-frame" src="index-preview.html"></iframe>
-            </div>
+            <iframe class="preview-frame" src="index.html"></iframe>
         </div>
         
-        <!-- Правая панель - редактор -->
         <div class="editor-panel">
             <div class="panel-header">
                 <h2 style="margin: 0;">Редактор контента</h2>
             </div>
             <div class="section-list">
-                <div class="section-item" data-section="hero">
+                <div class="section-item">
                     <div class="section-title">Главный баннер</div>
                     <div class="section-desc">Заголовок, описание и изображение</div>
                 </div>
-                <div class="section-item" data-section="about">
+                <div class="section-item">
                     <div class="section-title">О компании</div>
-                    <div class="section-desc">Информация о компании и статистика</div>
+                    <div class="section-desc">Информация о компании</div>
                 </div>
-                <div class="section-item" data-section="services">
+                <div class="section-item">
                     <div class="section-title">Услуги</div>
-                    <div class="section-desc">Список услуг компании</div>
+                    <div class="section-desc">Список услуг</div>
                 </div>
-                <div class="section-item" data-section="destinations">
+                <div class="section-item">
                     <div class="section-title">Направления</div>
                     <div class="section-desc">Популярные направления</div>
                 </div>
-                <div class="section-item" data-section="contact">
+                <div class="section-item">
                     <div class="section-title">Контакты</div>
                     <div class="section-desc">Контактная информация</div>
                 </div>
             </div>
         </div>
     </div>
-
-    <script>
-        // БЕЗОПАСНАЯ ВЕРСИЯ РЕДАКТОРА - НИКАКИХ BLOB OPERATIONS
-        console.log('🚀 Безопасный редактор загружен');
-        
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            initEditor();
-            setupSafeEnvironment();
-        });
-        
-        function initEditor() {
-            // Обработчики для секций
-            var sections = document.querySelectorAll('.section-item');
-            sections.forEach(function(section) {
-                section.addEventListener('click', function() {
-                    var sectionId = this.getAttribute('data-section');
-                    selectSection(sectionId);
-                });
-            });
-        }
-        
-        function setupSafeEnvironment() {
-            // Блокируем createObjectURL глобально
-            if (typeof URL !== 'undefined' && URL.createObjectURL) {
-                var originalCreateObjectURL = URL.createObjectURL;
-                URL.createObjectURL = function() {
-                    console.warn('🚫 createObjectURL заблокирован в режиме редактора');
-                    return 'blob:blocked-by-editor';
-                };
-            }
-            
-            // Перехватываем ошибки blob
-            window.addEventListener('error', function(event) {
-                if (event.target && event.target.src && event.target.src.includes('blob:')) {
-                    console.warn('Blob error intercepted:', event.target.src);
-                    event.preventDefault();
-                    return false;
-                }
-            });
-        }
-        
-        function selectSection(sectionId) {
-            var sectionName = getSectionName(sectionId);
-            showNotification('Выбрана секция: ' + sectionName);
-            
-            // Простой редактор - в реальности здесь будет форма редактирования
-            setTimeout(function() {
-                var content = prompt('Введите новый текст для секции "' + sectionName + '":', 'Текст секции...');
-                if (content !== null) {
-                    showNotification('Текст сохранен для: ' + sectionName);
-                    refreshPreview();
-                }
-            }, 100);
-        }
-        
-        function getSectionName(sectionId) {
-            var names = {
-                'hero': 'Главный баннер',
-                'about': 'О компании', 
-                'services': 'Услуги',
-                'destinations': 'Направления',
-                'contact': 'Контакты'
-            };
-            return names[sectionId] || sectionId;
-        }
-        
-        function refreshPreview() {
-            var frame = document.getElementById('preview-frame');
-            if (frame) {
-                frame.src = frame.src; // Простая перезагрузка
-                showNotification('Предпросмотр обновлен');
-            }
-        }
-        
-        function saveAndExit() {
-            showNotification('Сохранение...');
-            setTimeout(function() {
-                window.location.href = 'admin.html';
-            }, 500);
-        }
-        
-        function showNotification(message) {
-            var notification = document.createElement('div');
-            notification.style.cssText = [
-                'position: fixed',
-                'top: 20px',
-                'right: 20px',
-                'background: #28a745',
-                'color: white',
-                'padding: 15px 20px',
-                'border-radius: 8px',
-                'z-index: 10000',
-                'font-size: 14px',
-                'font-weight: 500',
-                'box-shadow: 0 4px 12px rgba(0,0,0,0.15)',
-                'animation: slideIn 0.3s ease'
-            ].join(';');
-            
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            setTimeout(function() {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 3000);
-        }
-        
-        // Добавляем анимацию
-        var style = document.createElement('style');
-        style.textContent = '@keyframes slideIn { from { transform: translateX(100%); opacity: 0; } to { transform: translateX(0); opacity: 1; } }';
-        document.head.appendChild(style);
-        
-        console.log('✅ Безопасная среда настроена');
-    </script>
+    <!-- НИКАКОГО JavaScript - абсолютно чистая страница -->
 </body>
 </html>
