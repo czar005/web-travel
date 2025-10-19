@@ -414,6 +414,15 @@
                             { id: 'address', type: 'text', label: 'Адрес', selector: '.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p, .footer-section p:nth-child(4)' },
                             { id: 'hours', type: 'text', label: 'Часы работы', selector: '.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p' }
                         ]
+                    },
+                    {
+                        id: 'footer',
+                        name: 'Футер',
+                        description: 'Текст в подвале сайта',
+                        fields: [
+                            { id: 'description', type: 'textarea', label: 'Описание компании', selector: '.footer-section p:first-child' },
+                            { id: 'copyright', type: 'text', label: 'Текст копирайта', selector: '.footer-bottom p' }
+                        ]
                     }
                 ];
                 
@@ -478,10 +487,10 @@
             }
 
             loadCurrentData() {
-                // Проверяем доступность dataManager
+                // Пробуем загрузить из dataManager
                 if (typeof window.dataManager !== 'undefined' && window.dataManager) {
                     this.currentData = window.dataManager.getData() || {};
-                    console.log('📁 Загружены текущие данные:', this.currentData);
+                    console.log('📁 Загружены данные из DataManager:', this.currentData);
                 } else {
                     console.warn('⚠️ DataManager не доступен, используем локальные данные');
                     this.currentData = this.getLocalData();
@@ -490,7 +499,7 @@
 
             getLocalData() {
                 // Локальное хранилище данных как fallback
-                const localData = localStorage.getItem('worldtravel_editor_data');
+                const localData = localStorage.getItem('worldtravel_data');
                 if (localData) {
                     return JSON.parse(localData);
                 }
@@ -508,19 +517,29 @@
                         },
                         services: { title: 'Наши услуги' },
                         destinations: { title: 'Популярные направления', subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами' },
-                        contact: { title: 'Свяжитесь с нами' }
+                        contact: { title: 'Свяжитесь с нами' },
+                        footer: { 
+                            description: 'Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.',
+                            copyright: '&copy; 2024 WorldTravel. Все права защищены.'
+                        }
                     },
                     contacts: {
                         phone: '+7 (999) 123-45-67',
                         email: 'info@worldtravel.com',
                         address: 'Москва, ул. Туристическая, 15',
                         hours: 'Пн-Пт: 9:00-18:00'
-                    }
+                    },
+                    settings: {
+                        siteTitle: 'WorldTravel - Туристическая компания',
+                        companyName: 'WorldTravel'
+                    },
+                    lastUpdate: new Date().toISOString()
                 };
             }
 
             saveLocalData(data) {
-                localStorage.setItem('worldtravel_editor_data', JSON.stringify(data));
+                localStorage.setItem('worldtravel_data', JSON.stringify(data));
+                console.log('💾 Данные сохранены в localStorage');
             }
 
             selectSection(sectionId) {
@@ -635,6 +654,13 @@
                     }
                 }
                 
+                // Для футера используем отдельный раздел
+                if (this.currentSection.id === 'footer') {
+                    if (this.currentData.content && this.currentData.content.footer && this.currentData.content.footer[field.id]) {
+                        return this.escapeHtml(this.currentData.content.footer[field.id]);
+                    }
+                }
+                
                 // Для остальных полей используем content
                 if (this.currentData.content && this.currentData.content[this.currentSection.id]) {
                     const sectionData = this.currentData.content[this.currentSection.id];
@@ -650,10 +676,9 @@
             getStatsEditor() {
                 let stats = [];
                 
-                // Пробуем получить статистику из dataManager или локальных данных
-                if ((typeof window.dataManager !== 'undefined' && window.dataManager && this.currentData.content && this.currentData.content.about) ||
-                    (this.currentData.content && this.currentData.content.about)) {
-                    stats = this.currentData.content.about.stats || [];
+                // Пробуем получить статистику
+                if (this.currentData.content && this.currentData.content.about && this.currentData.content.about.stats) {
+                    stats = this.currentData.content.about.stats;
                 }
                 
                 // Если статистики нет, используем стандартную
@@ -703,24 +728,121 @@
                         this.showNotification('Изменения применены и сохранены!');
                         
                         this.hasUnsavedChanges = false;
+                        
+                        // Перезагружаем данные
+                        this.loadCurrentData();
                     } else {
                         throw new Error('Не удалось сохранить данные');
                     }
                     
                 } catch (error) {
                     console.error('❌ Ошибка сохранения:', error);
-                    this.showNotification('Ошибка при сохранении изменений', 'error');
+                    this.showNotification('Ошибка при сохранении изменений: ' + error.message, 'error');
                 }
             }
 
             saveToDataManager() {
+                try {
+                    // Для контактов - отдельная логика
+                    if (this.currentSection.id === 'contact') {
+                        return this.saveContacts();
+                    }
+                    
+                    // Для футера - отдельная логика
+                    if (this.currentSection.id === 'footer') {
+                        return this.saveFooter();
+                    }
+                    
+                    // Для остальных секций
+                    return this.saveContentSection();
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка в saveToDataManager:', error);
+                    return false;
+                }
+            }
+
+            saveContacts() {
+                const contactUpdates = {};
+                
+                // Собираем данные контактов
+                this.currentSection.fields.forEach(field => {
+                    if (field.id !== 'title') {
+                        const input = document.querySelector(`[data-field="${field.id}"]`);
+                        if (input && input.value) {
+                            contactUpdates[field.id] = input.value;
+                        }
+                    }
+                });
+
+                console.log('📞 Сохранение контактов:', contactUpdates);
+
+                // Пробуем сохранить через dataManager
+                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                    const result = window.dataManager.updateContacts(contactUpdates);
+                    if (result) {
+                        console.log('✅ Контакты сохранены через DataManager');
+                        return true;
+                    }
+                }
+
+                // Fallback: сохраняем в локальное хранилище
+                if (!this.currentData.contacts) {
+                    this.currentData.contacts = {};
+                }
+                Object.assign(this.currentData.contacts, contactUpdates);
+                this.currentData.lastUpdate = new Date().toISOString();
+                this.saveLocalData(this.currentData);
+                
+                console.log('✅ Контакты сохранены в localStorage');
+                return true;
+            }
+
+            saveFooter() {
+                const footerUpdates = {};
+                
+                // Собираем данные футера
+                this.currentSection.fields.forEach(field => {
+                    const input = document.querySelector(`[data-field="${field.id}"]`);
+                    if (input && input.value) {
+                        footerUpdates[field.id] = input.value;
+                    }
+                });
+
+                console.log('🦶 Сохранение футера:', footerUpdates);
+
+                // Пробуем сохранить через dataManager
+                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                    const result = window.dataManager.updateContent('footer', footerUpdates);
+                    if (result) {
+                        console.log('✅ Футер сохранен через DataManager');
+                        return true;
+                    }
+                }
+
+                // Fallback: сохраняем в локальное хранилище
+                if (!this.currentData.content) {
+                    this.currentData.content = {};
+                }
+                if (!this.currentData.content.footer) {
+                    this.currentData.content.footer = {};
+                }
+                Object.assign(this.currentData.content.footer, footerUpdates);
+                this.currentData.lastUpdate = new Date().toISOString();
+                this.saveLocalData(this.currentData);
+                
+                console.log('✅ Футер сохранен в localStorage');
+                return true;
+            }
+
+            saveContentSection() {
                 const updates = {};
                 
                 // Собираем обновления для обычных полей
                 this.currentSection.fields.forEach(field => {
                     if (field.type !== 'stats') {
                         const input = document.querySelector(`[data-field="${field.id}"]`);
-                        if (input) {
+                        if (input && input.value) {
                             updates[field.id] = input.value;
                         }
                     }
@@ -733,65 +855,41 @@
                         const valueInput = document.querySelector(`[data-stat-value="${i}"]`);
                         const labelInput = document.querySelector(`[data-stat-label="${i}"]`);
                         
-                        if (valueInput && labelInput) {
+                        if (valueInput && labelInput && valueInput.value && labelInput.value) {
                             stats.push({
                                 value: valueInput.value,
                                 label: labelInput.value
                             });
                         }
                     }
-                    updates.stats = stats;
-                }
-
-                console.log('📝 Сохранение данных для секции:', this.currentSection.id, updates);
-
-                // Для контактов сохраняем в отдельный раздел
-                if (this.currentSection.id === 'contact') {
-                    const contactUpdates = {};
-                    this.currentSection.fields.forEach(field => {
-                        if (field.id !== 'title') {
-                            const input = document.querySelector(`[data-field="${field.id}"]`);
-                            if (input) {
-                                contactUpdates[field.id] = input.value;
-                            }
-                        }
-                    });
-                    
-                    // Сохраняем контакты
-                    if (typeof window.dataManager !== 'undefined' && window.dataManager) {
-                        window.dataManager.updateContacts(contactUpdates);
-                    } else {
-                        // Fallback для локального сохранения контактов
-                        if (!this.currentData.contacts) {
-                            this.currentData.contacts = {};
-                        }
-                        Object.assign(this.currentData.contacts, contactUpdates);
-                        this.saveLocalData(this.currentData);
+                    if (stats.length > 0) {
+                        updates.stats = stats;
                     }
                 }
 
-                // Сохраняем основной контент
+                console.log('📝 Сохранение контента:', this.currentSection.id, updates);
+
+                // Пробуем сохранить через dataManager
                 if (typeof window.dataManager !== 'undefined' && window.dataManager) {
                     const success = window.dataManager.updateContent(this.currentSection.id, updates);
                     if (success) {
-                        // Обновляем локальные данные
-                        this.loadCurrentData();
+                        console.log('✅ Контент сохранен через DataManager');
                         return true;
                     }
                 }
 
                 // Fallback: сохраняем в локальное хранилище
-                console.log('⚠️ Используем локальное сохранение');
                 if (!this.currentData.content) {
                     this.currentData.content = {};
                 }
                 if (!this.currentData.content[this.currentSection.id]) {
                     this.currentData.content[this.currentSection.id] = {};
                 }
-                
                 Object.assign(this.currentData.content[this.currentSection.id], updates);
+                this.currentData.lastUpdate = new Date().toISOString();
                 this.saveLocalData(this.currentData);
                 
+                console.log('✅ Контент сохранен в localStorage');
                 return true;
             }
 

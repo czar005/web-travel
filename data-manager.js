@@ -133,6 +133,10 @@ class DataManager {
                 },
                 contact: {
                     title: 'Свяжитесь с нами'
+                },
+                footer: {
+                    description: 'Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.',
+                    copyright: '&copy; 2024 WorldTravel. Все права защищены.'
                 }
             },
             lastUpdate: new Date().toISOString()
@@ -170,11 +174,11 @@ class DataManager {
 
     updateContacts(updates) {
         const data = this.getData();
-        if (!data) return {};
+        if (!data) return false;
         
         data.contacts = { ...data.contacts, ...updates };
         console.log('📞 Updating contacts:', updates);
-        return this.setData(data) ? data.contacts : {};
+        return this.setData(data);
     }
 
     // Settings management
@@ -185,11 +189,11 @@ class DataManager {
 
     updateSettings(updates) {
         const data = this.getData();
-        if (!data) return {};
+        if (!data) return false;
         
         data.settings = { ...data.settings, ...updates };
         console.log('⚙️ Updating settings:', updates);
-        return this.setData(data) ? data.settings : {};
+        return this.setData(data);
     }
 
     // Countries management
