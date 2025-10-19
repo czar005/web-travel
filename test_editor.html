@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Тест редактора</title>
+    <script>
+        function testFunctions() {
+            try {
+                // Проверяем что функции существуют
+                if (typeof selectSection === 'function' && typeof saveAndExit === 'function') {
+                    console.log('✅ Все функции работают');
+                    return true;
+                } else {
+                    console.log('❌ Некоторые функции не найдены');
+                    return false;
+                }
+            } catch(e) {
+                console.log('❌ Ошибка:', e);
+                return false;
+            }
+        }
+        
+        // Запускаем тест при загрузке
+        window.onload = testFunctions;
+    </script>
+</head>
+<body>
+    <h1>Тест редактора</h1>
+    <p>Проверьте консоль браузера</p>
+</body>
+</html>

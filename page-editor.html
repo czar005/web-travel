@@ -1,233 +1,34 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Редактор страниц - WorldTravel</title>
-    <link rel="stylesheet" href="admin-style.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <title>Редактор - WorldTravel</title>
     <style>
-        body { margin: 0; font-family: 'Inter', sans-serif; background: #f5f7fa; height: 100vh; overflow: hidden; }
-        .editor-container { display: flex; height: 100vh; }
-        .preview-panel { flex: 1; background: white; display: flex; flex-direction: column; }
-        .editor-panel { width: 400px; background: white; border-left: 2px solid #e1e5e9; display: flex; flex-direction: column; }
-        .panel-header { padding: 20px; background: #2c5aa0; color: white; display: flex; justify-content: space-between; align-items: center; }
-        .preview-frame { width: 100%; height: 100%; border: none; }
-        .section-item { padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; margin: 10px; cursor: pointer; }
-        .section-title { font-weight: 600; margin-bottom: 5px; }
-        .section-desc { color: #666; font-size: 0.9em; }
-        .btn { padding: 10px 20px; border: none; border-radius: 6px; cursor: pointer; color: white; text-decoration: none; display: inline-flex; align-items: center; gap: 8px; }
-        .btn-success { background: #28a745; }
-        .btn:hover { opacity: 0.9; }
-        .empty-state { text-align: center; padding: 40px; color: #666; }
+        body { margin: 0; font-family: Arial; }
+        .container { display: flex; height: 100vh; }
+        .preview { flex: 1; }
+        .sidebar { width: 300px; background: #f5f5f5; padding: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; cursor: pointer; border-radius: 5px; }
+        .btn { background: #2c5aa0; color: white; padding: 10px; border: none; margin: 10px 0; width: 100%; }
     </style>
 </head>
 <body>
-    <div class="editor-container">
-        <!-- Левая панель - предпросмотр -->
-        <div class="preview-panel">
-            <div class="panel-header">
-                <h2>Предпросмотр страницы</h2>
-                <button class="btn btn-success" onclick="saveAndExit()">
-                    <i class="fas fa-save"></i> Сохранить и выйти
-                </button>
-            </div>
-            <div style="flex: 1; position: relative;">
-                <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true"></iframe>
-            </div>
+    <div class="container">
+        <div class="preview">
+            <iframe src="index.html" style="width:100%;height:100%;border:none"></iframe>
         </div>
-
-        <!-- Правая панель - редактор -->
-        <div class="editor-panel">
-            <div class="panel-header">
-                <h2>Редактор контента</h2>
-            </div>
-            <div style="padding: 20px; flex: 1; overflow-y: auto;">
-                <h3 style="margin-bottom: 15px;">Структура страницы</h3>
-                <div id="section-list">
-                    <div class="section-item" onclick="selectSection('hero')">
-                        <div class="section-title">Главный баннер</div>
-                        <div class="section-desc">Заголовок, описание и изображение на главной странице</div>
-                    </div>
-                    <div class="section-item" onclick="selectSection('about')">
-                        <div class="section-title">О компании</div>
-                        <div class="section-desc">Информация о компании, статистика и изображение</div>
-                    </div>
-                    <div class="section-item" onclick="selectSection('services')">
-                        <div class="section-title">Услуги</div>
-                        <div class="section-desc">Список услуг компании</div>
-                    </div>
-                    <div class="section-item" onclick="selectSection('destinations')">
-                        <div class="section-title">Направления</div>
-                        <div class="section-desc">Популярные направления</div>
-                    </div>
-                    <div class="section-item" onclick="selectSection('contact')">
-                        <div class="section-title">Контакты</div>
-                        <div class="section-desc">Контактная информация</div>
-                    </div>
-                </div>
-            </div>
+        <div class="sidebar">
+            <h3>Редактор контента</h3>
+            <div class="section" onclick="alert('Главный баннер')">Главный баннер</div>
+            <div class="section" onclick="alert('О компании')">О компании</div>
+            <div class="section" onclick="alert('Услуги')">Услуги</div>
+            <div class="section" onclick="alert('Направления')">Направления</div>
+            <div class="section" onclick="alert('Контакты')">Контакты</div>
+            <button class="btn" onclick="window.location.href='admin.html'">Назад в админку</button>
         </div>
     </div>
-
-    
-<script>
-    // ФИНАЛЬНАЯ РАБОТАЮЩАЯ ВЕРСИЯ РЕДАКТОРА БЕЗ BLOB URL
-    var currentSection = null;
-
-    function selectSection(sectionId) {
-        currentSection = sectionId;
-        console.log('Выбрана секция:', sectionId);
-        showNotification('Выбрана секция: ' + getSectionName(sectionId));
-        
-        // Показываем простой редактор для выбранной секции
-        showContentEditor(sectionId);
-    }
-
-    function getSectionName(sectionId) {
-        var names = {
-            'hero': 'Главный баннер',
-            'about': 'О компании',
-            'services': 'Услуги', 
-            'destinations': 'Направления',
-            'contact': 'Контакты'
-        };
-        return names[sectionId] || sectionId;
-    }
-
-    function showContentEditor(sectionId) {
-        var editor = document.getElementById('content-editor');
-        if (!editor) return;
-        
-        var sectionData = getSectionData(sectionId);
-        
-        editor.innerHTML = '
-            <div style="padding: 20px;">
-                <h3 style="margin-bottom: 20px; color: #2c5aa0;">' + getSectionName(sectionId) + '</h3>
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Заголовок:</label>
-                    <input type="text" class="form-control" value="' + (sectionData.title || '') + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
-                </div>
-                <div class="form-group" style="margin-bottom: 15px;">
-                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Описание:</label>
-                    <textarea class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; height: 100px;">' + (sectionData.description || '') + '</textarea>
-                </div>
-                <button class="btn btn-primary" onclick="saveSectionChanges(\'' + sectionId + '\')" style="background: #2c5aa0; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
-                    <i class="fas fa-save"></i> Сохранить изменения
-                </button>
-            </div>
-        ';
-    }
-
-    function getSectionData(sectionId) {
-        // Загружаем данные из localStorage или используем значения по умолчанию
-        try {
-            var savedData = localStorage.getItem('worldtravel_data');
-            if (savedData) {
-                var data = JSON.parse(savedData);
-                if (data.content && data.content[sectionId]) {
-                    return data.content[sectionId];
-                }
-            }
-        } catch(e) {
-            console.warn('Ошибка загрузки данных:', e);
-        }
-        
-        // Значения по умолчанию
-        var defaults = {
-            'hero': { title: 'Откройте мир с WorldTravel', description: 'Мы создаем незабываемые путешествия по всему миру' },
-            'about': { title: 'О нашей компании', description: 'WorldTravel - это команда профессиональных путешественников' },
-            'services': { title: 'Наши услуги', description: 'Полный спектр туристических услуг' },
-            'destinations': { title: 'Популярные направления', description: 'Откройте для себя лучшие направления мира' },
-            'contact': { title: 'Свяжитесь с нами', description: 'Мы всегда рады помочь вам' }
-        };
-        
-        return defaults[sectionId] || {};
-    }
-
-    function saveSectionChanges(sectionId) {
-        var titleInput = document.querySelector('#content-editor input[type="text"]');
-        var descInput = document.querySelector('#content-editor textarea');
-        
-        if (titleInput && descInput) {
-            // Сохраняем в localStorage
-            try {
-                var savedData = localStorage.getItem('worldtravel_data');
-                var data = savedData ? JSON.parse(savedData) : { content: {} };
-                
-                if (!data.content) data.content = {};
-                if (!data.content[sectionId]) data.content[sectionId] = {};
-                
-                data.content[sectionId].title = titleInput.value;
-                data.content[sectionId].description = descInput.value;
-                data.lastUpdate = new Date().toISOString();
-                
-                localStorage.setItem('worldtravel_data', JSON.stringify(data));
-                showNotification('Изменения сохранены успешно!');
-                
-                // Обновляем предпросмотр
-                refreshPreview();
-                
-            } catch(e) {
-                console.error('Ошибка сохранения:', e);
-                showNotification('Ошибка сохранения', 'error');
-            }
-        }
-    }
-
-    function saveAndExit() {
-        showNotification('Возврат в админ-панель...');
-        setTimeout(function() {
-            window.location.href = 'admin.html';
-        }, 1000);
-    }
-
-    function refreshPreview() {
-        var frame = document.getElementById('preview-frame');
-        if (frame) {
-            // Просто перезагружаем фрейм
-            frame.src = frame.src.split('?')[0] + '?editor=true&t=' + Date.now();
-        }
-    }
-
-    function showNotification(message, type) {
-        type = type || 'success';
-        var backgroundColor = type === 'error' ? '#dc3545' : '#28a745';
-        
-        var notification = document.createElement('div');
-        notification.style.cssText = 'position:fixed;top:20px;right:20px;background:' + backgroundColor + ';color:white;padding:15px 20px;border-radius:8px;z-index:10000;animation:slideIn 0.3s ease';
-        notification.innerHTML = '<i class="fas fa-' + (type === 'error' ? 'exclamation-triangle' : 'check-circle') + '"></i> ' + message;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(function() {
-            if (notification.parentNode) {
-                notification.parentNode.removeChild(notification);
-            }
-        }, 3000);
-    }
-
-    // Инициализация при загрузке
-    document.addEventListener('DOMContentLoaded', function() {
-        console.log('✅ Редактор страниц инициализирован');
-        
-        // Создаем стили для анимации
-        var style = document.createElement('style');
-        style.textContent = '
-            @keyframes slideIn { 
-                from { transform: translateX(100%); opacity: 0; } 
-                to { transform: translateX(0); opacity: 1; } 
-            }
-            .form-control:focus { outline: none; border-color: #2c5aa0; }
-            .section-item:hover { background: #e3f2fd; border-color: #2c5aa0; }
-        ';
-        document.head.appendChild(style);
-    });
-
-    // Глобальные функции для кнопок
-    window.refreshPreview = refreshPreview;
-    window.saveAndExit = saveAndExit;
-</script>
-
+    <script>
+        console.log('Super simple editor loaded');
+    </script>
 </body>
 </html>
