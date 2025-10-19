@@ -101,6 +101,9 @@ class ContentUpdater {
             this.updateElement('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title', content.about.title);
             this.updateElement('.about-text p, #about p, .about p, section:nth-of-type(2) p', content.about.description);
             
+            // Обновляем навигацию для секции "О нас"
+            this.updateNavigation('about', content.about.title);
+            
             if (content.about.stats) {
                 this.updateStats(content.about.stats);
             }
@@ -109,6 +112,9 @@ class ContentUpdater {
         // Services section
         if (content.services) {
             this.updateElement('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title', content.services.title);
+            
+            // Обновляем навигацию для секции "Услуги"
+            this.updateNavigation('services', content.services.title);
             
             if (content.services.services) {
                 this.updateServices(content.services.services);
@@ -119,15 +125,22 @@ class ContentUpdater {
         if (content.destinations) {
             this.updateElement('#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title', content.destinations.title);
             this.updateElement('.destinations .section-subtitle, .section-subtitle, section:nth-of-type(4) .section-subtitle', content.destinations.subtitle);
+            
+            // Обновляем навигацию для секции "Направления"
+            this.updateNavigation('destinations', content.destinations.title);
         }
 
         // Contact section
         if (content.contact) {
             this.updateElement('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title', content.contact.title);
+            
+            // Обновляем навигацию для секции "Контакты"
+            this.updateNavigation('contact', content.contact.title);
         }
 
         // Footer section - ВАЖНО: исправлены селекторы для футера
         if (content.footer) {
+            // Исправленный селектор для описания компании в футере
             this.updateElement('.footer-section p:first-child', content.footer.description);
             this.updateElement('.footer-bottom p', content.footer.copyright, true);
         }
@@ -208,6 +221,20 @@ class ContentUpdater {
             this.updateElement('.logo h2, .header h2', settings.companyName);
             this.updateElement('.footer-section h3, .footer h3', settings.companyName);
         }
+    }
+
+    // Обновление навигационных ссылок
+    updateNavigation(sectionId, newTitle) {
+        if (!newTitle) return;
+        
+        const navLinks = document.querySelectorAll('.nav-links a');
+        navLinks.forEach(link => {
+            const href = link.getAttribute('href');
+            if (href === `#${sectionId}`) {
+                console.log(`🔄 Updating navigation for ${sectionId}: "${link.textContent}" -> "${newTitle}"`);
+                link.textContent = newTitle;
+            }
+        });
     }
 
     updateElement(selector, newValue, isHtml = false) {
