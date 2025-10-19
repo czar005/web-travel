@@ -1,11 +1,11 @@
-// Enhanced content updater with reliable change application and custom sections support
+// Enhanced content updater with support for all editable sections
 function ContentUpdater() {
     this.appliedChanges = new Set();
     this.init();
 }
 
 ContentUpdater.prototype.init = function() {
-    console.log('🚀 ContentUpdater initialized');
+    console.log('🚀 Enhanced ContentUpdater initialized');
     
     var self = this;
     if (document.readyState === 'loading') {
@@ -87,7 +87,7 @@ ContentUpdater.prototype.getDataHash = function(data) {
 ContentUpdater.prototype.applyContentChanges = function(content) {
     if (!content) return;
 
-    console.log('📝 Applying content changes:', content);
+    console.log('📝 Applying content changes to all sections');
 
     // Hero section
     if (content.hero) {
@@ -142,6 +142,53 @@ ContentUpdater.prototype.applyContentChanges = function(content) {
         this.updateElement('.footer-section:first-child p:first-child', content.footer.description);
         this.updateElement('.footer-bottom p', content.footer.copyright, true);
     }
+
+    // Custom sections
+    this.applyCustomSectionsData(content);
+};
+
+ContentUpdater.prototype.applyCustomSectionsData = function(content) {
+    var self = this;
+    Object.keys(content).forEach(function(sectionId) {
+        if (sectionId.startsWith('section-')) {
+            var sectionData = content[sectionId];
+            var sectionElement = document.getElementById(sectionId);
+            
+            if (sectionElement) {
+                // Update custom section content based on type
+                switch (sectionData.type) {
+                    case 'text':
+                        self.updateElement('#' + sectionId + ' .section-title', sectionData.title);
+                        self.updateElement('#' + sectionId + ' .section-content p', sectionData.content);
+                        break;
+                    case 'image':
+                        self.updateElement('#' + sectionId + ' .section-title', sectionData.title);
+                        self.updateElement('#' + sectionId + ' .text-content p', sectionData.content);
+                        if (sectionData.image) {
+                            self.updateImages('#' + sectionId + ' .image-content img', sectionData.image);
+                        }
+                        break;
+                    case 'features':
+                        self.updateElement('#' + sectionId + ' .section-title', sectionData.title);
+                        if (sectionData.features) {
+                            self.updateFeatures('#' + sectionId + ' .features-grid', sectionData.features);
+                        }
+                        break;
+                    case 'cta':
+                        self.updateElement('#' + sectionId + ' h2', sectionData.title);
+                        self.updateElement('#' + sectionId + ' p', sectionData.description);
+                        if (sectionData.buttonText) {
+                            self.updateElement('#' + sectionId + ' .cta-button', sectionData.buttonText);
+                            var button = document.querySelector('#' + sectionId + ' .cta-button');
+                            if (button && sectionData.buttonUrl) {
+                                button.href = sectionData.buttonUrl;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    });
 };
 
 ContentUpdater.prototype.updateElement = function(selector, content, isHTML) {
@@ -154,9 +201,6 @@ ContentUpdater.prototype.updateElement = function(selector, content, isHTML) {
                 element.textContent = content;
             }
         });
-        console.log('✅ Updated element:', selector);
-    } else {
-        console.log('❌ Element not found:', selector);
     }
 };
 
@@ -166,7 +210,6 @@ ContentUpdater.prototype.updateImages = function(selector, src) {
         elements.forEach(function(element) {
             element.src = src;
         });
-        console.log('✅ Updated image:', selector);
     }
 };
 
@@ -212,6 +255,28 @@ ContentUpdater.prototype.updateServices = function(services) {
     }
 };
 
+ContentUpdater.prototype.updateFeatures = function(selector, features) {
+    var container = document.querySelector(selector);
+    if (container) {
+        var featureItems = container.querySelectorAll('.feature-item');
+        if (featureItems.length >= features.length) {
+            features.forEach(function(feature, index) {
+                if (featureItems[index]) {
+                    var titleElement = featureItems[index].querySelector('h3');
+                    var descElement = featureItems[index].querySelector('p');
+                    var iconElement = featureItems[index].querySelector('.feature-icon i');
+                    
+                    if (titleElement) titleElement.textContent = feature.title;
+                    if (descElement) descElement.textContent = feature.description;
+                    if (iconElement && feature.icon) {
+                        iconElement.className = feature.icon;
+                    }
+                }
+            });
+        }
+    }
+};
+
 ContentUpdater.prototype.applyContactChanges = function(contacts) {
     if (!contacts) return;
 
@@ -239,8 +304,6 @@ ContentUpdater.prototype.applySettingsChanges = function(settings) {
 
 ContentUpdater.prototype.applyCustomSections = function(data) {
     if (!data.pageStructure || !data.content) return;
-
-    console.log('🔄 Applying custom sections...');
 
     var customSectionsContainer = document.getElementById('custom-sections');
     if (!customSectionsContainer) {
@@ -282,12 +345,12 @@ ContentUpdater.prototype.renderCustomSection = function(container, sectionData) 
         case 'image':
             html = '\
                 <div class="container">\
-                    <div class="section-content" style="display: flex; gap: 30px; align-items: center;">\
-                        <div class="text-content" style="flex: 1;">\
+                    <div class="section-content" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">\
+                        <div class="text-content" style="flex: 1; min-width: 300px;">\
                             <h2 class="section-title">' + (sectionData.title || '') + '</h2>\
                             <p>' + (sectionData.content || '') + '</p>\
                         </div>\
-                        <div class="image-content" style="flex: 1;">\
+                        <div class="image-content" style="flex: 1; min-width: 300px; text-align: center;">\
                             ' + (sectionData.image ? '<img src="' + sectionData.image + '" alt="' + (sectionData.title || '') + '" style="max-width: 100%; border-radius: 10px;">' : '') + '\
                         </div>\
                     </div>\
@@ -297,12 +360,12 @@ ContentUpdater.prototype.renderCustomSection = function(container, sectionData) 
         case 'features':
             var featuresHtml = (sectionData.features || []).map(function(feature) {
                 return '\
-                    <div class="feature-item" style="text-align: center; padding: 20px;">\
-                        <div class="feature-icon" style="font-size: 2em; margin-bottom: 15px; color: #2c5aa0;">\
+                    <div class="feature-item" style="text-align: center; padding: 30px 20px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;">\
+                        <div class="feature-icon" style="font-size: 3em; margin-bottom: 20px; color: #2c5aa0;">\
                             <i class="' + (feature.icon || 'fas fa-star') + '"></i>\
                         </div>\
-                        <h3 style="margin-bottom: 10px;">' + (feature.title || '') + '</h3>\
-                        <p style="color: #666;">' + (feature.description || '') + '</p>\
+                        <h3 style="margin-bottom: 15px; color: #333;">' + (feature.title || '') + '</h3>\
+                        <p style="color: #666; line-height: 1.6;">' + (feature.description || '') + '</p>\
                     </div>\
                 ';
             }).join('');
@@ -319,11 +382,11 @@ ContentUpdater.prototype.renderCustomSection = function(container, sectionData) 
         case 'cta':
             html = '\
                 <div class="container">\
-                    <div class="cta-section" style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #2c5aa0, #4a7bc8); color: white; border-radius: 15px;">\
-                        <h2 style="margin-bottom: 20px;">' + (sectionData.title || '') + '</h2>\
-                        <p style="margin-bottom: 30px; font-size: 1.1em;">' + (sectionData.description || '') + '</p>\
+                    <div class="cta-section" style="text-align: center; padding: 60px 40px; background: linear-gradient(135deg, #2c5aa0, #4a7bc8); color: white; border-radius: 15px; margin: 40px 0;">\
+                        <h2 style="margin-bottom: 20px; font-size: 2.5em;">' + (sectionData.title || '') + '</h2>\
+                        <p style="margin-bottom: 30px; font-size: 1.2em; opacity: 0.9;">' + (sectionData.description || '') + '</p>\
                         ' + (sectionData.buttonText ? '\
-                            <a href="' + (sectionData.buttonUrl || '#') + '" class="cta-button" style="background: white; color: #2c5aa0; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block;">\
+                            <a href="' + (sectionData.buttonUrl || '#') + '" class="cta-button" style="background: white; color: #2c5aa0; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 1.1em; transition: all 0.3s ease;">\
                                 ' + sectionData.buttonText + '\
                             </a>\
                         ' : '') + '\
@@ -344,5 +407,5 @@ ContentUpdater.prototype.renderCustomSection = function(container, sectionData) 
     container.appendChild(sectionElement);
 };
 
-// Initialize content updater
+// Initialize enhanced content updater
 var contentUpdater = new ContentUpdater();
