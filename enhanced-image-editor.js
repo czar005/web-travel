@@ -37,24 +37,24 @@ class ImageEditor {
             const editor = document.getElementById('content-editor');
             if (!editor) return;
 
-            const html = `
-                <div class="form-group">
-                    <label>🖼️ Изображение для "${sectionName}":</label>
-                    <div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">
-                        <input type="text" data-field="image" class="form-control" placeholder="URL изображения..." 
-                               value="${this.getCurrentValue('image') || ''}">
-                        <button type="button" class="btn-admin" onclick="editor.uploadImage('image')">
-                            <i class="fas fa-upload"></i>
-                        </button>
-                        <button type="button" class="btn-admin secondary" onclick="editor.setImageUrl('image')">
-                            <i class="fas fa-link"></i>
-                        </button>
-                    </div>
-                    <div style="font-size: 12px; color: #666; margin-top: 5px;">
-                        Можно указать URL или загрузить файл
-                    </div>
-                </div>
-            `;
+            const currentValue = this.getCurrentValue('image') || '';
+            
+            const html = '<div class="form-group">' +
+                '<label>🖼️ Изображение для "' + sectionName + '":</label>' +
+                '<div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">' +
+                '<input type="text" data-field="image" class="form-control" placeholder="URL изображения..." ' +
+                'value="' + currentValue + '">' +
+                '<button type="button" class="btn-admin" onclick="editor.uploadImage(\'image\')">' +
+                '<i class="fas fa-upload"></i>' +
+                '</button>' +
+                '<button type="button" class="btn-admin secondary" onclick="editor.setImageUrl(\'image\')">' +
+                '<i class="fas fa-link"></i>' +
+                '</button>' +
+                '</div>' +
+                '<div style="font-size: 12px; color: #666; margin-top: 5px;">' +
+                'Можно указать URL или загрузить файл' +
+                '</div>' +
+                '</div>';
 
             const titleField = editor.querySelector('[data-field="title"]');
             if (titleField) {
@@ -66,14 +66,14 @@ class ImageEditor {
             const input = document.createElement('input');
             input.type = 'file';
             input.accept = 'image/*';
-            input.onchange = (e) => {
+            input.onchange = function(e) {
                 const file = e.target.files[0];
                 if (file) {
                     const reader = new FileReader();
-                    reader.onload = (e) => {
-                        document.querySelector(`[data-field="${fieldId}"]`).value = e.target.result;
-                        this.hasUnsavedChanges = true;
-                        this.showNotification('Изображение загружено', 'success');
+                    reader.onload = function(e) {
+                        document.querySelector('[data-field="' + fieldId + '"]').value = e.target.result;
+                        window.editor.hasUnsavedChanges = true;
+                        window.editor.showNotification('Изображение загружено', 'success');
                     };
                     reader.readAsDataURL(file);
                 }
@@ -82,10 +82,10 @@ class ImageEditor {
         };
 
         window.editor.setImageUrl = function(fieldId) {
-            const current = document.querySelector(`[data-field="${fieldId}"]`).value;
+            const current = document.querySelector('[data-field="' + fieldId + '"]').value;
             const url = prompt('URL изображения:', current || '');
             if (url !== null) {
-                document.querySelector(`[data-field="${fieldId}"]`).value = url;
+                document.querySelector('[data-field="' + fieldId + '"]').value = url;
                 this.hasUnsavedChanges = true;
                 this.showNotification('URL установлен', 'success');
             }

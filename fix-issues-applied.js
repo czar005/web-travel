@@ -1,6 +1,6 @@
 // Автоматические исправления для сайта
 document.addEventListener('DOMContentLoaded', function() {
-    console.log('�� Применение автоматических исправлений...');
+    console.log('🔧 Применение автоматических исправлений...');
     
     // 1. Гарантируем правильные заголовки в навигации
     const navTitles = {
@@ -11,9 +11,9 @@ document.addEventListener('DOMContentLoaded', function() {
         'contact': 'Контакты'
     };
     
-    Object.keys(navTitles).forEach(sectionId => {
-        const links = document.querySelectorAll(`a[href="#${sectionId}"]`);
-        links.forEach(link => {
+    Object.keys(navTitles).forEach(function(sectionId) {
+        const links = document.querySelectorAll('a[href="#' + sectionId + '"]');
+        links.forEach(function(link) {
             if (link.textContent !== navTitles[sectionId]) {
                 link.textContent = navTitles[sectionId];
             }
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // 2. Гарантируем правильные контакты
     const contactItems = document.querySelectorAll('.contact-item');
-    contactItems.forEach(item => {
+    contactItems.forEach(function(item) {
         const strong = item.querySelector('strong');
         const p = item.querySelector('p');
         
