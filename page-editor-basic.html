@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Редактор - WorldTravel</title>
+    <style>
+        body { margin: 0; font-family: Arial; }
+        .container { display: flex; min-height: 100vh; }
+        .preview { flex: 1; }
+        .sidebar { width: 300px; background: #f0f0f0; padding: 20px; }
+        .section { background: white; padding: 15px; margin: 10px 0; border-radius: 5px; cursor: pointer; }
+        .btn { background: #2c5aa0; color: white; padding: 12px; border: none; width: 100%; margin: 10px 0; border-radius: 4px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="preview">
+            <iframe src="index.html" style="width:100%;height:100%;border:none"></iframe>
+        </div>
+        <div class="sidebar">
+            <h2>Редактор</h2>
+            <div class="section" onclick="edit('hero')">🏠 Главный баннер</div>
+            <div class="section" onclick="edit('about')">ℹ️ О компании</div>
+            <div class="section" onclick="edit('services')">🎯 Услуги</div>
+            <div class="section" onclick="edit('destinations')">🌍 Направления</div>
+            <div class="section" onclick="edit('contact')">📞 Контакты</div>
+            <button class="btn" onclick="exit()">📁 Назад в админку</button>
+        </div>
+    </div>
+    <script>
+        function edit(section) {
+            console.log('Edit:', section);
+            alert('Редактирование: ' + section);
+        }
+        function exit() {
+            window.location.href = 'admin.html';
+        }
+        console.log('Basic editor ready');
+    </script>
+</body>
+</html>
