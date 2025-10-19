@@ -114,6 +114,7 @@ StablePageEditor.prototype.handleImageUpload = function(file) {
     const fieldId = document.getElementById('image-file-input').getAttribute('data-field');
     // В реальном приложении здесь была бы загрузка на сервер
     // Для демо используем Object URL
+    const imageUrl = URL.createObjectURL(file);
     this.updateImageField(imageUrl, fieldId);
     this.showNotification('Изображение загружено (демо)');
 };

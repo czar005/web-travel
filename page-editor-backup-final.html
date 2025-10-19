@@ -811,7 +811,6 @@
                 this.loadSectionsList();
                 window.addEventListener("beforeunload", () => { this.cleanupTemporaryUrls(); });
                 window.addEventListener("error", (event) => {
-                    if (event.target && event.target.src && event.target.src.startsWith("blob:")) {
                         console.warn("Ошибка загрузки blob URL:", event.target.src);
                         if (event.target.tagName === "IMG") {
                             event.target.src = "images/travel-placeholder.svg";
@@ -828,7 +827,6 @@
                 
                 // Обработчик ошибок blob URL
                 window.addEventListener('error', (event) => {
-                    if (event.target && event.target.src && event.target.src.startsWith('blob:')) {
                         console.warn('Blob URL error:', event.target.src);
                         event.preventDefault();
                     }
@@ -1651,7 +1649,6 @@
             }
 
             // Создаем новый временный URL
-            const imageUrl = URL.createObjectURL(file);
             this.temporaryUrls.set(fieldId, imageUrl);
             this.updateImageField(imageUrl, fieldId);
             this.showNotification('Изображение загружено для предпросмотра', 'success');
@@ -1678,7 +1675,6 @@
                         this.temporaryUrls.delete(fieldId);
                     }
 
-                    const imageUrl = URL.createObjectURL(file);
                     this.temporaryUrls.set(fieldId, imageUrl);
                     this.updateImageField(imageUrl, fieldId);
                     this.showNotification("Изображение загружено для предпросмотра", "success");
@@ -1749,7 +1745,6 @@ this.temporaryUrls = new Map();
                         this.temporaryUrls.delete(fieldId);
                     }
 
-                    const imageUrl = URL.createObjectURL(file);
                     this.temporaryUrls.set(fieldId, imageUrl);
                     this.updateImageField(imageUrl, fieldId);
                     this.showNotification("Изображение загружено для предпросмотра", "success");
@@ -1762,7 +1757,6 @@ this.temporaryUrls = new Map();
 
             updateImageField(url, fieldId = null) {
         // Если это blob URL, добавляем обработчик ошибок
-        if (url.startsWith('blob:')) {
             setTimeout(() => {
                 const imgs = document.querySelectorAll('img[src="' + url + '"]');
                 imgs.forEach(img => {

@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: Arial, sans-serif; background: #f5f7fa; height: 100vh; overflow: hidden; }
+        .editor-container { display: flex; height: 100vh; }
+        .preview-panel { flex: 1; background: white; display: flex; flex-direction: column; }
+        .editor-panel { width: 400px; background: white; border-left: 2px solid #e1e5e9; display: flex; flex-direction: column; }
+        .panel-header { padding: 20px; background: #2c5aa0; color: white; }
+        .preview-frame { width: 100%; height: 100%; border: none; }
+        .section-list { padding: 20px; flex: 1; overflow-y: auto; }
+        .section-item { padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; margin-bottom: 10px; }
+        .section-title { font-weight: bold; margin-bottom: 5px; }
+        .section-desc { color: #666; font-size: 0.9em; }
+        .btn { background: #28a745; color: white; padding: 10px 20px; border: none; border-radius: 5px; margin: 5px; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2 style="margin: 0;">Предпросмотр страницы</h2>
+                <a href="admin.html" class="btn" style="margin-top: 10px;">
+                    Назад в админку
+                </a>
+            </div>
+            <iframe class="preview-frame" src="index.html"></iframe>
+        </div>
+        
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2 style="margin: 0;">Редактор контента</h2>
+            </div>
+            <div class="section-list">
+                <div class="section-item">
+                    <div class="section-title">Главный баннер</div>
+                    <div class="section-desc">Заголовок, описание и изображение</div>
+                </div>
+                <div class="section-item">
+                    <div class="section-title">О компании</div>
+                    <div class="section-desc">Информация о компании</div>
+                </div>
+                <div class="section-item">
+                    <div class="section-title">Услуги</div>
+                    <div class="section-desc">Список услуг</div>
+                </div>
+                <div class="section-item">
+                    <div class="section-title">Направления</div>
+                    <div class="section-desc">Популярные направления</div>
+                </div>
+                <div class="section-item">
+                    <div class="section-title">Контакты</div>
+                    <div class="section-desc">Контактная информация</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- НИКАКОГО JavaScript - абсолютно чистая страница -->
+</body>
+</html>

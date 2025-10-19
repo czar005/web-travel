@@ -9,6 +9,7 @@ window.addEventListener('beforeunload', () => {
 
 // Добавляем обработчик ошибок для blob URL
 window.addEventListener('error', (event) => {
+    if (event.target && event.target.src && event.target.src.startsWith('blob:')) {
         console.warn('Ошибка загрузки blob URL:', event.target.src);
         event.preventDefault();
     }

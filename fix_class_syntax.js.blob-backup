@@ -144,6 +144,7 @@ const oldSyntax = `
         }
 
         // Создаем новый URL
+        var imageUrl = URL.createObjectURL(file);
         this.temporaryUrls.set(fieldId, imageUrl);
         
         // Обновляем поле

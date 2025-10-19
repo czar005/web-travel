@@ -50,6 +50,7 @@ if (checks.hasScriptTags && checks.hasNoEOFErrors && checks.hasProperQuotes) {
     <script>
         function saveAndExit() {
             // Cleanup blob URLs
+            var images = document.querySelectorAll('img[src^="blob:"]');
             images.forEach(function(img) {
                 try { URL.revokeObjectURL(img.src); } catch(e) {}
             });

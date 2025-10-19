@@ -66,10 +66,12 @@
         function saveAndExit() {
             // Освобождаем все blob URL перед выходом
             document.querySelectorAll('input, img').forEach(function(element) {
+                if (element.src && element.src.startsWith('blob:')) {
                     try {
                         URL.revokeObjectURL(element.src);
                     } catch(e) {}
                 }
+                if (element.value && element.value.startsWith('blob:')) {
                     try {
                         URL.revokeObjectURL(element.value);
                     } catch(e) {}
@@ -88,6 +90,7 @@
             fileInput.onchange = function(e) {
                 var file = e.target.files[0];
                 if (file) {
+                    var url = URL.createObjectURL(file);
                     // Освобождаем URL через минуту для безопасности
                     setTimeout(function() {
                         try { URL.revokeObjectURL(url); } catch(e) {}

@@ -28,6 +28,7 @@ const simpleImageUpload = `handleImageUpload(file) {
     }
     
     // Создаем новый
+    const url = URL.createObjectURL(file);
     this.temporaryUrls.set(fieldId, url);
     
     // Обновляем поле

@@ -57,6 +57,7 @@ content = content.replace(
         }
 
         // Создаем новый URL
+        const imageUrl = URL.createObjectURL(file);
         this.temporaryUrls.set(fieldId, imageUrl);
         
         // Находим поле и обновляем его

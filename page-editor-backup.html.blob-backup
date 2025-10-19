@@ -1617,6 +1617,7 @@
 
     try {
         // Создаем временный URL для предпросмотра
+        const imageUrl = URL.createObjectURL(file);
         this.updateImageField(imageUrl, fieldId);
         this.showNotification('Изображение загружено для предпросмотра', 'success');
         
@@ -1664,6 +1665,7 @@ handleImageUpload(file) {
     }
 
     try {
+        const imageUrl = URL.createObjectURL(file);
         this.temporaryUrls.add(imageUrl);
         this.updateImageField(imageUrl, fieldId);
         this.showNotification('Изображение загружено для предпросмотра', 'success');
