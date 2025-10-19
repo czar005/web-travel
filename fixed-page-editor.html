@@ -1,0 +1,1437 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .editor-panel {
+            width: 450px;
+            background: white;
+            border-left: 2px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: #2c5aa0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-frame-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .section-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .section-item:hover {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .section-item.active {
+            border-color: #2c5aa0;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .section-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .section-item.active .section-desc {
+            color: #e0e0e0;
+        }
+
+        .section-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section-item:hover .section-actions {
+            opacity: 1;
+        }
+
+        .section-item.active .section-actions {
+            opacity: 1;
+        }
+
+        .btn-section-action {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-section-action:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .btn-section-action.delete {
+            color: #dc3545;
+        }
+
+        .btn-section-action.move {
+            color: #17a2b8;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3d6f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .stats-editor, .services-editor {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            border: 2px solid #e9ecef;
+        }
+
+        .stat-row, .service-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+            align-items: center;
+        }
+
+        .stat-row input, .service-row input {
+            flex: 1;
+        }
+
+        .service-row textarea {
+            flex: 2;
+            min-height: 60px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            background: #28a745;
+            color: white;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            border-bottom-color: #2c5aa0;
+            background: white;
+            color: #2c5aa0;
+        }
+
+        .content-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .save-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-indicator.show {
+            display: flex;
+        }
+
+        .debug-info {
+            background: #f8f9fa;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            color: #666;
+            margin-top: 15px;
+        }
+
+        .dynamic-items-controls {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+
+        /* Стили для загрузки изображений */
+        .image-upload-container {
+            margin: 15px 0;
+        }
+
+        .image-preview {
+            width: 100%;
+            max-width: 300px;
+            height: 200px;
+            border: 2px dashed #ddd;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 15px;
+            overflow: hidden;
+            background: #f8f9fa;
+        }
+
+        .image-preview img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: cover;
+        }
+
+        .image-preview.empty {
+            flex-direction: column;
+            color: #666;
+        }
+
+        .image-preview.empty i {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #ccc;
+        }
+
+        .upload-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s ease;
+        }
+
+        .upload-btn:hover {
+            background: #138496;
+        }
+
+        .image-url-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .image-url-input input {
+            flex: 1;
+        }
+
+        .current-image-info {
+            background: #e9ecef;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            font-size: 12px;
+            color: #666;
+        }
+
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        /* Стили для модального окна создания секции */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 10000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 500px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            color: #2c5aa0;
+        }
+
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #666;
+            transition: color 0.3s ease;
+        }
+
+        .close-modal:hover {
+            color: #dc3545;
+        }
+
+        .section-type-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 15px;
+            margin: 20px 0;
+        }
+
+        .section-type-card {
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .section-type-card:hover {
+            border-color: #2c5aa0;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+
+        .section-type-card.active {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .section-type-icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+            color: #2c5aa0;
+        }
+
+        .section-type-name {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .section-type-desc {
+            font-size: 0.8em;
+            color: #666;
+        }
+
+        .position-selector {
+            margin: 20px 0;
+        }
+
+        .position-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .position-option {
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .position-option:hover {
+            border-color: #2c5aa0;
+        }
+
+        .position-option.active {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .add-section-btn {
+            width: 100%;
+            margin-top: 20px;
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 15px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: background 0.3s ease;
+        }
+
+        .add-section-btn:hover {
+            background: #218838;
+        }
+
+        .add-section-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <!-- Левая панель - предпросмотр -->
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn btn-warning" onclick="editor.showAddSectionModal()">
+                        <i class="fas fa-plus"></i> Добавить секцию
+                    </button>
+                    <button class="btn btn-secondary" onclick="editor.safeRefresh()" style="margin-left: 10px;">
+                        <i class="fas fa-sync"></i> Обновить
+                    </button>
+                    <button class="btn btn-success" onclick="editor.saveAndExit()" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="save-indicator" id="save-indicator">
+                <i class="fas fa-check-circle"></i>
+                <span id="save-message">Изменения сохранены</span>
+            </div>
+
+            <div class="preview-frame-container">
+                <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true&nocache=1"></iframe>
+            </div>
+        </div>
+
+        <!-- Правая панель - редактор -->
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="sections">Секции</button>
+                <button class="tab-button" data-tab="content">Контент</button>
+            </div>
+
+            <div class="panel-content" id="sections-tab">
+                <div class="content-header">
+                    <h3>Структура страницы</h3>
+                    <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Управление секциями страницы</p>
+                </div>
+                <div class="section-list" id="section-list">
+                    <!-- Секции будут загружены через JS -->
+                </div>
+            </div>
+
+            <div class="panel-content" id="content-tab" style="display: none;">
+                <div id="content-editor">
+                    <div class="empty-state">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Выберите секцию для редактирования</p>
+                        <small>Перейдите на вкладку "Секции" и выберите нужный блок</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Модальное окно создания секции -->
+    <div class="modal" id="add-section-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Добавить новую секцию</h3>
+                <button class="close-modal" onclick="editor.hideAddSectionModal()">&times;</button>
+            </div>
+            
+            <div class="form-group">
+                <label>Название секции:</label>
+                <input type="text" id="new-section-name" class="form-control" placeholder="Введите название секции">
+            </div>
+
+            <div class="form-group">
+                <label>Тип секции:</label>
+                <div class="section-type-grid" id="section-type-grid">
+                    <div class="section-type-card" data-type="text">
+                        <div class="section-type-icon"><i class="fas fa-text-height"></i></div>
+                        <div class="section-type-name">Текстовая</div>
+                        <div class="section-type-desc">Простой текстовый блок</div>
+                    </div>
+                    <div class="section-type-card" data-type="image">
+                        <div class="section-type-icon"><i class="fas fa-image"></i></div>
+                        <div class="section-type-name">С изображением</div>
+                        <div class="section-type-desc">Текст с изображением</div>
+                    </div>
+                    <div class="section-type-card" data-type="features">
+                        <div class="section-type-icon"><i class="fas fa-star"></i></div>
+                        <div class="section-type-name">Особенности</div>
+                        <div class="section-type-desc">Список преимуществ</div>
+                    </div>
+                    <div class="section-type-card" data-type="cta">
+                        <div class="section-type-icon"><i class="fas fa-bullhorn"></i></div>
+                        <div class="section-type-name">Призыв к действию</div>
+                        <div class="section-type-desc">Кнопка и описание</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="form-group position-selector">
+                <label>Позиция секции:</label>
+                <div class="position-options" id="position-options">
+                    <div class="position-option" data-position="start">
+                        <i class="fas fa-arrow-up"></i>
+                        <div>В начало</div>
+                    </div>
+                    <div class="position-option" data-position="end">
+                        <i class="fas fa-arrow-down"></i>
+                        <div>В конец</div>
+                    </div>
+                    <div class="position-option" data-position="after-hero">
+                        <i class="fas fa-arrow-down"></i>
+                        <div>После героя</div>
+                    </div>
+                    <div class="position-option" data-position="before-footer">
+                        <i class="fas fa-arrow-up"></i>
+                        <div>Перед футером</div>
+                    </div>
+                </div>
+            </div>
+
+            <button class="add-section-btn" id="create-section-btn" onclick="editor.createNewSection()">
+                <i class="fas fa-plus"></i> Создать секцию
+            </button>
+        </div>
+    </div>
+
+    <!-- Скрытый input для загрузки файлов -->
+    <input type="file" id="image-file-input" accept="image/*" style="display: none;">
+
+    <script>
+        // Упрощенная версия редактора для стабильности
+        function StablePageEditor() {
+            this.currentSection = null;
+            this.currentData = {};
+            this.hasUnsavedChanges = false;
+            this.selectedSectionType = 'text';
+            this.selectedPosition = 'end';
+            this.sections = [];
+            this.init();
+        }
+
+        StablePageEditor.prototype.init = function() {
+            console.log('🚀 Инициализация редактора...');
+            this.loadCurrentData();
+            this.setupFrameListener();
+            this.setupTabHandlers();
+            this.setupImageUpload();
+            this.setupSectionModal();
+            this.loadSectionsList();
+            
+            // Авто-выбор первой секции
+            setTimeout(function() {
+                if (this.sections.length > 0) {
+                    this.selectSection(this.sections[0].id);
+                }
+            }.bind(this), 1000);
+        };
+
+        StablePageEditor.prototype.loadCurrentData = function() {
+            if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                this.currentData = window.dataManager.getData() || {};
+                console.log('📁 Загружены данные из DataManager:', this.currentData);
+            } else {
+                console.warn('⚠️ DataManager не доступен, используем локальные данные');
+                this.currentData = this.getLocalData();
+            }
+            
+            this.loadSectionsFromData();
+        };
+
+        StablePageEditor.prototype.getLocalData = function() {
+            var localData = localStorage.getItem('worldtravel_data');
+            if (localData) {
+                return JSON.parse(localData);
+            }
+            return {
+                content: {
+                    hero: { 
+                        id: 'hero',
+                        type: 'hero',
+                        name: 'Главный баннер',
+                        title: 'Откройте мир с WorldTravel', 
+                        subtitle: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                        image: 'images/travel-placeholder.svg'
+                    },
+                    about: { 
+                        id: 'about',
+                        type: 'about',
+                        name: 'О компании',
+                        title: 'О нашей компании', 
+                        description: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.',
+                        image: 'images/travel-placeholder.svg',
+                        stats: [
+                            { value: '5000', label: 'Довольных клиентов' },
+                            { value: '50', label: 'Стран мира' },
+                            { value: '10 лет', label: 'Опыта работы' }
+                        ]
+                    },
+                    services: { 
+                        id: 'services',
+                        type: 'services',
+                        name: 'Услуги',
+                        title: 'Наши услуги',
+                        services: [
+                            { title: 'Авиабилеты', description: 'Подбор и бронирование лучших авиаперелетов по выгодным ценам', icon: 'fas fa-plane' },
+                            { title: 'Отели', description: 'Бронирование отелей любого уровня комфорта по всему миру', icon: 'fas fa-hotel' },
+                            { title: 'Туры', description: 'Индивидуальные и групповые туры с профессиональными гидами', icon: 'fas fa-map-marked-alt' },
+                            { title: 'Страхование', description: 'Полное страховое сопровождение вашего путешествия', icon: 'fas fa-shield-alt' }
+                        ]
+                    },
+                    destinations: { 
+                        id: 'destinations',
+                        type: 'destinations',
+                        name: 'Направления',
+                        title: 'Популярные направления', 
+                        subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными туры' 
+                    },
+                    contact: { 
+                        id: 'contact',
+                        type: 'contact',
+                        name: 'Контакты',
+                        title: 'Свяжитесь с нами' 
+                    }
+                },
+                footer: { 
+                    id: 'footer',
+                    type: 'footer',
+                    name: 'Футер',
+                    description: 'Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.',
+                    copyright: '&copy; 2024 WorldTravel. Все права защищены.'
+                },
+                contacts: {
+                    email: 'info@worldtravel.com',
+                    phone: '+7 (999) 123-45-67',
+                    address: 'Москва, ул. Туристическая, 15',
+                    hours: 'Пн-Пт: 9:00-18:00'
+                },
+                settings: {
+                    siteTitle: 'WorldTravel - Туристическая компания',
+                    companyName: 'WorldTravel'
+                },
+                pageStructure: ['hero', 'about', 'services', 'destinations', 'contact'],
+                lastUpdate: new Date().toISOString()
+            };
+        };
+
+        StablePageEditor.prototype.loadSectionsFromData = function() {
+            this.sections = [];
+            
+            var pageStructure = this.currentData.pageStructure || ['hero', 'about', 'services', 'destinations', 'contact'];
+            var self = this;
+            
+            pageStructure.forEach(function(sectionId) {
+                if (self.currentData.content && self.currentData.content[sectionId]) {
+                    var sectionData = self.currentData.content[sectionId];
+                    self.sections.push({
+                        id: sectionId,
+                        type: sectionData.type || sectionId,
+                        name: sectionData.name || self.getSectionName(sectionId),
+                        description: self.getSectionDescription(sectionId)
+                    });
+                }
+            });
+
+            // Добавляем футер
+            if (this.currentData.footer) {
+                this.sections.push({
+                    id: 'footer',
+                    type: 'footer',
+                    name: 'Футер',
+                    description: 'Текст в подвале сайта'
+                });
+            }
+        };
+
+        StablePageEditor.prototype.getSectionName = function(sectionId) {
+            var names = {
+                'hero': 'Главный баннер',
+                'about': 'О компании',
+                'services': 'Услуги',
+                'destinations': 'Направления',
+                'contact': 'Контакты',
+                'footer': 'Футер'
+            };
+            return names[sectionId] || sectionId;
+        };
+
+        StablePageEditor.prototype.getSectionDescription = function(sectionId) {
+            var descriptions = {
+                'hero': 'Заголовок, описание и изображение на главной странице',
+                'about': 'Информация о компании, статистика и изображение',
+                'services': 'Список услуг компании',
+                'destinations': 'Популярные направления',
+                'contact': 'Контактная информация',
+                'footer': 'Текст в подвале сайта'
+            };
+            return descriptions[sectionId] || 'Секция страницы';
+        };
+
+        StablePageEditor.prototype.setupTabHandlers = function() {
+            var tabButtons = document.querySelectorAll('.tab-button');
+            var self = this;
+            
+            tabButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    var tabName = e.target.getAttribute('data-tab');
+                    if (tabName) {
+                        self.showTab(tabName);
+                    }
+                });
+            });
+        };
+
+        StablePageEditor.prototype.setupImageUpload = function() {
+            var fileInput = document.getElementById('image-file-input');
+            var self = this;
+            
+            fileInput.addEventListener('change', function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    self.handleImageUpload(file);
+                }
+            });
+        };
+
+        StablePageEditor.prototype.handleImageUpload = function(file) {
+            var fileInput = document.getElementById('image-file-input');
+            var fieldId = fileInput.getAttribute('data-field') || 'image';
+            
+            if (!file.type.startsWith('image/')) {
+                this.showNotification('Пожалуйста, выберите файл изображения', 'error');
+                return;
+            }
+
+            if (file.size > 5 * 1024 * 1024) {
+                this.showNotification('Размер файла не должен превышать 5MB', 'error');
+                return;
+            }
+
+            // Используем FileReader вместо создания blob URL
+            var reader = new FileReader();
+            var self = this;
+            
+            reader.onload = function(e) {
+                var imageUrl = e.target.result;
+                self.updateImageField(imageUrl, fieldId);
+                self.showNotification('Изображение загружено успешно', 'success');
+            };
+            
+            reader.onerror = function() {
+                self.showNotification('Ошибка загрузки изображения', 'error');
+            };
+            
+            reader.readAsDataURL(file);
+        };
+
+        StablePageEditor.prototype.updateImageField = function(url, fieldId) {
+            var field = document.querySelector('[data-field="' + fieldId + '"]');
+            if (field) {
+                field.value = url;
+                var preview = field.closest('.image-upload-container').querySelector('.image-preview');
+                if (preview) {
+                    preview.innerHTML = '<img src="' + url + '" alt="Preview">';
+                    preview.classList.remove('empty');
+                }
+                this.hasUnsavedChanges = true;
+            }
+        };
+
+        StablePageEditor.prototype.setupSectionModal = function() {
+            var self = this;
+            
+            // Обработчики для выбора типа секции
+            document.querySelectorAll('.section-type-card').forEach(function(card) {
+                card.addEventListener('click', function() {
+                    document.querySelectorAll('.section-type-card').forEach(function(c) {
+                        c.classList.remove('active');
+                    });
+                    card.classList.add('active');
+                    self.selectedSectionType = card.getAttribute('data-type');
+                });
+            });
+
+            // Обработчики для выбора позиции
+            document.querySelectorAll('.position-option').forEach(function(option) {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.position-option').forEach(function(o) {
+                        o.classList.remove('active');
+                    });
+                    option.classList.add('active');
+                    self.selectedPosition = option.getAttribute('data-position');
+                });
+            });
+
+            // Выбираем первый тип и позицию по умолчанию
+            document.querySelector('.section-type-card').classList.add('active');
+            document.querySelector('.position-option').classList.add('active');
+        };
+
+        StablePageEditor.prototype.setupFrameListener = function() {
+            var frame = document.getElementById('preview-frame');
+            var self = this;
+            
+            frame.onload = function() {
+                console.log('✅ Фрейм предпросмотра загружен');
+                if (self.currentSection) {
+                    setTimeout(function() {
+                        self.selectSection(self.currentSection.id);
+                    }, 500);
+                }
+            };
+        };
+
+        StablePageEditor.prototype.loadSectionsList = function() {
+            var container = document.getElementById('section-list');
+            container.innerHTML = '';
+
+            if (this.sections.length === 0) {
+                container.innerHTML = '\
+                    <div class="empty-state">\
+                        <i class="fas fa-inbox"></i>\
+                        <p>Секции не найдены</p>\
+                        <small>Создайте первую секцию используя кнопку "Добавить секцию"</small>\
+                    </div>\
+                ';
+                return;
+            }
+
+            var self = this;
+            this.sections.forEach(function(section) {
+                var sectionElement = document.createElement('div');
+                sectionElement.className = 'section-item ' + (self.currentSection && self.currentSection.id === section.id ? 'active' : '');
+                sectionElement.setAttribute('data-section', section.id);
+                
+                sectionElement.innerHTML = '\
+                    <div class="section-title">' + section.name + '</div>\
+                    <div class="section-desc">' + section.description + '</div>\
+                    <div class="section-actions">\
+                        <button class="btn-section-action move" title="Переместить">\
+                            <i class="fas fa-arrows-alt"></i>\
+                        </button>\
+                        <button class="btn-section-action delete" title="Удалить" onclick="editor.deleteSection(\'' + section.id + '\')">\
+                            <i class="fas fa-trash"></i>\
+                        </button>\
+                    </div>\
+                ';
+
+                sectionElement.addEventListener('click', function(e) {
+                    if (!e.target.closest('.section-actions')) {
+                        self.selectSection(section.id);
+                    }
+                });
+
+                container.appendChild(sectionElement);
+            });
+        };
+
+        StablePageEditor.prototype.showAddSectionModal = function() {
+            document.getElementById('add-section-modal').classList.add('active');
+            document.getElementById('new-section-name').value = '';
+            document.getElementById('new-section-name').focus();
+        };
+
+        StablePageEditor.prototype.hideAddSectionModal = function() {
+            document.getElementById('add-section-modal').classList.remove('active');
+        };
+
+        StablePageEditor.prototype.createNewSection = function() {
+            var name = document.getElementById('new-section-name').value.trim();
+            if (!name) {
+                this.showNotification('Введите название секции', 'error');
+                return;
+            }
+
+            var newSectionId = 'section-' + Date.now();
+            var newSection = {
+                id: newSectionId,
+                type: this.selectedSectionType,
+                name: name,
+                description: this.getSectionTypeDescription(this.selectedSectionType)
+            };
+
+            // Добавляем секцию в структуру страницы
+            this.addSectionToStructure(newSectionId, this.selectedPosition);
+
+            // Добавляем данные секции
+            if (!this.currentData.content) {
+                this.currentData.content = {};
+            }
+            this.currentData.content[newSectionId] = {
+                id: newSectionId,
+                type: this.selectedSectionType,
+                name: name,
+                title: name
+            };
+
+            // Добавляем секцию в список
+            this.sections.splice(this.getInsertIndex(this.selectedPosition), 0, newSection);
+
+            // Сохраняем изменения
+            this.saveData();
+            this.loadSectionsList();
+            this.hideAddSectionModal();
+            this.selectSection(newSectionId);
+            
+            this.showNotification('Секция "' + name + '" создана успешно!', 'success');
+        };
+
+        StablePageEditor.prototype.getSectionTypeDescription = function(type) {
+            var descriptions = {
+                'text': 'Простой текстовый блок',
+                'image': 'Текст с изображением',
+                'features': 'Список преимуществ и особенностей',
+                'cta': 'Призыв к действию с кнопкой'
+            };
+            return descriptions[type] || 'Новая секция';
+        };
+
+        StablePageEditor.prototype.addSectionToStructure = function(sectionId, position) {
+            if (!this.currentData.pageStructure) {
+                this.currentData.pageStructure = ['hero', 'about', 'services', 'destinations', 'contact'];
+            }
+
+            var structure = this.currentData.pageStructure;
+            var insertIndex = structure.length;
+
+            switch (position) {
+                case 'start':
+                    insertIndex = 0;
+                    break;
+                case 'after-hero':
+                    var heroIndex = structure.indexOf('hero');
+                    insertIndex = heroIndex !== -1 ? heroIndex + 1 : 1;
+                    break;
+                case 'before-footer':
+                    insertIndex = structure.length - 1;
+                    break;
+                case 'end':
+                default:
+                    insertIndex = structure.length;
+                    break;
+            }
+
+            structure.splice(insertIndex, 0, sectionId);
+        };
+
+        StablePageEditor.prototype.getInsertIndex = function(position) {
+            var structure = this.currentData.pageStructure || ['hero', 'about', 'services', 'destinations', 'contact'];
+            
+            switch (position) {
+                case 'start':
+                    return 0;
+                case 'after-hero':
+                    var heroIndex = structure.indexOf('hero');
+                    return heroIndex !== -1 ? heroIndex + 1 : 1;
+                case 'before-footer':
+                    return structure.length - 1;
+                case 'end':
+                default:
+                    return structure.length;
+            }
+        };
+
+        StablePageEditor.prototype.deleteSection = function(sectionId) {
+            if (!confirm('Удалить секцию "' + this.getSectionName(sectionId) + '"?')) {
+                return;
+            }
+
+            // Удаляем из структуры
+            if (this.currentData.pageStructure) {
+                this.currentData.pageStructure = this.currentData.pageStructure.filter(function(id) {
+                    return id !== sectionId;
+                });
+            }
+
+            // Удаляем данные
+            if (this.currentData.content && this.currentData.content[sectionId]) {
+                delete this.currentData.content[sectionId];
+            }
+
+            // Удаляем из списка
+            this.sections = this.sections.filter(function(s) {
+                return s.id !== sectionId;
+            });
+
+            // Сохраняем изменения
+            this.saveData();
+            this.loadSectionsList();
+
+            if (this.currentSection && this.currentSection.id === sectionId) {
+                this.currentSection = null;
+                this.showContentEditor();
+            }
+
+            this.showNotification('Секция удалена', 'success');
+        };
+
+        StablePageEditor.prototype.selectSection = function(sectionId) {
+            console.log('🎯 Выбор секции:', sectionId);
+            
+            document.querySelectorAll('.section-item').forEach(function(item) {
+                item.classList.remove('active');
+            });
+
+            var selectedItem = document.querySelector('[data-section="' + sectionId + '"]');
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+
+            this.currentSection = this.sections.find(function(s) {
+                return s.id === sectionId;
+            });
+            this.showContentEditor();
+            this.showTab('content');
+        };
+
+        StablePageEditor.prototype.showTab = function(tabName) {
+            console.log('📑 Переключение на вкладку:', tabName);
+            
+            document.querySelectorAll('.panel-content').forEach(function(tab) {
+                tab.style.display = 'none';
+            });
+            
+            var targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.tab-button').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            
+            var targetButton = document.querySelector('[data-tab="' + tabName + '"]');
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+        };
+
+        StablePageEditor.prototype.showContentEditor = function() {
+            if (!this.currentSection) {
+                var editor = document.getElementById('content-editor');
+                editor.innerHTML = '\
+                    <div class="empty-state">\
+                        <i class="fas fa-mouse-pointer"></i>\
+                        <p>Выберите секцию для редактирования</p>\
+                        <small>Перейдите на вкладку "Секции" и выберите нужный блок</small>\
+                    </div>\
+                ';
+                return;
+            }
+
+            var editor = document.getElementById('content-editor');
+            var currentValue = this.getCurrentValue('title');
+            
+            var editorHTML = '\
+                <div class="content-header">\
+                    <h3>' + this.currentSection.name + '</h3>\
+                    <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Редактирование содержимого секции</p>\
+                </div>\
+                <div class="form-group">\
+                    <label>Заголовок:</label>\
+                    <input type="text" class="form-control" data-field="title" value="' + (currentValue || '') + '" placeholder="Введите заголовок...">\
+                </div>\
+                <div class="action-buttons">\
+                    <button class="btn btn-primary" id="save-changes-btn">\
+                        <i class="fas fa-save"></i> Сохранить изменения\
+                    </button>\
+                    <button class="btn btn-secondary" id="back-to-sections-btn">\
+                        <i class="fas fa-arrow-left"></i> Назад к списку\
+                    </button>\
+                </div>\
+                <div class="debug-info">\
+                    <strong>Отладка:</strong> Секция: ' + this.currentSection.id + ' | Тип: ' + this.currentSection.type + '\
+                </div>\
+            ';
+
+            editor.innerHTML = editorHTML;
+            
+            var self = this;
+            document.getElementById('save-changes-btn').addEventListener('click', function() {
+                self.saveChanges();
+            });
+            
+            document.getElementById('back-to-sections-btn').addEventListener('click', function() {
+                self.showTab('sections');
+            });
+            
+            this.hasUnsavedChanges = false;
+        };
+
+        StablePageEditor.prototype.getCurrentValue = function(fieldId) {
+            if (this.currentData.content && this.currentData.content[this.currentSection.id]) {
+                return this.escapeHtml(this.currentData.content[this.currentSection.id][fieldId] || '');
+            }
+            return '';
+        };
+
+        StablePageEditor.prototype.saveChanges = function() {
+            if (!this.currentSection) return;
+
+            try {
+                var titleInput = document.querySelector('#content-editor [data-field="title"]');
+                if (titleInput) {
+                    var newTitle = titleInput.value;
+                    
+                    if (!this.currentData.content[this.currentSection.id]) {
+                        this.currentData.content[this.currentSection.id] = {};
+                    }
+                    this.currentData.content[this.currentSection.id].title = newTitle;
+                }
+
+                // Сохраняем изменения
+                this.saveData();
+                this.hasUnsavedChanges = false;
+                this.showSaveIndicator('Изменения сохранены успешно');
+                this.showNotification('Изменения применены!', 'success');
+                
+                // Обновляем предпросмотр
+                this.safeRefresh();
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                this.showNotification('Ошибка сохранения: ' + error.message, 'error');
+            }
+        };
+
+        StablePageEditor.prototype.saveData = function() {
+            try {
+                // Обновляем timestamp
+                this.currentData.lastUpdate = new Date().toISOString();
+                
+                // Сохраняем в localStorage
+                localStorage.setItem('worldtravel_data', JSON.stringify(this.currentData));
+                console.log('�� Данные сохранены в localStorage');
+                
+                // Обновляем DataManager если он доступен
+                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                    window.dataManager.setData(this.currentData);
+                }
+                
+                return true;
+            } catch (error) {
+                console.error('❌ Ошибка сохранения:', error);
+                this.showNotification('Ошибка сохранения данных', 'error');
+                return false;
+            }
+        };
+
+        StablePageEditor.prototype.safeRefresh = function() {
+            if (this.hasUnsavedChanges) {
+                if (!confirm('У вас есть несохраненные изменения. Обновить предпросмотр?')) {
+                    return;
+                }
+            }
+            
+            var frame = document.getElementById('preview-frame');
+            var currentSrc = frame.src.split('?')[0];
+            frame.src = currentSrc + '?editor=true&nocache=1&t=' + Date.now();
+            this.showNotification('Предпросмотр обновлен');
+        };
+
+        StablePageEditor.prototype.saveAndExit = function() {
+            if (this.hasUnsavedChanges) {
+                if (confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
+                    this.saveChanges();
+                }
+            }
+            
+            this.showNotification('Возврат в админ-панель...');
+            setTimeout(function() {
+                window.location.href = 'admin.html';
+            }, 500);
+        };
+
+        StablePageEditor.prototype.showNotification = function(message, type) {
+            type = type || 'success';
+            var notification = document.createElement('div');
+            notification.className = 'notification ' + (type === 'error' ? 'error' : '');
+            notification.innerHTML = '\
+                <i class="fas fa-' + (type === 'error' ? 'exclamation-triangle' : 'check-circle') + '"></i>\
+                ' + message + '\
+            ';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(function() {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 4000);
+        };
+
+        StablePageEditor.prototype.showSaveIndicator = function(message) {
+            var indicator = document.getElementById('save-indicator');
+            var messageEl = document.getElementById('save-message');
+            
+            if (indicator && messageEl) {
+                messageEl.textContent = message;
+                indicator.classList.add('show');
+                
+                setTimeout(function() {
+                    indicator.classList.remove('show');
+                }, 3000);
+            }
+        };
+
+        StablePageEditor.prototype.escapeHtml = function(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        // Инициализация редактора
+        var editor = new StablePageEditor();
+        window.editor = editor;
+
+        // Глобальные функции для кнопок
+        window.refreshPreview = function() { editor.safeRefresh(); };
+        window.saveAndExit = function() { editor.saveAndExit(); };
+    </script>
+</body>
+</html>
