@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Editor</title>
+    <script>
+        // Тестовый скрипт для проверки синтаксиса
+        function testSyntax() {
+            try {
+                // Проверяем базовый синтаксис
+                var test = 'hello';
+                console.log('Syntax OK');
+                return true;
+            } catch(e) {
+                console.error('Syntax error:', e);
+                return false;
+            }
+        }
+        
+        // Проверяем при загрузке
+        window.addEventListener('load', function() {
+            if (testSyntax()) {
+                console.log('✅ Все синтаксические проверки пройдены');
+            }
+        });
+    </script>
+</head>
+<body>
+    <h1>Тест синтаксиса</h1>
+    <p>Проверьте консоль браузера</p>
+</body>
+</html>

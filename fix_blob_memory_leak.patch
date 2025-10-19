@@ -1,0 +1,112 @@
+--- a/page-editor.html
++++ b/page-editor.html
+@@ -132,6 +132,7 @@
+             this.selectedPosition = 'end';
+             this.sections = [];
+             this.sortable = null;
++            this.temporaryUrls = new Map(); // Для отслеживания временных URL
+             this.init();
+         }
+ 
+@@ -140,32 +141,39 @@
+         }
+ 
+         handleImageUpload(file) {
+-    const fieldId = document.getElementById('image-file-input').getAttribute('data-field');
+-    
+-    // Валидация типа файла
+-    if (!file.type.startsWith('image/')) {
+-        this.showNotification('Пожалуйста, выберите файл изображения', 'error');
+-        return;
+-    }
++            const fieldId = document.getElementById('image-file-input').getAttribute('data-field');
++            
++            if (!file.type.startsWith('image/')) {
++                this.showNotification('Пожалуйста, выберите файл изображения', 'error');
++                return;
++            }
+ 
+-    // Валидация размера файла (максимум 5MB)
+-    if (file.size > 5 * 1024 * 1024) {
+-        this.showNotification('Размер файла не должен превышать 5MB', 'error');
+-        return;
+-    }
++            if (file.size > 5 * 1024 * 1024) {
++                this.showNotification('Размер файла не должен превышать 5MB', 'error');
++                return;
++            }
+ 
+-    try {
+-        // Создаем временный URL для предпросмотра
+-        const imageUrl = URL.createObjectURL(file);
+-        this.updateImageField(imageUrl, fieldId);
+-        this.showNotification('Изображение загружено для предпросмотра', 'success');
+-        
+-        // Освобождаем память через 30 секунд
+-        setTimeout(() => {
+-            try {
+-                URL.revokeObjectURL(imageUrl);
+-            } catch (e) {
+-                console.warn('Не удалось освободить URL:', e);
++            try {
++                // Освобождаем предыдущий временный URL для этого поля
++                if (this.temporaryUrls.has(fieldId)) {
++                    const oldUrl = this.temporaryUrls.get(fieldId);
++                    try {
++                        URL.revokeObjectURL(oldUrl);
++                        console.log('🗑️ Освобожден предыдущий URL для поля:', fieldId);
++                    } catch (e) {
++                        console.warn('Не удалось освободить предыдущий URL:', e);
++                    }
++                    this.temporaryUrls.delete(fieldId);
++                }
++
++                // Создаем новый временный URL
++                const imageUrl = URL.createObjectURL(file);
++                this.temporaryUrls.set(fieldId, imageUrl);
++                this.updateImageField(imageUrl, fieldId);
++                this.showNotification('Изображение загружено для предпросмотра', 'success');
++                
++            } catch (error) {
++                console.error('Ошибка загрузки изображения:', error);
++                this.showNotification('Ошибка загрузки изображения', 'error');
+             }
+-        }, 30000);
+-        
+-    } catch (error) {
+-        console.error('Ошибка загрузки изображения:', error);
+-        this.showNotification('Ошибка загрузки изображения', 'error');
+-    }
+-}
++        }
++
++        // Добавляем метод очистки временных URL
++        cleanupTemporaryUrls() {
++            for (const [fieldId, url] of this.temporaryUrls) {
++                try {
++                    URL.revokeObjectURL(url);
++                    console.log('🗑️ Освобожден URL для поля:', fieldId);
++                } catch (e) {
++                    console.warn('Не удалось освободить URL:', e);
++                }
++            }
++            this.temporaryUrls.clear();
++        }
++
++        // Обновляем метод saveAndExit для очистки URL
++        saveAndExit() {
++            this.cleanupTemporaryUrls();
++            
++            if (this.hasUnsavedChanges) {
++                if (confirm('У вас есть несохраненные изменения. Сохранить перед выходом?')) {
++                    if (!this.saveChanges()) {
++                        return;
++                    }
++                }
++            }
++            
++            this.showNotification('Возврат в админ-панель...');
++            setTimeout(() => {
++                window.location.href = 'admin.html';
++            }, 1000);
++        }
