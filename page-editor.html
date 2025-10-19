@@ -409,9 +409,9 @@
                         description: 'Контактная информация',
                         fields: [
                             { id: 'title', type: 'text', label: 'Заголовок', selector: '#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title' },
-                            { id: 'phone', type: 'text', label: 'Телефон', selector: '.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p' },
-                            { id: 'email', type: 'text', label: 'Email', selector: '.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p' },
-                            { id: 'address', type: 'text', label: 'Адрес', selector: '.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p' },
+                            { id: 'phone', type: 'text', label: 'Телефон', selector: '.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p, .footer-section p:nth-child(2)' },
+                            { id: 'email', type: 'text', label: 'Email', selector: '.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p, .footer-section p:nth-child(3)' },
+                            { id: 'address', type: 'text', label: 'Адрес', selector: '.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p, .footer-section p:nth-child(4)' },
                             { id: 'hours', type: 'text', label: 'Часы работы', selector: '.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p' }
                         ]
                     }
@@ -509,6 +509,12 @@
                         services: { title: 'Наши услуги' },
                         destinations: { title: 'Популярные направления', subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами' },
                         contact: { title: 'Свяжитесь с нами' }
+                    },
+                    contacts: {
+                        phone: '+7 (999) 123-45-67',
+                        email: 'info@worldtravel.com',
+                        address: 'Москва, ул. Туристическая, 15',
+                        hours: 'Пн-Пт: 9:00-18:00'
                     }
                 };
             }
@@ -594,10 +600,10 @@
 
                 editorHTML += `
                     <div class="action-buttons">
-                        <button class="btn btn-primary" onclick="editor.saveChanges()">
+                        <button class="btn btn-primary" id="save-changes-btn">
                             <i class="fas fa-save"></i> Применить изменения
                         </button>
-                        <button class="btn btn-secondary" onclick="editor.showTab('sections')">
+                        <button class="btn btn-secondary" id="back-to-sections-btn">
                             <i class="fas fa-arrow-left"></i> Назад к списку
                         </button>
                     </div>
@@ -608,19 +614,28 @@
                 `;
 
                 editor.innerHTML = editorHTML;
+                
+                // Назначаем обработчики для кнопок
+                document.getElementById('save-changes-btn').addEventListener('click', () => {
+                    this.saveChanges();
+                });
+                
+                document.getElementById('back-to-sections-btn').addEventListener('click', () => {
+                    this.showTab('sections');
+                });
+                
                 this.hasUnsavedChanges = false;
             }
 
             getCurrentValue(field) {
-                // Пробуем получить из dataManager
-                if (typeof window.dataManager !== 'undefined' && window.dataManager && this.currentData.content) {
-                    const sectionData = this.currentData.content[this.currentSection.id];
-                    if (sectionData && sectionData[field.id]) {
-                        return this.escapeHtml(sectionData[field.id]);
+                // Для контактов используем отдельный раздел
+                if (this.currentSection.id === 'contact' && field.id !== 'title') {
+                    if (this.currentData.contacts && this.currentData.contacts[field.id]) {
+                        return this.escapeHtml(this.currentData.contacts[field.id]);
                     }
                 }
                 
-                // Если в dataManager нет, пробуем получить из локальных данных
+                // Для остальных полей используем content
                 if (this.currentData.content && this.currentData.content[this.currentSection.id]) {
                     const sectionData = this.currentData.content[this.currentSection.id];
                     if (sectionData[field.id]) {
@@ -730,7 +745,32 @@
 
                 console.log('📝 Сохранение данных для секции:', this.currentSection.id, updates);
 
-                // Пробуем сохранить через dataManager
+                // Для контактов сохраняем в отдельный раздел
+                if (this.currentSection.id === 'contact') {
+                    const contactUpdates = {};
+                    this.currentSection.fields.forEach(field => {
+                        if (field.id !== 'title') {
+                            const input = document.querySelector(`[data-field="${field.id}"]`);
+                            if (input) {
+                                contactUpdates[field.id] = input.value;
+                            }
+                        }
+                    });
+                    
+                    // Сохраняем контакты
+                    if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                        window.dataManager.updateContacts(contactUpdates);
+                    } else {
+                        // Fallback для локального сохранения контактов
+                        if (!this.currentData.contacts) {
+                            this.currentData.contacts = {};
+                        }
+                        Object.assign(this.currentData.contacts, contactUpdates);
+                        this.saveLocalData(this.currentData);
+                    }
+                }
+
+                // Сохраняем основной контент
                 if (typeof window.dataManager !== 'undefined' && window.dataManager) {
                     const success = window.dataManager.updateContent(this.currentSection.id, updates);
                     if (success) {

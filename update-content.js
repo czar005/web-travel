@@ -35,12 +35,15 @@ class ContentUpdater {
     applyAllChanges() {
         if (!window.dataManager) {
             console.log('⏳ Waiting for DataManager...');
+            // Пробуем загрузить данные из localStorage как fallback
+            this.applyLocalChanges();
             return;
         }
 
         const data = window.dataManager.getData();
         if (!data) {
             console.log('📭 No data available');
+            this.applyLocalChanges();
             return;
         }
 
@@ -57,6 +60,21 @@ class ContentUpdater {
         
         this.appliedChanges.add(changeHash);
         console.log('✅ Changes applied successfully');
+    }
+
+    applyLocalChanges() {
+        const localData = localStorage.getItem('worldtravel_editor_data');
+        if (localData) {
+            try {
+                const data = JSON.parse(localData);
+                console.log('📁 Applying local changes...');
+                this.applyContentChanges(data.content);
+                this.applyContactChanges(data.contacts);
+                this.applySettingsChanges(data.settings);
+            } catch (error) {
+                console.error('❌ Error applying local changes:', error);
+            }
+        }
     }
 
     getDataHash(data) {
@@ -111,10 +129,16 @@ class ContentUpdater {
 
         console.log('📞 Applying contact changes:', contacts);
 
+        // Контакты в секции контактов
         this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p', contacts.phone);
         this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p', contacts.email);
         this.updateElement('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p', contacts.address);
         this.updateElement('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p', contacts.hours);
+
+        // Контакты в футере
+        this.updateElement('.footer-section p:nth-child(2)', contacts.phone);
+        this.updateElement('.footer-section p:nth-child(3)', contacts.email);
+        this.updateElement('.footer-section p:nth-child(4)', contacts.address);
     }
 
     applySettingsChanges(settings) {
