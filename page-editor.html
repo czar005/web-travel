@@ -790,13 +790,13 @@
     <script>
         class StablePageEditor {
             constructor() {
-                this.currentSection = null;
+                this.currentSection ;
                 this.currentData = {};
                 this.hasUnsavedChanges = false;
-                this.selectedSectionType = 'text';
-                this.selectedPosition = 'end';
+                this.selectedSectionType ;
+                this.selectedPosition ;
                 this.sections = [];
-                this.sortable = null;
+                this.sortable ;
                 this.temporaryUrls = new Map(); // Хранилище для временных blob URL // Для отслеживания временных URL
                 this.init();
             }
@@ -1132,7 +1132,7 @@
 
                 this.sections.forEach(section => {
                     const sectionElement = document.createElement('div');
-                    sectionElement.className = `section-item ${this.currentSection && this.currentSection.id === section.id ? 'active' : ''}`;
+                    sectionElement.className = `section-item " + this.currentSection && this.currentSection.id === section.id ? 'active' : '' + "`;
                     sectionElement.setAttribute('data-section', section.id);
                     
                     sectionElement.innerHTML = `
@@ -1140,12 +1140,12 @@
                             <button class="btn-section-action move drag-handle" title="Переместить">
                                 <i class="fas fa-arrows-alt"></i>
                             </button>
-                            <button class="btn-section-action delete" title="Удалить" onclick="editor.deleteSection('${section.id}')">
+                            <button class="btn-section-action delete" title="Удалить" onclick="editor.deleteSection('" + section.id + "')">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
-                        <div class="section-title">${section.name}</div>
-                        <div class="section-desc">${section.description}</div>
+                        <div class="section-title">" + section.name + "</div>
+                        <div class="section-desc">" + section.description + "</div>
                     `;
 
                     sectionElement.addEventListener('click', (e) => {
@@ -1208,7 +1208,7 @@
                 this.hideAddSectionModal();
                 this.selectSection(newSectionId);
                 
-                this.showNotification(`Секция "${name}" создана успешно!`, 'success');
+                this.showNotification(`Секция "" + name + "" создана успешно!`, 'success');
             }
 
             getSectionTypeDescription(type) {
@@ -1335,7 +1335,7 @@
             }
 
             deleteSection(sectionId) {
-                if (!confirm(`Удалить секцию "${this.getSectionName(sectionId)}"?`)) {
+                if (!confirm(`Удалить секцию "" + this.getSectionName(sectionId) + ""?`)) {
                     return;
                 }
 
@@ -1357,7 +1357,7 @@
                 this.loadSectionsList();
 
                 if (this.currentSection && this.currentSection.id === sectionId) {
-                    this.currentSection = null;
+                    this.currentSection ;
                     this.showContentEditor();
                 }
 
@@ -1383,7 +1383,7 @@
                     item.classList.remove('active');
                 });
 
-                const selectedItem = document.querySelector(`[data-section="${sectionId}"]`);
+                const selectedItem = document.querySelector(`[data-section="" + sectionId + ""]`);
                 if (selectedItem) {
                     selectedItem.classList.add('active');
                 }
@@ -1409,7 +1409,7 @@
                     btn.classList.remove('active');
                 });
                 
-                const targetButton = document.querySelector(`[data-tab="${tabName}"]`);
+                const targetButton = document.querySelector(`[data-tab="" + tabName + ""]`);
                 if (targetButton) {
                     targetButton.classList.add('active');
                 }
@@ -1432,7 +1432,7 @@
                 
                 let editorHTML = `
                     <div class="content-header">
-                        <h3>${this.currentSection.name}</h3>
+                        <h3>" + this.currentSection.name + "</h3>
                         <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Редактирование содержимого секции</p>
                     </div>
                 `;
@@ -1450,10 +1450,10 @@
                         const currentValue = this.getCurrentValue(field);
                         editorHTML += `
                             <div class="form-group">
-                                <label>${field.label}:</label>
-                                ${field.type === 'textarea' ? 
-                                    `<textarea class="form-control" data-field="${field.id}" placeholder="Введите ${field.label.toLowerCase()}...">${currentValue}</textarea>` :
-                                    `<input type="text" class="form-control" data-field="${field.id}" value="${currentValue}" placeholder="Введите ${field.label.toLowerCase()}...">`
+                                <label>" + field.label + ":</label>
+                                " + field.type === 'textarea' ? 
+                                    `<textarea class="form-control" data-field="${field.id + "" placeholder="Введите " + field.label.toLowerCase() + "...">" + currentValue + "</textarea>` :
+                                    `<input type="text" class="form-control" data-field="" + field.id + "" value="" + currentValue + "" placeholder="Введите " + field.label.toLowerCase() + "...">`
                                 }
                             </div>
                         `;
@@ -1471,7 +1471,7 @@
                     </div>
                     
                     <div class="debug-info">
-                        <strong>Отладка:</strong> Секция: ${this.currentSection.id} | Тип: ${this.currentSection.type} | Поля: ${this.currentSection.fields.length}
+                        <strong>Отладка:</strong> Секция: " + this.currentSection.id + " | Тип: " + this.currentSection.type + " | Поля: " + this.currentSection.fields.length + "
                     </div>
                 `;
 
@@ -1529,9 +1529,9 @@
                 stats.forEach((stat, index) => {
                     html += `
                         <div class="stat-row">
-                            <input type="text" class="form-control" data-stat="${index}" data-field="value" value="${stat.value}" placeholder="Значение">
-                            <input type="text" class="form-control" data-stat="${index}" data-field="label" value="${stat.label}" placeholder="Подпись">
-                            <button class="btn btn-danger btn-small" onclick="editor.removeStat(${index})">
+                            <input type="text" class="form-control" data-stat="" + index + "" data-field="value" value="" + stat.value + "" placeholder="Значение">
+                            <input type="text" class="form-control" data-stat="" + index + "" data-field="label" value="" + stat.label + "" placeholder="Подпись">
+                            <button class="btn btn-danger btn-small" onclick="editor.removeStat(" + index + ")">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1554,10 +1554,10 @@
                 services.forEach((service, index) => {
                     html += `
                         <div class="service-row">
-                            <input type="text" class="form-control" data-service="${index}" data-field="title" value="${service.title}" placeholder="Название услуги">
-                            <textarea class="form-control" data-service="${index}" data-field="description" placeholder="Описание услуги">${service.description}</textarea>
-                            <input type="text" class="form-control" data-service="${index}" data-field="icon" value="${service.icon}" placeholder="Иконка (fas fa-...)">
-                            <button class="btn btn-danger btn-small" onclick="editor.removeService(${index})">
+                            <input type="text" class="form-control" data-service="" + index + "" data-field="title" value="" + service.title + "" placeholder="Название услуги">
+                            <textarea class="form-control" data-service="" + index + "" data-field="description" placeholder="Описание услуги">" + service.description + "</textarea>
+                            <input type="text" class="form-control" data-service="" + index + "" data-field="icon" value="" + service.icon + "" placeholder="Иконка (fas fa-...)">
+                            <button class="btn btn-danger btn-small" onclick="editor.removeService(" + index + ")">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1580,10 +1580,10 @@
                 features.forEach((feature, index) => {
                     html += `
                         <div class="stat-row">
-                            <input type="text" class="form-control" data-feature="${index}" data-field="title" value="${feature.title}" placeholder="Название особенности">
-                            <textarea class="form-control" data-feature="${index}" data-field="description" placeholder="Описание особенности">${feature.description}</textarea>
-                            <input type="text" class="form-control" data-feature="${index}" data-field="icon" value="${feature.icon}" placeholder="Иконка">
-                            <button class="btn btn-danger btn-small" onclick="editor.removeFeature(${index})">
+                            <input type="text" class="form-control" data-feature="" + index + "" data-field="title" value="" + feature.title + "" placeholder="Название особенности">
+                            <textarea class="form-control" data-feature="" + index + "" data-field="description" placeholder="Описание особенности">" + feature.description + "</textarea>
+                            <input type="text" class="form-control" data-feature="" + index + "" data-field="icon" value="" + feature.icon + "" placeholder="Иконка">
+                            <button class="btn btn-danger btn-small" onclick="editor.removeFeature(" + index + ")">
                                 <i class="fas fa-trash"></i>
                             </button>
                         </div>
@@ -1603,34 +1603,54 @@
                 const currentImage = this.getCurrentValue(field);
                 return `
                     <div class="form-group image-upload-container">
-                        <label>${field.label}:</label>
-                        <div class="image-preview ${!currentImage ? 'empty' : ''}">
-                            ${currentImage ? 
-                                `<img src="${currentImage}" alt="Preview">` :
+                        <label>" + field.label + ":</label>
+                        <div class="image-preview " + !currentImage ? 'empty' : '' + "">
+                            " + currentImage ? 
+                                `<img src="${currentImage + "" alt="Preview">` :
                                 `<i class="fas fa-image"></i><span>Изображение не выбрано</span>`
                             }
                         </div>
                         <div class="image-actions">
-                            <button class="btn btn-primary" onclick="document.getElementById('image-file-input').setAttribute('data-field', '${field.id}'); document.getElementById('image-file-input').click()">
+                            <button class="btn btn-primary" onclick="document.getElementById('image-file-input').setAttribute('data-field', '" + field.id + "'); document.getElementById('image-file-input').click()">
                                 <i class="fas fa-upload"></i> Загрузить
                             </button>
-                            <button class="btn btn-secondary" onclick="editor.promptImageUrl('${field.id}')">
+                            <button class="btn btn-secondary" onclick="editor.promptImageUrl('" + field.id + "')">
                                 <i class="fas fa-link"></i> Указать URL
                             </button>
                         </div>
-                        <input type="hidden" data-field="${field.id}" value="${currentImage}">
+                        <input type="hidden" data-field="" + field.id + "" value="" + currentImage + "">
                     </div>
                 `;
             }
 
             handleImageUpload(file) {
-        const fileInput = document.getElementById('image-file-input');
-        const fieldId = fileInput.getAttribute('data-field') || 'image';
-        
-        if (!file.type.startsWith('image/')) {
-            this.showNotification('Пожалуйста, выберите файл изображения', 'error');
-            return;
+    const input = document.getElementById('image-file-input');
+    const fieldId = input.getAttribute('data-field') || 'image';
+    
+    if (!file.type.startsWith('image/')) {
+        alert('Выберите изображение');
+        return;
+    }
+    
+    // Освобождаем старый URL
+    if (this.temporaryUrls.has(fieldId)) {
+        URL.revokeObjectURL(this.temporaryUrls.get(fieldId));
+    }
+    
+    // Создаем новый
+    const url = URL.createObjectURL(file);
+    this.temporaryUrls.set(fieldId, url);
+    
+    // Обновляем поле
+    const field = document.querySelector('[data-field="' + fieldId + '"]');
+    if (field) {
+        field.value = url;
+        const preview = field.parentNode.querySelector('.image-preview');
+        if (preview) {
+            preview.innerHTML = '<img src="' + url + '" alt="Preview">';
         }
+    }
+}
 
         if (file.size > 5 * 1024 * 1024) {
             this.showNotification('Размер файла не должен превышать 5MB', 'error');
@@ -1760,7 +1780,7 @@ this.temporaryUrls = new Map();
                 }
             }
 
-            updateImageField(url, fieldId = null) {
+            updateImageField(url, fieldId ) {
         // Если это blob URL, добавляем обработчик ошибок
         if (url.startsWith('blob:')) {
             setTimeout(() => {
@@ -1774,13 +1794,13 @@ this.temporaryUrls = new Map();
             }, 100);
         }
                 const field = fieldId ? 
-                    document.querySelector(`[data-field="${fieldId}"]`) :
+                    document.querySelector(`[data-field="" + fieldId + ""]`) :
                     document.querySelector('[data-field="image"]');
                 
                 if (field) {
                     field.value = url;
                     const preview = field.closest('.image-upload-container').querySelector('.image-preview');
-                    preview.innerHTML = `<img src="${url}" alt="Preview">`;
+                    preview.innerHTML = `<img src="" + url + "" alt="Preview">`;
                     preview.classList.remove('empty');
                     this.hasUnsavedChanges = true;
                 }
@@ -1987,10 +2007,10 @@ this.temporaryUrls = new Map();
 
             showNotification(message, type = 'success') {
                 const notification = document.createElement('div');
-                notification.className = `notification ${type === 'error' ? 'error' : ''}`;
+                notification.className = `notification " + type === 'error' ? 'error' : '' + "`;
                 notification.innerHTML = `
-                    <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : 'check-circle'}"></i>
-                    ${message}
+                    <i class="fas fa-" + type === 'error' ? 'exclamation-triangle' : 'check-circle' + ""></i>
+                    " + message + "
                 `;
                 
                 document.body.appendChild(notification);
