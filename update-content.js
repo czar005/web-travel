@@ -23,8 +23,16 @@ class ContentUpdater {
             setTimeout(() => this.applyAllChanges(), 50);
         });
 
+        // Listen for storage changes (from editor)
+        window.addEventListener('storage', (e) => {
+            if (e.key === 'worldtravel_data') {
+                console.log('📦 Storage change detected, updating content...');
+                setTimeout(() => this.applyAllChanges(), 100);
+            }
+        });
+
         // Periodic check for changes
-        setInterval(() => this.applyAllChanges(), 2000);
+        setInterval(() => this.applyAllChanges(), 3000);
 
         // Also apply changes when coming from editor
         if (window.location.search.includes('editor=true')) {
@@ -33,16 +41,9 @@ class ContentUpdater {
     }
 
     applyAllChanges() {
-        if (!window.dataManager) {
-            console.log('⏳ Waiting for DataManager...');
-            this.applyLocalChanges();
-            return;
-        }
-
-        const data = window.dataManager.getData();
+        const data = this.getCurrentData();
         if (!data) {
             console.log('📭 No data available');
-            this.applyLocalChanges();
             return;
         }
 
@@ -51,7 +52,11 @@ class ContentUpdater {
             return; // Changes already applied
         }
 
-        console.log('🔄 Applying changes from DataManager...');
+        console.log('🔄 Applying changes to page...', {
+            content: Object.keys(data.content || {}).length,
+            contacts: data.contacts ? 'yes' : 'no',
+            pageStructure: data.pageStructure ? data.pageStructure.length : 0
+        });
         
         this.applyContentChanges(data.content);
         this.applyContactChanges(data.contacts);
@@ -62,20 +67,29 @@ class ContentUpdater {
         console.log('✅ Changes applied successfully');
     }
 
-    applyLocalChanges() {
-        const localData = localStorage.getItem('worldtravel_data');
-        if (localData) {
-            try {
-                const data = JSON.parse(localData);
-                console.log('📁 Applying local changes...');
-                this.applyContentChanges(data.content);
-                this.applyContactChanges(data.contacts);
-                this.applySettingsChanges(data.settings);
-                this.applyCustomSections(data);
-            } catch (error) {
-                console.error('❌ Error applying local changes:', error);
+    getCurrentData() {
+        // Try multiple sources for data
+        if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+            const data = window.dataManager.getData();
+            if (data) {
+                console.log('📁 Using DataManager data');
+                return data;
             }
         }
+
+        // Try localStorage
+        try {
+            const localData = localStorage.getItem('worldtravel_data');
+            if (localData) {
+                const data = JSON.parse(localData);
+                console.log('📁 Using localStorage data');
+                return data;
+            }
+        } catch (error) {
+            console.error('Error parsing localStorage data:', error);
+        }
+
+        return null;
     }
 
     getDataHash(data) {
@@ -91,9 +105,9 @@ class ContentUpdater {
     applyContentChanges(content) {
         if (!content) return;
 
-        console.log('📝 Applying content changes:', content);
+        console.log('📝 Applying content changes:', Object.keys(content));
 
-        // Hero section - ОТДЕЛЬНОЕ изображение
+        // Hero section
         if (content.hero) {
             this.updateElement('#home h1, .hero h1, section:first-of-type h1', content.hero.title);
             this.updateElement('#home p, .hero p, section:first-of-type p', content.hero.subtitle);
@@ -102,17 +116,17 @@ class ContentUpdater {
             }
         }
 
-        // About section - ОТДЕЛЬНОЕ изображение
+        // About section
         if (content.about) {
             this.updateElement('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title', content.about.title);
             this.updateElement('.about-text p, #about p, .about p, section:nth-of-type(2) p', content.about.description);
             
-            // Обновляем изображение (ТОЛЬКО для about)
+            // Обновляем изображение
             if (content.about.image) {
                 this.updateImages('.about-image img, .image-placeholder img', content.about.image);
             }
             
-            // Обновляем навигацию для секции "О нас"
+            // Обновляем навигацию
             this.updateNavigation('about', content.about.title);
             
             if (content.about.stats) {
@@ -124,7 +138,7 @@ class ContentUpdater {
         if (content.services) {
             this.updateElement('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title', content.services.title);
             
-            // Обновляем навигацию для секции "Услуги"
+            // Обновляем навигацию
             this.updateNavigation('services', content.services.title);
             
             if (content.services.services) {
@@ -137,7 +151,7 @@ class ContentUpdater {
             this.updateElement('#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title', content.destinations.title);
             this.updateElement('.destinations .section-subtitle, .section-subtitle, section:nth-of-type(4) .section-subtitle', content.destinations.subtitle);
             
-            // Обновляем навигацию для секции "Направления"
+            // Обновляем навигацию
             this.updateNavigation('destinations', content.destinations.title);
         }
 
@@ -145,13 +159,12 @@ class ContentUpdater {
         if (content.contact) {
             this.updateElement('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title', content.contact.title);
             
-            // Обновляем навигацию для секции "Контакты"
+            // Обновляем навигацию
             this.updateNavigation('contact', content.contact.title);
         }
 
         // Footer section
         if (content.footer) {
-            // Исправленный селектор: первый параграф в первом footer-section
             this.updateElement('.footer-section:first-child p:first-child', content.footer.description);
             this.updateElement('.footer-bottom p', content.footer.copyright, true);
         }
@@ -160,7 +173,7 @@ class ContentUpdater {
     applyCustomSections(data) {
         if (!data.pageStructure || !data.content) return;
 
-        console.log('🔄 Applying custom sections...');
+        console.log('🔄 Applying custom sections...', data.pageStructure);
 
         // Создаем контейнер для пользовательских секций перед футером
         let customSectionsContainer = document.getElementById('custom-sections');
@@ -168,8 +181,13 @@ class ContentUpdater {
             customSectionsContainer = document.createElement('div');
             customSectionsContainer.id = 'custom-sections';
             const footer = document.querySelector('footer');
-            if (footer) {
-                footer.parentNode.insertBefore(customSectionsContainer, footer);
+            const contact = document.querySelector('#contact');
+            const insertBefore = footer || document.body.lastElementChild;
+            
+            if (insertBefore) {
+                insertBefore.parentNode.insertBefore(customSectionsContainer, insertBefore);
+            } else {
+                document.body.appendChild(customSectionsContainer);
             }
         }
 
@@ -178,16 +196,28 @@ class ContentUpdater {
 
         // Добавляем пользовательские секции согласно структуре
         data.pageStructure.forEach(sectionId => {
-            if (sectionId.startsWith('section-') && data.content[sectionId]) {
+            // Пропускаем стандартные секции
+            const standardSections = ['hero', 'about', 'services', 'destinations', 'contact', 'footer'];
+            if (standardSections.includes(sectionId)) return;
+
+            if (data.content[sectionId]) {
                 this.renderCustomSection(customSectionsContainer, data.content[sectionId]);
             }
         });
+
+        // Если есть пользовательские секции, добавляем стили
+        if (customSectionsContainer.children.length > 0) {
+            this.ensureCustomStyles();
+        }
     }
 
     renderCustomSection(container, sectionData) {
         const sectionElement = document.createElement('section');
         sectionElement.className = `custom-section ${sectionData.type}-section`;
         sectionElement.id = sectionData.id;
+        sectionElement.setAttribute('data-section-id', sectionData.id);
+
+        console.log('�� Rendering custom section:', sectionData.id, sectionData.type);
 
         switch (sectionData.type) {
             case 'text':
@@ -203,13 +233,13 @@ class ContentUpdater {
             case 'image':
                 sectionElement.innerHTML = `
                     <div class="container">
-                        <div class="section-content" style="display: flex; gap: 30px; align-items: center;">
-                            <div class="text-content" style="flex: 1;">
+                        <div class="section-content" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">
+                            <div class="text-content" style="flex: 1; min-width: 300px;">
                                 <h2 class="section-title">${sectionData.title || ''}</h2>
                                 <p>${sectionData.content || ''}</p>
                             </div>
-                            <div class="image-content" style="flex: 1;">
-                                ${sectionData.image ? `<img src="${sectionData.image}" alt="${sectionData.title}" style="max-width: 100%; border-radius: 10px;">` : ''}
+                            <div class="image-content" style="flex: 1; min-width: 300px; text-align: center;">
+                                ${sectionData.image ? `<img src="${sectionData.image}" alt="${sectionData.title}" style="max-width: 100%; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">` : ''}
                             </div>
                         </div>
                     </div>
@@ -221,12 +251,12 @@ class ContentUpdater {
                         <h2 class="section-title">${sectionData.title || ''}</h2>
                         <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 40px;">
                             ${(sectionData.features || []).map(feature => `
-                                <div class="feature-item" style="text-align: center; padding: 20px;">
-                                    <div class="feature-icon" style="font-size: 2em; margin-bottom: 15px; color: #2c5aa0;">
+                                <div class="feature-item" style="text-align: center; padding: 30px 20px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;">
+                                    <div class="feature-icon" style="font-size: 3em; margin-bottom: 20px; color: #2c5aa0;">
                                         <i class="${feature.icon || 'fas fa-star'}"></i>
                                     </div>
-                                    <h3 style="margin-bottom: 10px;">${feature.title || ''}</h3>
-                                    <p style="color: #666;">${feature.description || ''}</p>
+                                    <h3 style="margin-bottom: 15px; color: #333;">${feature.title || ''}</h3>
+                                    <p style="color: #666; line-height: 1.6;">${feature.description || ''}</p>
                                 </div>
                             `).join('')}
                         </div>
@@ -236,14 +266,50 @@ class ContentUpdater {
             case 'cta':
                 sectionElement.innerHTML = `
                     <div class="container">
-                        <div class="cta-section" style="text-align: center; padding: 60px 20px; background: linear-gradient(135deg, #2c5aa0, #4a7bc8); color: white; border-radius: 15px;">
-                            <h2 style="margin-bottom: 20px;">${sectionData.title || ''}</h2>
-                            <p style="margin-bottom: 30px; font-size: 1.1em;">${sectionData.description || ''}</p>
+                        <div class="cta-section" style="text-align: center; padding: 60px 40px; background: linear-gradient(135deg, #2c5aa0, #4a7bc8); color: white; border-radius: 15px; margin: 40px 0;">
+                            <h2 style="margin-bottom: 20px; font-size: 2.5em;">${sectionData.title || ''}</h2>
+                            <p style="margin-bottom: 30px; font-size: 1.2em; opacity: 0.9;">${sectionData.description || ''}</p>
                             ${sectionData.buttonText ? `
-                                <a href="${sectionData.buttonUrl || '#'}" class="cta-button" style="background: white; color: #2c5aa0; padding: 15px 30px; border-radius: 25px; text-decoration: none; font-weight: 600; display: inline-block;">
+                                <a href="${sectionData.buttonUrl || '#'}" class="cta-button" style="background: white; color: #2c5aa0; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 1.1em; transition: all 0.3s ease;">
                                     ${sectionData.buttonText}
                                 </a>
                             ` : ''}
+                        </div>
+                    </div>
+                `;
+                break;
+            case 'contacts':
+                sectionElement.innerHTML = `
+                    <div class="container">
+                        <h2 class="section-title">${sectionData.title || 'Контакты'}</h2>
+                        <div class="contact-content" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 40px; margin-top: 40px;">
+                            <div class="contact-info" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                                <h3 style="margin-bottom: 20px; color: #2c5aa0;">Контактная информация</h3>
+                                ${sectionData.phone ? `
+                                    <div class="contact-item" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-phone" style="color: #2c5aa0;"></i>
+                                        <span style="font-weight: 500;">${sectionData.phone}</span>
+                                    </div>
+                                ` : ''}
+                                ${sectionData.email ? `
+                                    <div class="contact-item" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-envelope" style="color: #2c5aa0;"></i>
+                                        <span style="font-weight: 500;">${sectionData.email}</span>
+                                    </div>
+                                ` : ''}
+                                ${sectionData.address ? `
+                                    <div class="contact-item" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-map-marker-alt" style="color: #2c5aa0;"></i>
+                                        <span style="font-weight: 500;">${sectionData.address}</span>
+                                    </div>
+                                ` : ''}
+                                ${sectionData.hours ? `
+                                    <div class="contact-item" style="margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">
+                                        <i class="fas fa-clock" style="color: #2c5aa0;"></i>
+                                        <span style="font-weight: 500;">${sectionData.hours}</span>
+                                    </div>
+                                ` : ''}
+                            </div>
                         </div>
                     </div>
                 `;
@@ -252,19 +318,165 @@ class ContentUpdater {
 
         // Добавляем стили
         sectionElement.style.padding = '80px 0';
-        sectionElement.style.background = '#f8f9fa';
+        sectionElement.style.background = sectionData.type === 'cta' ? 'transparent' : '#f8f9fa';
         
         if (sectionData.type === 'cta') {
-            sectionElement.style.background = 'transparent';
             sectionElement.style.padding = '40px 0';
         }
 
         container.appendChild(sectionElement);
     }
 
-    // ... остальные методы без изменений ...
-    // [applyContactChanges, updateNavigation, updateImages и т.д.]
+    ensureCustomStyles() {
+        // Добавляем стили для кастомных секций если их еще нет
+        if (!document.getElementById('custom-sections-styles')) {
+            const style = document.createElement('style');
+            style.id = 'custom-sections-styles';
+            style.textContent = `
+                .custom-section {
+                    transition: all 0.3s ease;
+                }
+                .custom-section .feature-item:hover {
+                    transform: translateY(-5px);
+                }
+                .custom-section .cta-button:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 8px 25px rgba(255,255,255,0.3);
+                }
+                @media (max-width: 768px) {
+                    .custom-section .section-content {
+                        flex-direction: column;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    applyContactChanges(contacts) {
+        if (!contacts) return;
+
+        console.log('📞 Applying contact changes:', contacts);
+
+        // Обновляем контакты в секции contact
+        if (contacts.phone) {
+            this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p, .footer-section p:nth-child(2)', contacts.phone);
+        }
+        if (contacts.email) {
+            this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p, .footer-section p:nth-child(3)', contacts.email);
+        }
+        if (contacts.address) {
+            this.updateElement('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p, .footer-section p:nth-child(4)', contacts.address);
+        }
+        if (contacts.hours) {
+            this.updateElement('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p', contacts.hours);
+        }
+    }
+
+    applySettingsChanges(settings) {
+        if (!settings) return;
+
+        console.log('⚙️ Applying settings changes:', settings);
+
+        if (settings.siteTitle) {
+            document.title = settings.siteTitle;
+        }
+        if (settings.companyName) {
+            this.updateElement('.logo h2', settings.companyName);
+        }
+    }
+
+    updateElement(selector, value, isHtml = false) {
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0 && value) {
+            elements.forEach(element => {
+                if (isHtml) {
+                    element.innerHTML = value;
+                } else {
+                    element.textContent = value;
+                }
+            });
+            console.log('✅ Updated element:', selector, value);
+        }
+    }
+
+    updateImages(selector, imageUrl) {
+        const elements = document.querySelectorAll(selector);
+        if (elements.length > 0 && imageUrl) {
+            elements.forEach(element => {
+                element.src = imageUrl;
+                element.onerror = () => {
+                    console.warn('⚠️ Failed to load image:', imageUrl);
+                    element.src = 'images/travel-placeholder.svg';
+                };
+            });
+            console.log('🖼️ Updated image:', selector, imageUrl);
+        }
+    }
+
+    updateNavigation(sectionId, title) {
+        // Обновляем текст в навигации если нужно
+        const navLinks = document.querySelectorAll(`a[href="#${sectionId}"]`);
+        if (navLinks.length > 0 && title) {
+            // Можно добавить логику обновления навигации если нужно
+        }
+    }
+
+    updateStats(stats) {
+        const statsContainer = document.querySelector('.stats');
+        if (statsContainer && stats.length > 0) {
+            statsContainer.innerHTML = stats.map(stat => `
+                <div class="stat animate-counter" data-target="${stat.value}">
+                    <h3>${stat.value}</h3>
+                    <p>${stat.label}</p>
+                </div>
+            `).join('');
+            console.log('📊 Updated stats:', stats.length, 'items');
+        }
+    }
+
+    updateServices(services) {
+        const servicesGrid = document.querySelector('.services-grid');
+        if (servicesGrid && services.length > 0) {
+            servicesGrid.innerHTML = services.map((service, index) => {
+                const animations = ['slide-in-left', 'slide-in-bottom', 'slide-in-right', 'slide-in-top'];
+                const animationClass = animations[index % animations.length] || 'slide-in-bottom';
+                
+                return `
+                    <div class="service-card ${animationClass}">
+                        <div class="service-icon"><i class="${service.icon || 'fas fa-star'}"></i></div>
+                        <h3>${service.title}</h3>
+                        <p>${service.description}</p>
+                    </div>
+                `;
+            }).join('');
+            console.log('🎯 Updated services:', services.length, 'items');
+        }
+    }
+
+    // Метод для принудительного обновления
+    forceUpdate() {
+        this.appliedChanges.clear();
+        this.applyAllChanges();
+        console.log('🔄 Forced content update');
+    }
 }
 
 // Initialize content updater
 const contentUpdater = new ContentUpdater();
+
+// Глобальная функция для обновления из редактора
+window.updatePageContent = function() {
+    if (window.contentUpdater) {
+        window.contentUpdater.forceUpdate();
+    }
+};
+
+// Автоматическое обновление при изменении данных
+window.addEventListener('storage', function(e) {
+    if (e.key === 'worldtravel_data' && window.contentUpdater) {
+        setTimeout(() => window.contentUpdater.forceUpdate(), 100);
+    }
+});
+
+console.log('✅ ContentUpdater ready with auto-refresh functionality');
