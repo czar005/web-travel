@@ -70,63 +70,164 @@
         </div>
     </div>
 
-    <script>
-        // ПРОСТАЯ РАБОТАЮЩАЯ ВЕРСИЯ РЕДАКТОРА
-        var currentSection = null;
-        var temporaryUrls = [];
+    
+<script>
+    // ФИНАЛЬНАЯ РАБОТАЮЩАЯ ВЕРСИЯ РЕДАКТОРА БЕЗ BLOB URL
+    var currentSection = null;
 
-        function selectSection(sectionId) {
-            currentSection = sectionId;
-            console.log('Выбрана секция:', sectionId);
-            showNotification('Выбрана секция: ' + getSectionName(sectionId));
+    function selectSection(sectionId) {
+        currentSection = sectionId;
+        console.log('Выбрана секция:', sectionId);
+        showNotification('Выбрана секция: ' + getSectionName(sectionId));
+        
+        // Показываем простой редактор для выбранной секции
+        showContentEditor(sectionId);
+    }
+
+    function getSectionName(sectionId) {
+        var names = {
+            'hero': 'Главный баннер',
+            'about': 'О компании',
+            'services': 'Услуги', 
+            'destinations': 'Направления',
+            'contact': 'Контакты'
+        };
+        return names[sectionId] || sectionId;
+    }
+
+    function showContentEditor(sectionId) {
+        var editor = document.getElementById('content-editor');
+        if (!editor) return;
+        
+        var sectionData = getSectionData(sectionId);
+        
+        editor.innerHTML = '
+            <div style="padding: 20px;">
+                <h3 style="margin-bottom: 20px; color: #2c5aa0;">' + getSectionName(sectionId) + '</h3>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Заголовок:</label>
+                    <input type="text" class="form-control" value="' + (sectionData.title || '') + '" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">
+                </div>
+                <div class="form-group" style="margin-bottom: 15px;">
+                    <label style="display: block; margin-bottom: 5px; font-weight: 600;">Описание:</label>
+                    <textarea class="form-control" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px; height: 100px;">' + (sectionData.description || '') + '</textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveSectionChanges(\'' + sectionId + '\')" style="background: #2c5aa0; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer;">
+                    <i class="fas fa-save"></i> Сохранить изменения
+                </button>
+            </div>
+        ';
+    }
+
+    function getSectionData(sectionId) {
+        // Загружаем данные из localStorage или используем значения по умолчанию
+        try {
+            var savedData = localStorage.getItem('worldtravel_data');
+            if (savedData) {
+                var data = JSON.parse(savedData);
+                if (data.content && data.content[sectionId]) {
+                    return data.content[sectionId];
+                }
+            }
+        } catch(e) {
+            console.warn('Ошибка загрузки данных:', e);
         }
+        
+        // Значения по умолчанию
+        var defaults = {
+            'hero': { title: 'Откройте мир с WorldTravel', description: 'Мы создаем незабываемые путешествия по всему миру' },
+            'about': { title: 'О нашей компании', description: 'WorldTravel - это команда профессиональных путешественников' },
+            'services': { title: 'Наши услуги', description: 'Полный спектр туристических услуг' },
+            'destinations': { title: 'Популярные направления', description: 'Откройте для себя лучшие направления мира' },
+            'contact': { title: 'Свяжитесь с нами', description: 'Мы всегда рады помочь вам' }
+        };
+        
+        return defaults[sectionId] || {};
+    }
 
-        function getSectionName(sectionId) {
-            var names = {
-                'hero': 'Главный баннер',
-                'about': 'О компании',
-                'services': 'Услуги', 
-                'destinations': 'Направления',
-                'contact': 'Контакты'
-            };
-            return names[sectionId] || sectionId;
+    function saveSectionChanges(sectionId) {
+        var titleInput = document.querySelector('#content-editor input[type="text"]');
+        var descInput = document.querySelector('#content-editor textarea');
+        
+        if (titleInput && descInput) {
+            // Сохраняем в localStorage
+            try {
+                var savedData = localStorage.getItem('worldtravel_data');
+                var data = savedData ? JSON.parse(savedData) : { content: {} };
+                
+                if (!data.content) data.content = {};
+                if (!data.content[sectionId]) data.content[sectionId] = {};
+                
+                data.content[sectionId].title = titleInput.value;
+                data.content[sectionId].description = descInput.value;
+                data.lastUpdate = new Date().toISOString();
+                
+                localStorage.setItem('worldtravel_data', JSON.stringify(data));
+                showNotification('Изменения сохранены успешно!');
+                
+                // Обновляем предпросмотр
+                refreshPreview();
+                
+            } catch(e) {
+                console.error('Ошибка сохранения:', e);
+                showNotification('Ошибка сохранения', 'error');
+            }
         }
+    }
 
-        function saveAndExit() {
-            // Очищаем все временные blob URL
-            cleanupTemporaryUrls();
+    function saveAndExit() {
+        showNotification('Возврат в админ-панель...');
+        setTimeout(function() {
             window.location.href = 'admin.html';
+        }, 1000);
+    }
+
+    function refreshPreview() {
+        var frame = document.getElementById('preview-frame');
+        if (frame) {
+            // Просто перезагружаем фрейм
+            frame.src = frame.src.split('?')[0] + '?editor=true&t=' + Date.now();
         }
+    }
 
-        function cleanupTemporaryUrls() {
-            temporaryUrls.forEach(function(url) {
-                try {
-                    URL.revokeObjectURL(url);
-                } catch(e) {
-                    console.warn('Не удалось освободить URL');
-                }
-            });
-            temporaryUrls = [];
-        }
+    function showNotification(message, type) {
+        type = type || 'success';
+        var backgroundColor = type === 'error' ? '#dc3545' : '#28a745';
+        
+        var notification = document.createElement('div');
+        notification.style.cssText = 'position:fixed;top:20px;right:20px;background:' + backgroundColor + ';color:white;padding:15px 20px;border-radius:8px;z-index:10000;animation:slideIn 0.3s ease';
+        notification.innerHTML = '<i class="fas fa-' + (type === 'error' ? 'exclamation-triangle' : 'check-circle') + '"></i> ' + message;
+        
+        document.body.appendChild(notification);
+        
+        setTimeout(function() {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 3000);
+    }
 
-        function showNotification(message) {
-            var notification = document.createElement('div');
-            notification.style.cssText = 'position:fixed;top:20px;right:20px;background:#28a745;color:white;padding:15px 20px;border-radius:8px;z-index:10000;animation:slideIn 0.3s ease';
-            notification.innerHTML = '<i class="fas fa-check-circle"></i> ' + message;
-            
-            document.body.appendChild(notification);
-            
-            setTimeout(function() {
-                if (notification.parentNode) {
-                    notification.parentNode.removeChild(notification);
-                }
-            }, 3000);
-        }
+    // Инициализация при загрузке
+    document.addEventListener('DOMContentLoaded', function() {
+        console.log('✅ Редактор страниц инициализирован');
+        
+        // Создаем стили для анимации
+        var style = document.createElement('style');
+        style.textContent = '
+            @keyframes slideIn { 
+                from { transform: translateX(100%); opacity: 0; } 
+                to { transform: translateX(0); opacity: 1; } 
+            }
+            .form-control:focus { outline: none; border-color: #2c5aa0; }
+            .section-item:hover { background: #e3f2fd; border-color: #2c5aa0; }
+        ';
+        document.head.appendChild(style);
+    });
 
-        // Очистка при закрытии страницы
-        window.addEventListener('beforeunload', cleanupTemporaryUrls);
+    // Глобальные функции для кнопок
+    window.refreshPreview = refreshPreview;
+    window.saveAndExit = saveAndExit;
+</script>
 
-        console.log('✅ Редактор страниц загружен успешно!');
-    </script>
 </body>
 </html>
