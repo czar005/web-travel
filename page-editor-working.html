@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .sortable-ghost{opacity:0.4;background:#c8ebfb}
+        body {font-family:Inter,sans-serif;background:#f5f7fa;height:100vh;margin:0}
+        .editor-container{display:flex;height:100vh}
+        .preview-panel{flex:1;background:white;display:flex;flex-direction:column}
+        .editor-panel{width:400px;background:white;border-left:2px solid #e1e5e9;display:flex;flex-direction:column}
+        .panel-header{padding:20px;background:#2c5aa0;color:white}
+        .tab-buttons{display:flex;background:#f8f9fa}
+        .tab-button{flex:1;padding:16px;border:none;background:transparent;cursor:pointer}
+        .tab-button.active{background:white;color:#2c5aa0}
+        .panel-content{flex:1;padding:20px;overflow-y:auto}
+        .section-item{padding:15px;background:#f8f9fa;border:2px solid #e9ecef;border-radius:8px;margin-bottom:10px;cursor:pointer}
+        .btn{padding:10px 20px;border:none;border-radius:6px;cursor:pointer;color:white}
+        .btn-primary{background:#2c5aa0}
+        .btn-success{background:#28a745}
+        .notification{position:fixed;top:20px;right:20px;padding:15px;background:#28a745;color:white;border-radius:8px}
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn btn-success" onclick="saveAndExit()">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            <div style="flex:1;padding:20px">
+                <iframe src="index.html" style="width:100%;height:100%;border:none"></iframe>
+            </div>
+        </div>
+        
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+            <div class="tab-buttons">
+                <button class="tab-button active">Секции</button>
+                <button class="tab-button">Контент</button>
+            </div>
+            <div class="panel-content">
+                <div class="section-item">
+                    <div class="section-title">Главный баннер</div>
+                    <div class="section-desc">Заголовок и описание на главной</div>
+                </div>
+                <div class="section-item">
+                    <div class="section-title">О компании</div>
+                    <div class="section-desc">Информация о компании</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ПРОСТАЯ РАБОЧАЯ ВЕРСИЯ БЕЗ КЛАССОВ
+        function saveAndExit() {
+            // Освобождаем все blob URL перед выходом
+            document.querySelectorAll('input, img').forEach(function(element) {
+                if (element.src && element.src.startsWith('blob:')) {
+                    try {
+                        URL.revokeObjectURL(element.src);
+                    } catch(e) {}
+                }
+                if (element.value && element.value.startsWith('blob:')) {
+                    try {
+                        URL.revokeObjectURL(element.value);
+                    } catch(e) {}
+                }
+            });
+            
+            window.location.href = 'admin.html';
+        }
+        
+        // Обработчик для файлового ввода
+        document.addEventListener('DOMContentLoaded', function() {
+            var fileInput = document.createElement('input');
+            fileInput.type = 'file';
+            fileInput.accept = 'image/*';
+            fileInput.style.display = 'none';
+            fileInput.onchange = function(e) {
+                var file = e.target.files[0];
+                if (file) {
+                    var url = URL.createObjectURL(file);
+                    // Освобождаем URL через минуту для безопасности
+                    setTimeout(function() {
+                        try { URL.revokeObjectURL(url); } catch(e) {}
+                    }, 60000);
+                }
+            };
+            document.body.appendChild(fileInput);
+        });
+        
+        console.log('Редактор загружен');
+    </script>
+</body>
+</html>
