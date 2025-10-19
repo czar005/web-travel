@@ -138,10 +138,10 @@ class ContentUpdater {
             this.updateNavigation('contact', content.contact.title);
         }
 
-        // Footer section - ВАЖНО: исправлены селекторы для футера
+        // Footer section - ИСПРАВЛЕННЫЙ СЕЛЕКТОР для описания компании
         if (content.footer) {
-            // Исправленный селектор для описания компании в футере
-            this.updateElement('.footer-section p:first-child', content.footer.description);
+            // Исправленный селектор: первый параграф в первом footer-section
+            this.updateElement('.footer-section:first-child p:first-child', content.footer.description);
             this.updateElement('.footer-bottom p', content.footer.copyright, true);
         }
     }
