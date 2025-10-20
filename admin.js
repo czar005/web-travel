@@ -31,7 +31,7 @@ function initializeAdmin() {
 }
 
 function setupAdminEventListeners() {
-    console.log('�� Setting up admin event listeners...');
+    console.log('🔧 Setting up admin event listeners...');
     
     // Form handlers
     const addCountryForm = document.getElementById('add-country-form');
