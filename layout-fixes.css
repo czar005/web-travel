@@ -1,0 +1,61 @@
+/* Layout fixes to prevent overflow */
+.form-group input[type="text"],
+.form-group textarea,
+.form-group select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+.stats-editor-fixed input,
+.services-editor-fixed input,
+.services-editor-fixed textarea {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Ensure responsive layout in editors */
+.stats-editor-fixed > div,
+.services-editor-fixed > div {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+}
+
+.stats-editor-fixed input,
+.services-editor-fixed input {
+    min-width: 120px;
+    flex: 1;
+}
+
+/* Fix for contact form in editor */
+[data-contacts-editor] input {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Ensure no horizontal scroll */
+.editor-panel {
+    overflow-x: hidden;
+}
+
+.panel-content {
+    max-width: 100%;
+    overflow-x: hidden;
+}
+
+/* Responsive fixes for mobile */
+@media (max-width: 768px) {
+    .stats-editor-fixed > div,
+    .services-editor-fixed > div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .stats-editor-fixed input,
+    .services-editor-fixed input {
+        min-width: auto;
+        width: 100%;
+    }
+}
