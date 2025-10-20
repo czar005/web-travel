@@ -142,3 +142,23 @@
         max-width: 100%;
     }
 }
+
+/* Fix for editor input overflow - ONLY THIS FIX */
+#content-editor input,
+#content-editor textarea,
+#content-editor select {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#content-editor .working-stats-editor input,
+#content-editor .working-services-editor input {
+    max-width: 200px;
+}
+
+@media (max-width: 768px) {
+    #content-editor .working-stats-editor input,
+    #content-editor .working-services-editor input {
+        max-width: 100%;
+    }
+}
