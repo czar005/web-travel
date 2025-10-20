@@ -1,0 +1,128 @@
+/* Fix for editor input overflow */
+#content-editor .form-group {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#content-editor .form-control {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#content-editor .working-stats-editor,
+#content-editor .working-services-editor {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+#content-editor .working-stats-editor > div,
+#content-editor .working-services-editor > div {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Fix for stats editor inputs */
+#working-stats-list > div {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#working-stats-list input {
+    flex: 1;
+    min-width: 120px;
+    max-width: 200px;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+/* Fix for services editor */
+#working-services-list > div {
+    margin-bottom: 15px;
+    padding: 15px;
+    background: white;
+    border-radius: 8px;
+    border: 1px solid #e9ecef;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#working-services-list .service-row {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#working-services-list input,
+#working-services-list textarea {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Responsive fixes */
+@media (max-width: 768px) {
+    #content-editor .form-group {
+        padding: 0 10px;
+    }
+    
+    #working-stats-list > div {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    #working-stats-list input {
+        max-width: 100%;
+        min-width: auto;
+    }
+    
+    #working-services-list > div {
+        padding: 10px;
+    }
+}
+
+/* Ensure all editor containers don't overflow */
+.tab-content {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+.panel-content {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: hidden;
+}
+
+/* Fix for action buttons */
+.action-buttons {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.action-buttons .btn {
+    flex: 1;
+    min-width: 150px;
+    max-width: 100%;
+    box-sizing: border-box;
+}
