@@ -116,3 +116,29 @@
     max-width: 100% !important;
     box-sizing: border-box !important;
 }
+/* Fix for editor input overflow */
+/* Fix only for overflowing inputs in content editor - DO NOT TOUCH OTHER STYLES */
+#content-editor .form-control {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+#content-editor .working-stats-editor input,
+#content-editor .working-services-editor input {
+    max-width: 200px;
+    box-sizing: border-box;
+}
+
+#content-editor .working-stats-editor textarea,
+#content-editor .working-services-editor textarea {
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+/* Mobile fix only */
+@media (max-width: 768px) {
+    #content-editor .working-stats-editor input,
+    #content-editor .working-services-editor input {
+        max-width: 100%;
+    }
+}
