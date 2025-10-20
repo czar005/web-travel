@@ -1,0 +1,65 @@
+/* FINAL OVERFLOW FIX - SIMPLE AND EFFECTIVE */
+#content-editor * {
+    box-sizing: border-box !important;
+    max-width: 100% !important;
+}
+
+.working-services-editor,
+.working-stats-editor {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* SERVICE ITEMS - SIMPLE FIX */
+.service-item {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.service-item > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    width: 100% !important;
+}
+
+.service-item input[type="text"] {
+    min-width: 120px !important;
+    max-width: 200px !important;
+    width: auto !important;
+    flex: 1 !important;
+}
+
+.service-item button {
+    min-width: 60px !important;
+    flex-shrink: 0 !important;
+}
+
+.service-item textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+/* STATS ITEMS - SIMPLE FIX */
+.stat-item {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.stat-item input[type="text"] {
+    min-width: 80px !important;
+    max-width: 150px !important;
+    width: auto !important;
+    flex: 1 !important;
+}
+
+.stat-item input[type="text"]:nth-child(2) {
+    min-width: 120px !important;
+    max-width: 200px !important;
+}
+
+.stat-item button {
+    min-width: 70px !important;
+    flex-shrink: 0 !important;
+}
