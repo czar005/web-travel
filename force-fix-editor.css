@@ -1,0 +1,110 @@
+/* FORCE FIX EDITOR OVERFLOW */
+.working-services-editor,
+.working-stats-editor,
+.stats-manager,
+.service-item,
+.stat-item {
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* FIX SERVICE ITEMS */
+.service-item > div[style*="display: flex"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    align-items: center !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.service-item input[type="text"] {
+    flex: none !important;
+    min-width: 0 !important;
+    max-width: 200px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.service-item input[type="text"]:first-child {
+    flex: 1 1 150px !important;
+    min-width: 150px !important;
+    max-width: 200px !important;
+}
+
+.service-item input[type="text"]:nth-child(2) {
+    flex: 1 1 120px !important;
+    min-width: 120px !important;
+    max-width: 150px !important;
+}
+
+.service-item button {
+    flex-shrink: 0 !important;
+    min-width: 60px !important;
+    max-width: 80px !important;
+    width: auto !important;
+}
+
+.service-item textarea {
+    max-width: 100% !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* FIX STATS ITEMS */
+.stat-item[style*="display: flex"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 8px !important;
+    align-items: center !important;
+    max-width: 100% !important;
+    width: 100% !important;
+}
+
+.stat-item input[type="text"] {
+    flex: none !important;
+    min-width: 0 !important;
+    max-width: 200px !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.stat-item input[type="text"]:first-child {
+    flex: 1 1 80px !important;
+    min-width: 80px !important;
+    max-width: 100px !important;
+}
+
+.stat-item input[type="text"]:nth-child(2) {
+    flex: 2 1 120px !important;
+    min-width: 120px !important;
+    max-width: 200px !important;
+}
+
+.stat-item button {
+    flex-shrink: 0 !important;
+    min-width: 70px !important;
+    max-width: 90px !important;
+    width: auto !important;
+}
+
+/* MOBILE FIX */
+@media (max-width: 768px) {
+    .service-item > div[style*="display: flex"],
+    .stat-item[style*="display: flex"] {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .service-item input[type="text"],
+    .stat-item input[type="text"] {
+        max-width: 100% !important;
+        min-width: 100% !important;
+    }
+    
+    .service-item button,
+    .stat-item button {
+        align-self: flex-start !important;
+    }
+}
