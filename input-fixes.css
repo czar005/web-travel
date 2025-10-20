@@ -1,0 +1,118 @@
+/* Input fixes to prevent overflow */
+.working-stats-editor input,
+.working-services-editor input,
+.working-services-editor textarea,
+.working-stats-editor button,
+.working-services-editor button {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+/* Specific fixes for stats editor */
+.working-stats-editor > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.working-stats-editor input[type="text"] {
+    flex: 1 1 auto !important;
+    min-width: 120px !important;
+    max-width: 200px !important;
+    width: auto !important;
+}
+
+.working-stats-editor button {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+}
+
+/* Specific fixes for services editor */
+.working-services-editor > div {
+    width: 100% !important;
+    max-width: 100% !important;
+}
+
+.working-services-editor .working-services-editor > div > div {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    gap: 10px !important;
+    align-items: center !important;
+    width: 100% !important;
+}
+
+.working-services-editor input[type="text"] {
+    flex: 1 1 auto !important;
+    min-width: 150px !important;
+    max-width: 250px !important;
+    width: auto !important;
+}
+
+.working-services-editor textarea {
+    width: 100% !important;
+    max-width: 100% !important;
+    min-height: 80px !important;
+    resize: vertical !important;
+}
+
+.working-services-editor button {
+    flex: 0 0 auto !important;
+    white-space: nowrap !important;
+}
+
+/* Container fixes */
+.working-stats-editor,
+.working-services-editor {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+}
+
+/* Responsive fixes for mobile */
+@media (max-width: 768px) {
+    .working-stats-editor > div,
+    .working-services-editor > div > div {
+        flex-direction: column !important;
+        align-items: stretch !important;
+    }
+    
+    .working-stats-editor input,
+    .working-services-editor input {
+        min-width: 100% !important;
+        max-width: 100% !important;
+        width: 100% !important;
+    }
+    
+    .working-stats-editor button,
+    .working-services-editor button {
+        width: 100% !important;
+        margin-top: 5px !important;
+    }
+}
+
+/* Ensure no horizontal scroll in editor panel */
+.editor-panel {
+    overflow-x: hidden !important;
+}
+
+.panel-content {
+    max-width: 100% !important;
+    overflow-x: hidden !important;
+    box-sizing: border-box !important;
+}
+
+/* Fix for form groups */
+.form-group {
+    width: 100% !important;
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    max-width: 100% !important;
+    box-sizing: border-box !important;
+}
