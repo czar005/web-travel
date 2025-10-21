@@ -223,5 +223,19 @@
     <script src="diagnose.js"></script>
     <script src="force-refresh.js"></script>
     <script src="clean-overflow-fix.js"></script>
+<script>
+// GUARANTEED FOOTER FIX
+(function() {
+    console.log('🎯 GUARANTEED FOOTER FIX EXECUTING');
+    const footerSection = document.querySelector('.footer-section');
+    if (footerSection) {
+        const p = footerSection.querySelector('p');
+        if (p) {
+            p.textContent = 'Ваш надежный партнер в мире путешествий.';
+            console.log('✅ Footer paragraph updated');
+        }
+    }
+})();
+</script>
 </body>
 </html>
