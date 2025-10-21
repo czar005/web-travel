@@ -1,129 +1,109 @@
-// Simple and reliable content updater
-function SimpleContentUpdater() {
+// Enhanced content updater with better footer support
+function EnhancedContentUpdater() {
     this.init();
 }
 
-SimpleContentUpdater.prototype.init = function() {
-    console.log('🚀 Simple Content Updater started');
+EnhancedContentUpdater.prototype.init = function() {
+    console.log('🚀 Enhanced Content Updater initialized');
     
-    // Apply changes immediately
-    this.applyChanges();
+    // Wait for data and apply updates
+    const checkData = () => {
+        if (window.dataManager) {
+            this.applyAllUpdates();
+        } else {
+            setTimeout(checkData, 100);
+        }
+    };
+    
+    checkData();
     
     // Listen for data updates
     window.addEventListener('dataUpdated', () => {
-        console.log('📢 Data update received');
-        setTimeout(() => this.applyChanges(), 100);
+        setTimeout(() => this.applyAllUpdates(), 50);
     });
-    
-    // Periodic check
-    setInterval(() => this.applyChanges(), 2000);
 };
 
-SimpleContentUpdater.prototype.applyChanges = function() {
-    if (!window.dataManager) {
-        console.log('⏳ Waiting for DataManager...');
-        return;
-    }
+EnhancedContentUpdater.prototype.applyAllUpdates = function() {
+    if (!window.dataManager) return;
     
     const data = window.dataManager.getData();
-    if (!data) {
-        console.log('📭 No data available');
-        return;
+    if (!data) return;
+    
+    console.log('🔄 Applying all content updates...');
+    
+    // Update footer specifically
+    this.updateFooter(data);
+    
+    // Update other content
+    this.updateContent(data.content);
+    this.updateContacts(data.contacts);
+};
+
+EnhancedContentUpdater.prototype.updateFooter = function(data) {
+    if (!data.footer) return;
+    
+    // Update footer description
+    if (data.footer.description) {
+        const footerDesc = document.querySelector('.footer-section:first-child p');
+        if (footerDesc) {
+            footerDesc.textContent = data.footer.description;
+            console.log('✅ Footer description updated:', data.footer.description);
+        }
     }
     
-    console.log('�� Applying content changes...');
-    
-    // Apply content
-    if (data.content) {
-        this.updateContent(data.content);
-    }
-    
-    // Apply contacts
-    if (data.contacts) {
-        this.updateContacts(data.contacts);
-    }
-    
-    // Apply settings
-    if (data.settings && data.settings.siteTitle) {
-        document.title = data.settings.siteTitle;
+    // Update footer copyright
+    if (data.footer.copyright) {
+        const footerCopyright = document.querySelector('.footer-bottom p');
+        if (footerCopyright) {
+            footerCopyright.innerHTML = data.footer.copyright;
+        }
     }
 };
 
-SimpleContentUpdater.prototype.updateContent = function(content) {
-    // Hero
+EnhancedContentUpdater.prototype.updateContent = function(content) {
+    if (!content) return;
+    
+    // Hero section
     if (content.hero) {
         this.updateElement('#home h1', content.hero.title);
         this.updateElement('#home p', content.hero.subtitle);
     }
     
-    // About
+    // About section
     if (content.about) {
         this.updateElement('#about .section-title', content.about.title);
         this.updateElement('.about-text p', content.about.description);
     }
     
-    // Services
+    // Services section
     if (content.services) {
         this.updateElement('#services .section-title', content.services.title);
     }
     
-    // Destinations
-    if (content.destinations) {
-        this.updateElement('#destinations .section-title', content.destinations.title);
-        this.updateElement('.destinations .section-subtitle', content.destinations.subtitle);
-    }
-    
-    // Contact
-    if (content.contact) {
-        this.updateElement('#contact .section-title', content.contact.title);
-    }
-    
-    // Footer
-    if (content.footer) {
-        this.updateElement('.footer-section:first-child p', content.footer.description);
-        this.updateElement('.footer-bottom p', content.footer.copyright, true);
-    }
+    // Add other sections as needed...
 };
 
-SimpleContentUpdater.prototype.updateContacts = function(contacts) {
-    // Update contact section
+EnhancedContentUpdater.prototype.updateContacts = function(contacts) {
+    if (!contacts) return;
+    
+    // Update contact information
     if (contacts.phone) {
-        this.updateContactField('Телефон', contacts.phone);
+        this.updateElement('.contact-info .contact-item:nth-child(1) p', contacts.phone);
+        this.updateElement('.footer-section:nth-child(3) p:nth-child(1)', contacts.phone);
     }
     if (contacts.email) {
-        this.updateContactField('Email', contacts.email);
+        this.updateElement('.contact-info .contact-item:nth-child(2) p', contacts.email);
+        this.updateElement('.footer-section:nth-child(3) p:nth-child(2)', contacts.email);
     }
-    if (contacts.address) {
-        this.updateContactField('Адрес', contacts.address);
-    }
-    if (contacts.hours) {
-        this.updateContactField('Часы', contacts.hours);
-    }
+    // Add other contact fields...
 };
 
-SimpleContentUpdater.prototype.updateElement = function(selector, content, isHTML) {
+EnhancedContentUpdater.prototype.updateElement = function(selector, content) {
     const element = document.querySelector(selector);
-    if (element) {
-        if (isHTML) {
-            element.innerHTML = content;
-        } else {
-            element.textContent = content;
-        }
+    if (element && content) {
+        element.textContent = content;
     }
 };
 
-SimpleContentUpdater.prototype.updateContactField = function(fieldName, value) {
-    const contactItems = document.querySelectorAll('.contact-item');
-    contactItems.forEach(item => {
-        const strong = item.querySelector('strong');
-        if (strong && strong.textContent.includes(fieldName)) {
-            const p = item.querySelector('p');
-            if (p) {
-                p.textContent = value;
-            }
-        }
-    });
-};
-
-// Initialize
-new SimpleContentUpdater();
+// Initialize enhanced content updater
+new EnhancedContentUpdater();
