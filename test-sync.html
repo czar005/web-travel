@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sync Test</title>
+</head>
+<body>
+    <h1>Sync Test Page</h1>
+    <button onclick="testSave()">Test Save Data</button>
+    <button onclick="testLoad()">Test Load Data</button>
+    
+    <script>
+        function testSave() {
+            const testData = {
+                contacts: {
+                    phone: '+7 (999) 999-99-99',
+                    email: 'test@test.com',
+                    address: 'Test Address',
+                    hours: 'Test Hours'
+                },
+                footer: {
+                    description: 'Test Footer Description',
+                    copyright: '&copy; 2024 Test Company'
+                },
+                content: {
+                    about: { title: 'Test About Title' },
+                    services: { title: 'Test Services Title' },
+                    destinations: { title: 'Test Destinations Title' },
+                    contact: { title: 'Test Contact Title' }
+                },
+                lastUpdate: new Date().toISOString()
+            };
+            
+            localStorage.setItem('worldtravel_data', JSON.stringify(testData));
+            console.log('✅ Test data saved');
+            alert('Test data saved! Check main page.');
+        }
+        
+        function testLoad() {
+            const data = localStorage.getItem('worldtravel_data');
+            console.log('Loaded data:', data);
+            alert('Data: ' + (data ? 'EXISTS' : 'MISSING'));
+        }
+    </script>
+</body>
+</html>
