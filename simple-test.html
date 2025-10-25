@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Simple Data Test</title>
+</head>
+<body>
+    <h1>Simple Data Test</h1>
+    <button onclick="saveTestData()">Save Test Data</button>
+    <button onclick="loadTestData()">Load Test Data</button>
+    <button onclick="checkMainPage()">Check Main Page</button>
+    
+    <script>
+        function saveTestData() {
+            const testData = {
+                contacts: { phone: '+7 (999) 111-11-11' },
+                footer: { description: 'TEST DESCRIPTION' },
+                settings: { siteTitle: 'TEST SITE' },
+                lastUpdate: new Date().toISOString()
+            };
+            
+            localStorage.setItem('worldtravel_data', JSON.stringify(testData));
+            alert('✅ Test data saved to localStorage!');
+        }
+        
+        function loadTestData() {
+            const data = localStorage.getItem('worldtravel_data');
+            alert('Data: ' + (data ? 'EXISTS' : 'MISSING'));
+            if (data) {
+                console.log('Loaded data:', JSON.parse(data));
+            }
+        }
+        
+        function checkMainPage() {
+            window.open('/', '_blank');
+        }
+    </script>
+</body>
+</html>
