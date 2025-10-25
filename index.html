@@ -55,6 +55,38 @@
     <script src="fix-script-errors.js"></script>
     <script src="data-manager-loader.js"></script>
 <body>
+<script>
+console.log('🔍 DEBUG: Starting script diagnostics...');
+
+// Check if scripts are loading
+console.log('✅ Inline script working');
+
+// Check if simple-sync.js exists
+fetch('simple-sync.js')
+    .then(response => {
+        if (response.ok) {
+            console.log('✅ simple-sync.js file exists and accessible');
+        } else {
+            console.log('❌ simple-sync.js file not found or inaccessible');
+        }
+    })
+    .catch(error => {
+        console.log('❌ Error fetching simple-sync.js:', error);
+    });
+
+// List all loaded scripts
+setTimeout(() => {
+    const scripts = document.querySelectorAll('script[src]');
+    console.log('📜 Loaded scripts (' + scripts.length + '):');
+    scripts.forEach((script, i) => {
+        console.log('  ' + (i+1) + '. ' + script.src);
+        // Check if each script loaded successfully
+        script.onerror = function() {
+            console.log('❌ Script failed to load: ' + this.src);
+        };
+    });
+}, 1000);
+</script>
     <script>console.log("✅ INLINE SCRIPT WORKING"); alert("Page loaded");</script>
 <script src="smart-suppressor.js"></script>
     <script src="exact-content-updater.js"></script>
@@ -961,3 +993,71 @@
     <script src="data-manager-loader.js"></script>
     <script src="fix-exact-updater.js"></script>
     <script src="data-manager-loader.js"></script>
+<script>
+// Inline test commands
+console.log('🧪 INLINE TEST COMMANDS LOADED');
+
+window.testSave = function() {
+    const testData = {
+        contacts: {
+            phone: '+7 (999) TEST-99-99',
+            email: 'test@test.com'
+        },
+        settings: {
+            siteTitle: 'TEST SITE TITLE'
+        },
+        lastUpdate: new Date().toISOString()
+    };
+    
+    localStorage.setItem('worldtravel_data', JSON.stringify(testData));
+    console.log('✅ Test data saved to localStorage');
+    
+    // Trigger sync
+    if (window.forceUpdate) {
+        window.forceUpdate();
+    } else {
+        console.log('❌ forceUpdate not available');
+    }
+};
+
+window.checkData = function() {
+    const data = localStorage.getItem('worldtravel_data');
+    console.log('📦 Current data:', data ? JSON.parse(data) : 'NO DATA');
+};
+
+console.log('✅ Test commands ready: testSave(), checkData()');
+</script>
+<script>
+// Inline test commands
+console.log('🧪 INLINE TEST COMMANDS LOADED');
+
+window.testSave = function() {
+    const testData = {
+        contacts: {
+            phone: '+7 (999) TEST-99-99',
+            email: 'test@test.com'
+        },
+        settings: {
+            siteTitle: 'TEST SITE TITLE'
+        },
+        lastUpdate: new Date().toISOString()
+    };
+    
+    localStorage.setItem('worldtravel_data', JSON.stringify(testData));
+    console.log('✅ Test data saved to localStorage');
+    
+    // Trigger sync
+    if (window.forceUpdate) {
+        window.forceUpdate();
+    } else {
+        console.log('❌ forceUpdate not available');
+    }
+};
+
+window.checkData = function() {
+    const data = localStorage.getItem('worldtravel_data');
+    console.log('📦 Current data:', data ? JSON.parse(data) : 'NO DATA');
+};
+
+console.log('✅ Test commands ready: testSave(), checkData()');
+</script>
