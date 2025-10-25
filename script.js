@@ -76,13 +76,13 @@ function loadCountriesData() {
                     showNoCountriesMessage();
                 }
             } else {
-                throw new Error('Data manager not available');
-            }
-        } catch (err) {
-            console.error('Error loading countries:', err);
-            if (loading) loading.style.display = 'none';
-            if (error) error.style.display = 'block';
-        }
+//                throw new Error('Data manager not available');
+//            }
+//        } catch (err) {
+//            console.error('Error loading countries:', err);
+//            if (loading) loading.style.display = 'none';
+//            if (error) error.style.display = 'block';
+//        }
     }, 1000);
 }
 
