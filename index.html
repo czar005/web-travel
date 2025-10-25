@@ -61,17 +61,12 @@ console.log('🔍 DEBUG: Starting script diagnostics...');
 // Check if scripts are loading
 console.log('✅ Inline script working');
 
-// Check if simple-sync.js exists
-fetch('simple-sync.js')
     .then(response => {
         if (response.ok) {
-            console.log('✅ simple-sync.js file exists and accessible');
         } else {
-            console.log('❌ simple-sync.js file not found or inaccessible');
         }
     })
     .catch(error => {
-        console.log('❌ Error fetching simple-sync.js:', error);
     });
 
 // List all loaded scripts
@@ -916,6 +911,8 @@ setTimeout(() => {
     <script src="fix-script-errors.js"></script>
     <script src="data-manager-loader.js"></script>
     <script src="silent-fix.js"></script>
+    <script src="data-manager-fixed.js"></script>
+    <script src="simple-sync-working.js"></script>
     <script src="script.js?v=4"></script>
     <script src="data-manager-loader.js"></script>
     <script src="fix-script-errors.js"></script>
