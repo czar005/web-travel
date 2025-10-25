@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Update</title>
+</head>
+<body>
+    <h1>Test Data Update</h1>
+    <p>Use this page to test if data sync works between admin and main page.</p>
+    
+    <button onclick="updateContacts()">Update Contacts</button>
+    <button onclick="updateFooter()">Update Footer</button>
+    <button onclick="updateContent()">Update Content</button>
+    <button onclick="checkMainPage()">Check Main Page</button>
+    
+    <script>
+        function updateContacts() {
+            const data = {
+                contacts: {
+                    phone: '+7 (999) 123-45-67',
+                    email: 'test@example.com',
+                    address: 'Test Address, Moscow',
+                    hours: 'Test Hours: 9:00-18:00'
+                },
+                lastUpdate: new Date().toISOString()
+            };
+            localStorage.setItem('worldtravel_data', JSON.stringify(data));
+            alert('✅ Contacts updated! Check main page.');
+        }
+        
+        function updateFooter() {
+            const data = {
+                footer: {
+                    description: 'Updated footer description from test',
+                    copyright: '&copy; 2024 Updated Company'
+                },
+                lastUpdate: new Date().toISOString()
+            };
+            localStorage.setItem('worldtravel_data', JSON.stringify(data));
+            alert('✅ Footer updated! Check main page.');
+        }
+        
+        function updateContent() {
+            const data = {
+                content: {
+                    about: { title: 'Updated About Title' },
+                    services: { title: 'Updated Services Title' },
+                    destinations: { title: 'Updated Destinations Title' },
+                    contact: { title: 'Updated Contact Title' },
+                    hero: { title: 'Updated Hero Title', subtitle: 'Updated Hero Subtitle' }
+                },
+                lastUpdate: new Date().toISOString()
+            };
+            localStorage.setItem('worldtravel_data', JSON.stringify(data));
+            alert('✅ Content updated! Check main page.');
+        }
+        
+        function checkMainPage() {
+            window.open('/', '_blank');
+        }
+    </script>
+</body>
+</html>
