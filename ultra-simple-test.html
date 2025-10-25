@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Ultra Simple Test</title>
+    <script>
+        console.log('✅ ULTRA SIMPLE TEST LOADED');
+        alert('Page loaded!');
+        
+        window.ultraTest = function() {
+            console.log('✅ ultraTest() working!');
+            localStorage.setItem('test_key', 'test_value');
+            console.log('✅ localStorage test passed');
+            return 'SUCCESS';
+        };
+    </script>
+</head>
+<body>
+    <h1>Ultra Simple Test Page</h1>
+    <p>Open console and run: ultraTest()</p>
+</body>
+</html>

@@ -1,47 +1,42 @@
-// Simple sync - minimal and reliable
-console.log('✅ simple-sync.js LOADED SUCCESSFULLY');
+// Simple sync - fixed version
+console.log('🎯 SIMPLE-SYNC.JS LOADED');
 
-// Simple function to check for data changes
 function simpleSync() {
-    console.log('Checking for data updates...');
+    console.log('🔍 Checking for data updates...');
     
-    const data = localStorage.getItem('worldtravel_data');
-    if (data) {
-        console.log('Data found in localStorage:', data.length + ' characters');
-        try {
-            const parsed = JSON.parse(data);
-            console.log('Data parsed successfully');
+    try {
+        const data = localStorage.getItem('worldtravel_data');
+        console.log('Data in localStorage:', data ? 'EXISTS' : 'MISSING');
+        
+        if (data) {
+            console.log('Data length:', data.length);
             
-            // Simple test - update page title if available
-            if (parsed.settings && parsed.settings.siteTitle) {
-                document.title = parsed.settings.siteTitle;
-                console.log('Updated page title to:', parsed.settings.siteTitle);
-            }
-            
-            // Update contacts if available
-            if (parsed.contacts && parsed.contacts.phone) {
-                const elements = document.querySelectorAll('.contact-info .contact-item:nth-child(1) p');
-                elements.forEach(el => {
-                    if (el.textContent !== parsed.contacts.phone) {
-                        el.textContent = parsed.contacts.phone;
-                        console.log('Updated phone to:', parsed.contacts.phone);
+            try {
+                const parsed = JSON.parse(data);
+                console.log('Data parsed successfully');
+                
+                // Simple update test
+                if (parsed.settings && parsed.settings.siteTitle) {
+                    if (document.title !== parsed.settings.siteTitle) {
+                        document.title = parsed.settings.siteTitle;
+                        console.log('✅ Updated page title');
                     }
-                });
+                }
+                
+            } catch (parseError) {
+                console.log('❌ Parse error:', parseError);
             }
-            
-        } catch (e) {
-            console.log('Error parsing data:', e);
         }
-    } else {
-        console.log('No data found in localStorage');
+    } catch (error) {
+        console.log('❌ Sync error:', error);
     }
 }
 
-// Start checking
-setInterval(simpleSync, 2000);
+// Start syncing
+setInterval(simpleSync, 3000);
 
-// Make available globally
+// Global functions
 window.simpleSync = simpleSync;
 window.forceUpdate = simpleSync;
 
-console.log('✅ simple-sync.js READY - use forceUpdate() in console');
+console.log('✅ SIMPLE-SYNC.JS READY');

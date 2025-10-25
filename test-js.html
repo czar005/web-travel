@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>JavaScript Test</title>
+</head>
+<body>
+    <h1>JavaScript Test Page</h1>
+    
+    <script>
+        console.log('✅ BASIC JAVASCRIPT WORKING');
+        alert('JavaScript is working!');
+        
+        // Test function
+        window.testFunction = function() {
+            console.log('✅ testFunction() called successfully');
+            return 'JavaScript functions work!';
+        };
+        
+        // Test localStorage
+        try {
+            localStorage.setItem('test', 'value');
+            console.log('✅ localStorage working');
+        } catch (e) {
+            console.log('❌ localStorage error:', e);
+        }
+    </script>
+</body>
+</html>
