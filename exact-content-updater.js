@@ -208,7 +208,7 @@ class ExactContentUpdater {
     updateExactNavigation(content) {
         const navTitles = {
             'home': 'Главная',
-            'about': content && content.about?.title || 'О нас',
+            'about': content && content && content.about?.title || 'О нас',
             'services': content.services?.title || 'Услуги',
             'destinations': content.destinations?.title || 'Направления',
             'contact': content.contact?.title || 'Контакты'
