@@ -208,10 +208,10 @@ class ExactContentUpdater {
     updateExactNavigation(content) {
         const navTitles = {
 //            'home': 'Главная',
-//            'about': content && content && content.about?.title || 'О нас',
-//            'services': content.services?.title || 'Услуги',
-//            'destinations': content.destinations?.title || 'Направления',
-//            'contact': content.contact?.title || 'Контакты'
+//            'about': content && content && content && content.about?.title || 'О нас',
+//            'services': content && content.services?.title || 'Услуги',
+//            'destinations': content && content.destinations?.title || 'Направления',
+//            'contact': content && content.contact?.title || 'Контакты'
 //        };
 //        
 //        // Обновляем навигацию ТОЧНО
