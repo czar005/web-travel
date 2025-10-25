@@ -1,0 +1,11 @@
+--- exact-content-updater.js
++++ exact-content-updater.js
+@@ -208,7 +208,7 @@
+ 
+ ExactContentUpdater.prototype.updateExactNavigation = function(content) {
+     // Update navigation links
+-    if (content.about && content.about.title) {
++    if (content && content.about && content.about.title) {
+         this.updateElement('.nav-links a[href="#about"]', content.about.title);
+     }
+     if (content.services && content.services.title) {

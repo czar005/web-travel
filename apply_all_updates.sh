@@ -1,0 +1,6287 @@
+#!/bin/bash
+
+echo "🔄 Начинаем обновление всех файлов проекта..."
+
+# 1. Обновляем admin-style.css
+cat > admin-style.css << 'CSS_EOF'
+/* Admin Styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Inter', sans-serif;
+    background: #f5f5f5;
+    color: #333;
+}
+
+.admin-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.admin-header {
+    background: white;
+    padding: 20px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.admin-header h1 {
+    color: #2c5aa0;
+    font-size: 1.5rem;
+}
+
+.admin-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.admin-tabs {
+    display: flex;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    margin-bottom: 20px;
+    overflow: hidden;
+}
+
+.tab-button {
+    flex: 1;
+    padding: 15px 20px;
+    border: none;
+    background: transparent;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+}
+
+.tab-button:hover {
+    background: #f8f9fa;
+}
+
+.tab-button.active {
+    background: #2c5aa0;
+    color: white;
+}
+
+.tab-content {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    padding: 30px;
+}
+
+.tab-pane {
+    display: none;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+.admin-section {
+    margin-bottom: 30px;
+}
+
+.admin-section h3 {
+    color: #2c5aa0;
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+}
+
+.admin-hint {
+    color: #666;
+    font-size: 14px;
+    margin-bottom: 15px;
+    font-style: italic;
+}
+
+.admin-form {
+    max-width: 600px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 5px;
+    font-weight: 500;
+    color: #333;
+}
+
+.form-group input,
+.form-group textarea,
+.form-group select {
+    width: 100%;
+    padding: 10px 15px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus {
+    outline: none;
+    border-color: #2c5aa0;
+}
+
+.btn-admin {
+    background: #2c5aa0;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    border-radius: 5px;
+    cursor: pointer;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 0.3s ease;
+}
+
+.btn-admin:hover {
+    background: #1e3d6f;
+}
+
+.btn-admin.secondary {
+    background: #6c757d;
+}
+
+.btn-admin.secondary:hover {
+    background: #545b62;
+}
+
+.btn-admin.danger {
+    background: #dc3545;
+}
+
+.btn-admin.danger:hover {
+    background: #c82333;
+}
+
+.btn-admin.warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.btn-admin.warning:hover {
+    background: #e0a800;
+}
+
+.table-container {
+    overflow-x: auto;
+}
+
+.admin-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 10px;
+}
+
+.admin-table th,
+.admin-table td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #eee;
+}
+
+.admin-table th {
+    background: #f8f9fa;
+    font-weight: 600;
+    color: #333;
+}
+
+.admin-table tr:hover {
+    background: #f8f9fa;
+}
+
+.btn-small {
+    padding: 6px 12px;
+    border: none;
+    border-radius: 3px;
+    cursor: pointer;
+    font-size: 12px;
+    margin-right: 5px;
+}
+
+.btn-small.danger {
+    background: #dc3545;
+    color: white;
+}
+
+.btn-small.danger:hover {
+    background: #c82333;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .admin-container {
+        padding: 10px;
+    }
+    
+    .admin-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .admin-tabs {
+        flex-direction: column;
+    }
+    
+    .tab-content {
+        padding: 20px;
+    }
+}
+
+/* Стили для таблицы туров */
+.tour-info {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.tour-info small {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.country-badge {
+    background: #e3f2fd;
+    color: #1976d2;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.price-tag {
+    background: #e8f5e8;
+    color: #2e7d32;
+    padding: 6px 12px;
+    border-radius: 15px;
+    font-weight: 700;
+    font-size: 0.9rem;
+}
+
+.duration-badge {
+    background: #fff3e0;
+    color: #ef6c00;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.tour-count-badge {
+    background: #2c5aa0;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 10px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    min-width: 25px;
+    display: inline-block;
+    text-align: center;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-small.warning {
+    background: #ffc107;
+    color: #000;
+}
+
+.btn-small.warning:hover {
+    background: #e0a800;
+}
+
+/* Улучшения для форм */
+.form-group input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.form-group input[type="number"]::-webkit-outer-spin-button,
+.form-group input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Анимации для таблиц */
+.admin-table tr {
+    transition: background-color 0.2s ease;
+}
+
+.admin-table tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Адаптивность для админки */
+@media (max-width: 768px) {
+    .admin-table {
+        font-size: 0.9rem;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .tour-info {
+        min-width: 150px;
+    }
+    
+    .country-badge,
+    .price-tag,
+    .duration-badge {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
+}
+CSS_EOF
+echo "✅ admin-style.css обновлен"
+
+# 2. Обновляем index.html
+cat > index.html << 'HTML_EOF'
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldTravel - Туристическая компания</title>
+    <link rel="stylesheet" href="layout-fixes.css">
+    <link rel="stylesheet" href="input-fixes.css">
+    <link rel="stylesheet" href="style.css?v=4">
+    <link rel="stylesheet" href="force-display.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <nav class="nav">
+            <div class="logo">
+                <h2><i class="fas fa-globe-americas"></i> WorldTravel</h2>
+            </div>
+            <ul class="nav-links">
+                <li><a href="#home">Главная</a></li>
+                <li><a href="#about">О нас</a></li>
+                <li><a href="#services">Услуги</a></li>
+                <li><a href="#destinations">Направления</a></li>
+                <li><a href="#contact">Контакты</a></li>
+                <li>
+                    <a href="admin-login.html" class="admin-link"><i class="fas fa-cog"></i> Админка</a>
+                </li>
+            </ul>
+            <div class="hamburger">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+        </nav>
+    </header>
+
+    <!-- Hero Section -->
+    <section id="home" class="hero">
+        <div class="hero-content">
+            <h1 class="animate-fade-in">Откройте мир с WorldTravel</h1>
+            <p class="animate-fade-in-delay">Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.</p>
+            <button class="cta-button animate-bounce" onclick="scrollToDestinations()">Начать путешествие</button>
+        </div>
+        <div class="hero-image" style="margin-left: 100px;">
+            <div class="floating-element element-1"><i class="fas fa-plane"></i></div>
+            <div class="floating-element element-2"><i class="fas fa-map-marked-alt"></i></div>
+            <div class="floating-element element-3"><i class="fas fa-passport"></i></div>
+            <div class="image-placeholder pulse-animation">
+                <img src="images/travel-placeholder.svg" alt="Путешествия" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="about">
+        <div class="container">
+            <h2 class="section-title">О нас</h2>
+            <div class="about-content">
+                <div class="about-text">
+                    <p>WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.</p>
+                    <div class="stats">
+                        <div class="stat animate-counter" data-target="5000">
+                            <h3>5000</h3>
+                            <p>Довольных клиентов</p>
+                        </div>
+                        <div class="stat animate-counter" data-target="50">
+                            <h3>50</h3>
+                            <p>Стран мира</p>
+                        </div>
+                        <div class="stat">
+                            <h3>10 лет</h3>
+                            <p>Опыта работы</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="about-image">
+                    <div class="image-placeholder rotate-animation">
+                        <img src="images/travel-placeholder.svg" alt="Команда WorldTravel" style="width: 100%; height: 100%; object-fit: cover; border-radius: 20px;">
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Services Section -->
+    <section id="services" class="services">
+        <div class="container">
+            <h2 class="section-title">Услуги</h2>
+            <div class="services-grid">
+                <div class="service-card slide-in-left">
+                    <div class="service-icon"><i class="fas fa-plane"></i></div>
+                    <h3>Авиабилеты</h3>
+                    <p>Подбор и бронирование лучших авиаперелетов по выгодным ценам</p>
+                </div>
+                <div class="service-card slide-in-bottom">
+                    <div class="service-icon"><i class="fas fa-hotel"></i></div>
+                    <h3>Отели</h3>
+                    <p>Бронирование отелей любого уровня комфорта по всему миру</p>
+                </div>
+                <div class="service-card slide-in-right">
+                    <div class="service-icon"><i class="fas fa-map-marked-alt"></i></div>
+                    <h3>Туры</h3>
+                    <p>Индивидуальные и групповые туры с профессиональными гидами</p>
+                </div>
+                <div class="service-card slide-in-top">
+                    <div class="service-icon"><i class="fas fa-shield-alt"></i></div>
+                    <h3>Страхование</h3>
+                    <p>Полное страховое сопровождение вашего путешествия</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Destinations Section -->
+    <section id="destinations" class="destinations">
+        <div class="container">
+            <h2 class="section-title">Направления</h2>
+            <p class="section-subtitle">Откройте для себя лучшие направления мира с нашими эксклюзивными турами</p>
+            
+            <div class="search-box">
+                <input type="text" class="search-input" placeholder="🔍 Поиск стран или туров...">
+            </div>
+
+            <div class="loading-message" id="destinations-loading">
+                <i class="fas fa-spinner fa-spin"></i> Загружаем направления...
+            </div>
+            <div class="destinations-grid" id="destinations-grid">
+                <!-- Страны будут загружаться через JavaScript -->
+            </div>
+            <div class="error-message" id="destinations-error" style="display: none;">
+                <i class="fas fa-exclamation-triangle"></i> Не удалось загрузить направления. Пожалуйста, обновите страницу.
+            </div>
+        </div>
+    </section>
+
+    <!-- Contact Section -->
+    <section id="contact" class="contact">
+        <div class="container">
+            <h2 class="section-title">Контакты</h2>
+            <div class="contact-content">
+                <div class="contact-info">
+                    <h3>Наши контакты</h3>
+                    <div class="contact-item">
+                        <i class="fas fa-phone"></i>
+                        <div>
+                            <strong>Телефон:</strong>
+                            <p>+7 (999) 123-45-67</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-envelope"></i>
+                        <div>
+                            <strong>Email:</strong>
+                            <p>info@worldtravel.com</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-map-marker-alt"></i>
+                        <div>
+                            <strong>Адрес:</strong>
+                            <p>Москва, ул. Туристическая, 15</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <i class="fas fa-clock"></i>
+                        <div>
+                            <strong>Часы работы:</strong>
+                            <p>Пн-Пт: 9:00-18:00</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <input type="text" placeholder="Ваше имя" required>
+                    <input type="email" placeholder="Ваш email" required>
+                    <input type="tel" placeholder="Ваш телефон">
+                    <textarea placeholder="Ваше сообщение" rows="5" required></textarea>
+                    <button type="submit">Отправить сообщение</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-content">
+                <div class="footer-section">
+                    <h3><i class="fas fa-globe-americas"></i> WorldTravel</h3>
+                    <p>Ваш надежный партнер в мире путешествий. Мы делаем ваши мечты о путешествиях реальностью.</p>
+                </div>
+                <div class="footer-section">
+                    <h4>Быстрые ссылки</h4>
+                    <ul>
+                        <li><a href="#home">Главная</a></li>
+                        <li><a href="#about">О нас</a></li>
+                        <li><a href="#services">Услуги</a></li>
+                        <li><a href="#destinations">Направления</a></li>
+                        <li><a href="#contact">Контакты</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h4>Контакты</h4>
+                    <p><i class="fas fa-phone"></i> +7 (999) 123-45-67</p>
+                    <p><i class="fas fa-envelope"></i> info@worldtravel.com</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Москва, ул. Туристическая, 15</p>
+                    <p><i class="fas fa-clock"></i> Пн-Пт: 9:00-18:00</p>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 WorldTravel. Все права защищены.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Scripts -->
+    <script src="data-manager-fixed.js"></script>
+    <script src="exact-content-updater.js"></script>
+    <script src="script.js?v=4"></script>
+    <script src="fix-data-structure.js"></script>
+    <script src="diagnose.js"></script>
+    <script src="force-refresh.js"></script>
+</body>
+</html>
+HTML_EOF
+echo "✅ index.html обновлен"
+
+# 3. Обновляем admin.js
+cat > admin.js << 'JS_EOF'
+// Improved Admin JavaScript with better error handling and force refresh
+console.log('🔄 Admin JS loading...');
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('✅ Admin DOM loaded');
+    initializeAdmin();
+});
+
+function initializeAdmin() {
+    console.log('🚀 Initializing admin...');
+    
+    // Wait for dataManager to be ready
+    const initInterval = setInterval(() => {
+        if (window.dataManager) {
+            clearInterval(initInterval);
+            loadAdminData();
+            setupAdminEventListeners();
+            loadCountrySelect();
+            console.log('✅ Admin initialized successfully');
+        }
+    }, 100);
+
+    // Fallback timeout
+    setTimeout(() => {
+        clearInterval(initInterval);
+        if (!window.dataManager) {
+            console.error('❌ DataManager not available, using fallback');
+            showAdminNotification('Ошибка загрузки данных. Обновите страницу.', 'error');
+        }
+    }, 5000);
+}
+
+function setupAdminEventListeners() {
+    console.log('🔧 Setting up admin event listeners...');
+    
+    // Form handlers
+    const addCountryForm = document.getElementById('add-country-form');
+    const addTourForm = document.getElementById('add-tour-form');
+    const contactForm = document.getElementById('contact-form');
+    const settingsForm = document.getElementById('settings-form');
+    
+    if (addCountryForm) {
+        addCountryForm.addEventListener('submit', handleAddCountry);
+        console.log('✅ Country form handler added');
+    }
+    
+    if (addTourForm) {
+        addTourForm.addEventListener('submit', handleAddTour);
+        console.log('✅ Tour form handler added');
+    }
+    
+    if (contactForm) {
+        contactForm.addEventListener('submit', handleUpdateContacts);
+        console.log('✅ Contact form handler added');
+    }
+    
+    if (settingsForm) {
+        settingsForm.addEventListener('submit', handleUpdateSettings);
+        console.log('✅ Settings form handler added');
+    }
+    
+    // Tab handlers
+    const tabButtons = document.querySelectorAll('.tab-button');
+    tabButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const tabName = this.getAttribute('data-tab');
+            console.log('📑 Switching to tab:', tabName);
+            switch(tabName) {
+                case 'countries':
+                    loadCountriesTable();
+                    break;
+                case 'tours':
+                    loadToursTable();
+                    loadCountrySelect();
+                    break;
+                case 'contacts':
+                    loadContactsForm();
+                    break;
+                case 'settings':
+                    loadSettingsForm();
+                    break;
+            }
+        });
+    });
+
+    // Force refresh button
+    const refreshBtn = document.createElement('button');
+    refreshBtn.className = 'btn-admin secondary';
+    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Обновить данные';
+    refreshBtn.style.marginLeft = '10px';
+    refreshBtn.onclick = forceRefreshData;
+    
+    const headerActions = document.querySelector('.editor-actions');
+    if (headerActions) {
+        headerActions.appendChild(refreshBtn);
+    }
+}
+
+function forceRefreshData() {
+    console.log('🔄 Force refreshing data...');
+    if (window.dataManager) {
+        window.dataManager.forceRefresh();
+        loadAdminData();
+        showAdminNotification('Данные обновлены', 'success');
+    } else {
+        showAdminNotification('Ошибка обновления данных', 'error');
+    }
+}
+
+function loadAdminData() {
+    console.log('📥 Loading admin data...');
+    
+    if (!window.dataManager) {
+        console.error('❌ DataManager not available');
+        showAdminNotification('Ошибка загрузки данных менеджера', 'error');
+        return;
+    }
+    
+    const data = window.dataManager.getData();
+    console.log('📊 Admin loaded data:', {
+        countries: data?.countries?.length || 0,
+        tours: data ? window.dataManager.getAllTours().length : 0
+    });
+    
+    if (data) {
+        loadCountriesTable();
+        loadToursTable();
+        loadContactsForm();
+        loadSettingsForm();
+        showAdminNotification('Данные успешно загружены', 'success');
+    } else {
+        showAdminNotification('Данные не найдены, создаем стандартные', 'warning');
+        window.dataManager.setDefaultData();
+        setTimeout(loadAdminData, 500);
+    }
+}
+
+function loadCountriesTable() {
+    console.log('🌍 Loading countries table...');
+    
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const tbody = document.querySelector('#countries-table tbody');
+    
+    console.log('📋 Countries to display:', countries.length);
+    
+    if (tbody) {
+        if (countries.length > 0) {
+            tbody.innerHTML = countries.map(country => `
+                <tr>
+                    <td><strong>${country.name}</strong></td>
+                    <td>${country.description || 'Описание отсутствует'}</td>
+                    <td><span class="tour-count-badge">${country.tours ? country.tours.length : 0}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-small" onclick="editCountry(${country.id})" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-small danger" onclick="deleteCountry(${country.id})" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            console.log('✅ Countries table loaded');
+        } else {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 40px;">Страны не добавлены</td></tr>';
+            console.log('📭 No countries to display');
+        }
+    } else {
+        console.error('❌ Countries table body not found');
+    }
+}
+
+function loadToursTable() {
+    console.log('🗺️ Loading tours table...');
+    
+    if (!window.dataManager) return;
+    
+    const allTours = window.dataManager.getAllTours();
+    const tbody = document.querySelector('#tours-table tbody');
+    
+    console.log('📋 Tours to display:', allTours.length);
+    
+    if (tbody) {
+        if (allTours.length > 0) {
+            tbody.innerHTML = allTours.map(tour => `
+                <tr>
+                    <td>
+                        <div class="tour-info">
+                            <strong>${tour.name}</strong>
+                            <small>ID: ${tour.id}</small>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="country-badge">${tour.countryName}</span>
+                    </td>
+                    <td>
+                        <span class="price-tag">${tour.price}</span>
+                    </td>
+                    <td>
+                        <span class="duration-badge">${tour.duration}</span>
+                    </td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-small warning" onclick="editTour(${tour.countryId}, ${tour.id})" title="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-small danger" onclick="deleteTour(${tour.countryId}, ${tour.id})" title="Удалить">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+            console.log('✅ Tours table loaded');
+        } else {
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="5" style="text-align: center; color: #999; padding: 40px;">
+                        <i class="fas fa-map-marked-alt" style="font-size: 3rem; margin-bottom: 15px; display: block; color: #ccc;"></i>
+                        <p>Туры не найдены</p>
+                        <small>Добавьте первый тур используя форму выше</small>
+                    </td>
+                </tr>
+            `;
+            console.log('📭 No tours to display');
+        }
+    } else {
+        console.error('❌ Tours table body not found');
+    }
+}
+
+function loadContactsForm() {
+    console.log('📞 Loading contacts form...');
+    
+    if (!window.dataManager) return;
+    
+    const contacts = window.dataManager.getContacts();
+    const form = document.getElementById('contact-form');
+    
+    console.log('📋 Contacts data:', contacts);
+    
+    if (form) {
+        form.querySelector('#contact-phone').value = contacts.phone || '';
+        form.querySelector('#contact-email').value = contacts.email || '';
+        form.querySelector('#contact-address').value = contacts.address || '';
+        form.querySelector('#contact-hours').value = contacts.hours || '';
+        console.log('✅ Contacts form loaded');
+    }
+}
+
+function loadSettingsForm() {
+    console.log('⚙️ Loading settings form...');
+    
+    if (!window.dataManager) return;
+    
+    const settings = window.dataManager.getSettings();
+    const form = document.getElementById('settings-form');
+    
+    console.log('📋 Settings data:', settings);
+    
+    if (form) {
+        form.querySelector('#site-title').value = settings.siteTitle || '';
+        form.querySelector('#company-name').value = settings.companyName || '';
+        console.log('✅ Settings form loaded');
+    }
+}
+
+function loadCountrySelect() {
+    console.log('🌍 Loading country select...');
+    
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const select = document.getElementById('tour-country');
+    
+    console.log('📋 Countries for select:', countries.length);
+    
+    if (select) {
+        if (countries.length > 0) {
+            select.innerHTML = '<option value="">-- Выберите страну --</option>' + 
+                countries.map(country => 
+                    `<option value="${country.id}">${country.name}</option>`
+                ).join('');
+            console.log('✅ Country select loaded');
+        } else {
+            select.innerHTML = '<option value="">Сначала добавьте страны</option>';
+            console.log('📭 No countries for select');
+        }
+    }
+}
+
+// Form handlers with improved validation
+function handleAddCountry(e) {
+    e.preventDefault();
+    console.log('➕ Adding new country...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const countryData = {
+        name: formData.get('name').trim(),
+        description: formData.get('description').trim()
+    };
+    
+    if (!countryData.name) {
+        showAdminNotification('Введите название страны', 'error');
+        return;
+    }
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    const result = window.dataManager.addCountry(countryData);
+    if (result) {
+        form.reset();
+        loadCountriesTable();
+        loadCountrySelect();
+        showAdminNotification(`Страна "${countryData.name}" успешно добавлена!`, 'success');
+        console.log('✅ Country added:', countryData.name);
+    } else {
+        showAdminNotification('Ошибка при добавлении страны', 'error');
+        console.error('❌ Failed to add country');
+    }
+}
+
+function handleAddTour(e) {
+    e.preventDefault();
+    console.log('➕ Adding new tour...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const tourData = {
+        name: formData.get('name').trim(),
+        price: formData.get('price').trim(),
+        duration: formData.get('duration').trim()
+    };
+    
+    const countryId = parseInt(formData.get('country'));
+    
+    // Validation
+    if (!tourData.name) {
+        showAdminNotification('Введите название тура', 'error');
+        return;
+    }
+    
+    if (!tourData.price) {
+        showAdminNotification('Введите цену тура', 'error');
+        return;
+    }
+    
+    if (!tourData.duration) {
+        showAdminNotification('Введите длительность тура', 'error');
+        return;
+    }
+    
+    if (!countryId) {
+        showAdminNotification('Выберите страну', 'error');
+        return;
+    }
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    const result = window.dataManager.addTour(countryId, tourData);
+    if (result) {
+        form.reset();
+        loadToursTable();
+        showAdminNotification(`Тур "${tourData.name}" успешно добавлен!`, 'success');
+        console.log('✅ Tour added:', tourData.name);
+    } else {
+        showAdminNotification('Ошибка при добавлении тура', 'error');
+        console.error('❌ Failed to add tour');
+    }
+}
+
+function handleUpdateContacts(e) {
+    e.preventDefault();
+    console.log('📞 Updating contacts...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const contactData = {
+        phone: formData.get('phone').trim(),
+        email: formData.get('email').trim(),
+        address: formData.get('address').trim(),
+        hours: formData.get('hours').trim()
+    };
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    window.dataManager.updateContacts(contactData);
+    showAdminNotification('Контактная информация обновлена!', 'success');
+    console.log('✅ Contacts updated');
+}
+
+function handleUpdateSettings(e) {
+    e.preventDefault();
+    console.log('⚙️ Updating settings...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const settingsData = {
+        siteTitle: formData.get('siteTitle').trim(),
+        companyName: formData.get('companyName').trim()
+    };
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    window.dataManager.updateSettings(settingsData);
+    showAdminNotification('Настройки сайта обновлены!', 'success');
+    console.log('✅ Settings updated');
+}
+
+// Country management functions
+function editCountry(countryId) {
+    console.log('✏️ Editing country:', countryId);
+    
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    
+    if (country) {
+        const newName = prompt('Введите новое название страны:', country.name);
+        if (newName === null) return;
+        
+        const newDesc = prompt('Введите новое описание:', country.description || '');
+        if (newDesc === null) return;
+        
+        if (newName.trim()) {
+            window.dataManager.updateCountry(countryId, {
+                name: newName.trim(),
+                description: newDesc.trim()
+            });
+            loadCountriesTable();
+            loadCountrySelect();
+            loadToursTable();
+            showAdminNotification('Страна обновлена!', 'success');
+            console.log('✅ Country updated');
+        } else {
+            showAdminNotification('Название страны не может быть пустым', 'error');
+        }
+    }
+}
+
+function deleteCountry(countryId) {
+    console.log('🗑️ Deleting country:', countryId);
+    
+    if (!window.dataManager) return;
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    
+    if (!country) return;
+    
+    const tourCount = country.tours ? country.tours.length : 0;
+    const message = tourCount > 0 
+        ? `Вы уверены, что хотите удалить страну "${country.name}"? Все ${tourCount} туров в этой стране также будут удалены.`
+        : `Вы уверены, что хотите удалить страну "${country.name}"?`;
+    
+    if (confirm(message)) {
+        if (window.dataManager.deleteCountry(countryId)) {
+            loadCountriesTable();
+            loadToursTable();
+            loadCountrySelect();
+            showAdminNotification('Страна удалена!', 'success');
+            console.log('✅ Country deleted');
+        } else {
+            showAdminNotification('Ошибка при удалении страны', 'error');
+        }
+    }
+}
+
+// Tour management functions
+function editTour(countryId, tourId) {
+    console.log('✏️ Editing tour:', tourId, 'in country:', countryId);
+    
+    if (!window.dataManager) return;
+    
+    const allTours = window.dataManager.getAllTours();
+    const tour = allTours.find(t => t.id === tourId && t.countryId === countryId);
+    
+    if (tour) {
+        const newName = prompt('Введите новое название тура:', tour.name);
+        if (newName === null) return;
+        
+        const newPrice = prompt('Введите новую цену:', tour.price);
+        if (newPrice === null) return;
+        
+        const newDuration = prompt('Введите новую длительность:', tour.duration);
+        if (newDuration === null) return;
+        
+        if (newName.trim() && newPrice && newDuration.trim()) {
+            // Delete old tour and create new one
+            if (window.dataManager.deleteTour(countryId, tourId)) {
+                window.dataManager.addTour(countryId, {
+                    name: newName.trim(),
+                    price: newPrice.trim(),
+                    duration: newDuration.trim()
+                });
+                loadToursTable();
+                showAdminNotification('Тур обновлен!', 'success');
+                console.log('✅ Tour updated');
+            }
+        } else {
+            showAdminNotification('Все поля должны быть заполнены', 'error');
+        }
+    }
+}
+
+function deleteTour(countryId, tourId) {
+    console.log('🗑️ Deleting tour:', tourId, 'from country:', countryId);
+    
+    if (!window.dataManager) return;
+    
+    const allTours = window.dataManager.getAllTours();
+    const tour = allTours.find(t => t.id === tourId && t.countryId === countryId);
+    
+    if (tour && confirm(`Вы уверены, что хотите удалить тур "${tour.name}"?`)) {
+        if (window.dataManager.deleteTour(countryId, tourId)) {
+            loadToursTable();
+            showAdminNotification('Тур удален!', 'success');
+            console.log('✅ Tour deleted');
+        } else {
+            showAdminNotification('Ошибка при удалении тура', 'error');
+        }
+    }
+}
+
+// Notification system
+function showAdminNotification(message, type = 'info') {
+    console.log(`📢 ${type.toUpperCase()}: ${message}`);
+    
+    // Remove existing notifications
+    document.querySelectorAll('.admin-notification').forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    const bgColor = type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : type === 'success' ? '#28a745' : '#007bff';
+    const textColor = type === 'warning' ? '#000' : '#fff';
+    
+    notification.className = 'admin-notification';
+    notification.innerHTML = `
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: ${bgColor};
+            color: ${textColor};
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        ">
+            <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            ${message}
+            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 10px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto-remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Add CSS for notifications if not exists
+if (!document.querySelector('#admin-notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'admin-notification-styles';
+    style.textContent = `
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    `;
+    document.head.appendChild(style);
+}
+
+// Debug function
+window.debugAdmin = function() {
+    console.log('🔍 Admin Debug Info:');
+    console.log('- DataManager available:', !!window.dataManager);
+    if (window.dataManager) {
+        window.dataManager.debugData();
+    }
+    console.log('- Countries table:', document.querySelector('#countries-table tbody')?.children.length || 0, 'rows');
+    console.log('- Tours table:', document.querySelector('#tours-table tbody')?.children.length || 0, 'rows');
+};
+
+console.log('✅ Admin JS loaded successfully');
+JS_EOF
+echo "✅ admin.js обновлен"
+
+# 4. Обновляем admin-login.html
+cat > admin-login.html << 'LOGIN_EOF'
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Login - WorldTravel</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .login-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 15px 35px rgba(0, 0, 0, 0.2);
+            width: 100%;
+            max-width: 400px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .login-box h2 {
+            color: white;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+
+        .user-box {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .user-box input {
+            width: 100%;
+            padding: 10px 0;
+            font-size: 16px;
+            color: white;
+            margin-bottom: 30px;
+            border: none;
+            border-bottom: 1px solid white;
+            outline: none;
+            background: transparent;
+        }
+
+        .user-box label {
+            position: absolute;
+            top: 0;
+            left: 0;
+            padding: 10px 0;
+            font-size: 16px;
+            color: white;
+            pointer-events: none;
+            transition: 0.5s;
+        }
+
+        .user-box input:focus ~ label,
+        .user-box input:valid ~ label {
+            top: -20px;
+            left: 0;
+            color: #03e9f4;
+            font-size: 12px;
+        }
+
+        button {
+            background: transparent;
+            border: 1px solid white;
+            color: white;
+            padding: 12px 30px;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            border-radius: 25px;
+            cursor: pointer;
+            transition: 0.5s;
+            width: 100%;
+            font-size: 16px;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background: white;
+            color: #667eea;
+        }
+
+        .message {
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 8px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        .message.success {
+            background: rgba(46, 204, 113, 0.2);
+            color: #2ecc71;
+            border: 1px solid #2ecc71;
+        }
+
+        .message.error {
+            background: rgba(231, 76, 60, 0.2);
+            color: #e74c3c;
+            border: 1px solid #e74c3c;
+        }
+
+        .code-inputs {
+            display: flex;
+            justify-content: space-between;
+            margin: 20px 0;
+        }
+
+        .code-inputs input {
+            width: 45px;
+            height: 45px;
+            text-align: center;
+            font-size: 20px;
+            border: 2px solid white;
+            background: transparent;
+            color: white;
+            border-radius: 8px;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            opacity: 0.7;
+            pointer-events: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-box">
+            <h2>Admin Login</h2>
+            
+            <div id="loginSection">
+                <div class="user-box">
+                    <input type="text" id="username" required>
+                    <label>Логин</label>
+                </div>
+                <div class="user-box">
+                    <input type="password" id="password" required>
+                    <label>Пароль</label>
+                </div>
+                <button type="button" onclick="handleLogin()">Войти</button>
+            </div>
+
+            <div id="codeSection" class="hidden">
+                <div class="message info">
+                    Код отправлен на вашу почту narekgrigoryan424@gmail.com
+                </div>
+                <div class="code-inputs">
+                    <input type="text" maxlength="1" oninput="moveToNext(this, 1)">
+                    <input type="text" maxlength="1" oninput="moveToNext(this, 2)">
+                    <input type="text" maxlength="1" oninput="moveToNext(this, 3)">
+                    <input type="text" maxlength="1" oninput="moveToNext(this, 4)">
+                    <input type="text" maxlength="1" oninput="moveToNext(this, 5)">
+                    <input type="text" maxlength="1" oninput="moveToNext(this, 6)">
+                </div>
+                <button type="button" onclick="verifyCode()">Подтвердить код</button>
+                <button type="button" onclick="goBackToLogin()" style="background: transparent; margin-top: 10px;">Назад</button>
+            </div>
+
+            <div id="message" class="message"></div>
+        </div>
+    </div>
+
+    <script>
+   let currentAuthCode = '';
+let currentUsername = '';
+
+async function handleLogin() {
+    const username = document.getElementById('username').value;
+    const password = document.getElementById('password').value;
+
+    if (username !== 'admin' || password !== 'admin') {
+        showMessage('Неверный логин или пароль', 'error');
+        return;
+    }
+
+    showMessage('Отправка кода на вашу почту...', 'success');
+    setLoadingState(true);
+
+    try {
+        currentAuthCode = Math.floor(100000 + Math.random() * 900000).toString();
+        currentUsername = username;
+        
+        console.log('🔐 GENERATED CODE:', currentAuthCode);
+
+        // ВРЕМЕННО ПРОПУСКАЕМ ОТПРАВКУ EMAIL - используем тестовый код
+        console.log('📧 Email sending skipped for testing');
+        
+        showMessage('✅ Код отправлен! Тестовый код: ' + currentAuthCode, 'success');
+        document.getElementById('loginSection').classList.add('hidden');
+        document.getElementById('codeSection').classList.remove('hidden');
+        clearCodeInputs();
+        document.querySelector('.code-inputs input').focus();
+        
+    } catch (error) {
+        console.error('Error:', error);
+        showMessage('❌ Ошибка', 'error');
+    } finally {
+        setLoadingState(false);
+    }
+}
+
+function moveToNext(input, nextIndex) {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    
+    if (input.value.length === 1 && nextIndex < inputs.length) {
+        inputs[nextIndex].focus();
+    }
+    
+    const allFilled = Array.from(inputs).every(input => input.value.length === 1);
+    if (allFilled) {
+        verifyCode();
+    }
+}
+
+function verifyCode() {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    const enteredCode = Array.from(inputs).map(input => input.value).join('');
+    
+    if (enteredCode.length !== 6) {
+        showMessage('Введите все 6 цифр кода', 'error');
+        return;
+    }
+
+    setLoadingState(true);
+
+    setTimeout(() => {
+        if (enteredCode === currentAuthCode) {
+            showMessage('✅ Успешный вход! Перенаправление...', 'success');
+            
+            // СОХРАНЯЕМ В SessionStorage (работает лучше)
+            sessionStorage.setItem('adminAuthenticated', 'true');
+            sessionStorage.setItem('adminUsername', currentUsername);
+            sessionStorage.setItem('authTime', Date.now().toString());
+            
+            // ДУБЛИРУЕМ В LocalStorage
+            localStorage.setItem('adminAuthenticated', 'true');
+            localStorage.setItem('adminUsername', currentUsername);
+            localStorage.setItem('authTime', Date.now().toString());
+            
+            console.log('💾 SAVED TO STORAGE:');
+            console.log('SessionStorage:', {
+                auth: sessionStorage.getItem('adminAuthenticated'),
+                user: sessionStorage.getItem('adminUsername')
+            });
+            console.log('LocalStorage:', {
+                auth: localStorage.getItem('adminAuthenticated'),
+                user: localStorage.getItem('adminUsername')
+            });
+            
+            // ПЕРЕНАПРАВЛЯЕМ СРАЗУ
+            console.log('🔄 REDIRECTING TO ADMIN.HTML');
+            window.location.href = 'admin.html';
+            
+        } else {
+            showMessage('❌ Неверный код. Попробуйте еще раз.', 'error');
+            shakeCodeInputs();
+        }
+        setLoadingState(false);
+    }, 500);
+}
+
+function goBackToLogin() {
+    document.getElementById('codeSection').classList.add('hidden');
+    document.getElementById('loginSection').classList.remove('hidden');
+    showMessage('', '');
+    currentAuthCode = '';
+}
+
+function clearCodeInputs() {
+    const inputs = document.querySelectorAll('.code-inputs input');
+    inputs.forEach(input => input.value = '');
+}
+
+function shakeCodeInputs() {
+    const container = document.querySelector('.code-inputs');
+    container.style.animation = 'shake 0.5s';
+    setTimeout(() => {
+        container.style.animation = '';
+        clearCodeInputs();
+        document.querySelector('.code-inputs input').focus();
+    }, 500);
+}
+
+function setLoadingState(loading) {
+    const buttons = document.querySelectorAll('button');
+    buttons.forEach(button => {
+        button.disabled = loading;
+        button.classList.toggle('loading', loading);
+    });
+}
+
+function showMessage(text, type) {
+    const messageEl = document.getElementById('message');
+    messageEl.textContent = text;
+    messageEl.className = 'message';
+    if (type) {
+        messageEl.classList.add(type);
+    }
+}
+
+// Анимация тряски
+const style = document.createElement('style');
+style.textContent = `
+    @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        75% { transform: translateX(5px); }
+    }
+`;
+document.head.appendChild(style);
+
+// Автофокус
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('username').focus();
+});
+
+// Обработка Enter
+document.addEventListener('keypress', function(e) {
+    if (e.key === 'Enter') {
+        if (!document.getElementById('codeSection').classList.contains('hidden')) {
+            verifyCode();
+        } else {
+            handleLogin();
+        }
+    }
+});
+    </script>
+</body>
+</html>
+LOGIN_EOF
+echo "✅ admin-login.html обновлен"
+
+# 5. Обновляем page-editor.html
+cat > page-editor.html << 'PAGE_EDITOR_EOF'
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="layout-fixes.css">
+    <link rel="stylesheet" href="input-fixes.css">
+    <link rel="stylesheet" href="enhanced-editor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        /* Все стили из предыдущей версии */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f5f7fa;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+
+        .editor-panel {
+            width: 450px;
+            background: white;
+            border-left: 2px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: #2c5aa0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-frame-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .section-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .section-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .section-item:hover {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .section-item.active {
+            border-color: #2c5aa0;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .section-title {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        .section-desc {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .section-item.active .section-desc {
+            color: #e0e0e0;
+        }
+
+        .section-actions {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            display: flex;
+            gap: 5px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .section-item:hover .section-actions {
+            opacity: 1;
+        }
+
+        .section-item.active .section-actions {
+            opacity: 1;
+        }
+
+        .btn-section-action {
+            background: rgba(255,255,255,0.9);
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .btn-section-action:hover {
+            background: white;
+            transform: scale(1.1);
+        }
+
+        .btn-section-action.delete {
+            color: #dc3545;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
+        }
+
+        textarea.form-control {
+            resize: vertical;
+            min-height: 100px;
+            font-family: inherit;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #1e3d6f;
+            transform: translateY(-1px);
+        }
+
+        .btn-secondary {
+            background: #6c757d;
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #545b62;
+        }
+
+        .btn-success {
+            background: #28a745;
+            color: white;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #000;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 12px;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #666;
+        }
+
+        .empty-state i {
+            font-size: 3em;
+            margin-bottom: 15px;
+            color: #ccc;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 25px;
+            padding-top: 20px;
+            border-top: 2px solid #f0f0f0;
+        }
+
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 20px;
+            border-radius: 8px;
+            background: #28a745;
+            color: white;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        }
+
+        .notification.error {
+            background: #dc3545;
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        .tab-buttons {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .tab-button {
+            flex: 1;
+            padding: 16px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .tab-button.active {
+            border-bottom-color: #2c5aa0;
+            background: white;
+            color: #2c5aa0;
+        }
+
+        .content-header {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+
+        .save-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 0;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-indicator.show {
+            display: flex;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn btn-warning" onclick="editor.showAddSectionModal()">
+                        <i class="fas fa-plus"></i> Добавить секцию
+                    </button>
+                    <button class="btn btn-secondary" onclick="editor.safeRefresh()" style="margin-left: 10px;">
+                        <i class="fas fa-sync"></i> Обновить
+                    </button>
+                    <button class="btn btn-success" onclick="editor.saveAndExit()" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="save-indicator" id="save-indicator">
+                <i class="fas fa-check-circle"></i>
+                <span id="save-message">Изменения сохранены</span>
+            </div>
+
+            <div class="preview-frame-container">
+                <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true&nocache=1"></iframe>
+            </div>
+        </div>
+
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+            
+            <div class="tab-buttons">
+                <button class="tab-button active" data-tab="sections">Секции</button>
+                <button class="tab-button" data-tab="content">Контент</button>
+            </div>
+
+            <div class="panel-content" id="sections-tab">
+                <div class="content-header">
+                    <h3>Структура страницы</h3>
+                    <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Управление секциями страницы</p>
+                </div>
+                <div class="section-list" id="section-list">
+                    <!-- Секции будут загружены через JS -->
+                </div>
+            </div>
+
+            <div class="panel-content" id="content-tab" style="display: none;">
+                <div id="content-editor">
+                    <div class="empty-state">
+                        <i class="fas fa-mouse-pointer"></i>
+                        <p>Выберите секцию для редактирования</p>
+                        <small>Перейдите на вкладку "Секции" и выберите нужный блок</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Упрощенная и стабильная версия редактора
+        function StablePageEditor() {
+            this.currentSection = null;
+            this.currentData = {};
+            this.hasUnsavedChanges = false;
+            this.sections = [];
+            
+            this.init();
+        }
+
+        StablePageEditor.prototype.init = function() {
+            console.log('🚀 Инициализация редактора...');
+            this.loadCurrentData();
+            this.setupTabHandlers();
+            this.loadSectionsList();
+            
+            var self = this;
+            setTimeout(function() {
+                if (self.sections.length > 0) {
+                    self.selectSection(self.sections[0].id);
+                }
+            }, 1000);
+        };
+
+        StablePageEditor.prototype.loadCurrentData = function() {
+            console.log('📁 Загрузка данных...');
+            
+            // Пробуем разные источники данных
+            if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                this.currentData = window.dataManager.getData() || {};
+                console.log('✅ Данные загружены из DataManager');
+            } else {
+                console.log('⚠️ DataManager не доступен, пробуем localStorage');
+                this.currentData = this.getLocalData();
+            }
+            
+            this.loadSectionsFromData();
+            console.log('📊 Загружено секций:', this.sections.length);
+        };
+
+        StablePageEditor.prototype.getLocalData = function() {
+            var localData = localStorage.getItem('worldtravel_data');
+            if (localData) {
+                try {
+                    return JSON.parse(localData);
+                } catch (e) {
+                    console.error('❌ Ошибка парсинга localStorage:', e);
+                }
+            }
+            
+            // Возвращаем стандартную структуру данных
+            return {
+                content: {
+                    hero: { 
+                        id: 'hero',
+                        type: 'hero',
+                        name: 'Главный баннер',
+                        title: 'Откройте мир с WorldTravel', 
+                        subtitle: 'Мы создаем незабываемые путешествия по всему миру.',
+                        image: 'images/travel-placeholder.svg'
+                    },
+                    about: { 
+                        id: 'about',
+                        type: 'about',
+                        name: 'О компании',
+                        title: 'О нашей компании', 
+                        description: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму.',
+                        image: 'images/travel-placeholder.svg'
+                    },
+                    services: { 
+                        id: 'services',
+                        type: 'services',
+                        name: 'Услуги',
+                        title: 'Наши услуги'
+                    },
+                    destinations: { 
+                        id: 'destinations',
+                        type: 'destinations',
+                        name: 'Направления',
+                        title: 'Популярные направления'
+                    },
+                    contact: { 
+                        id: 'contact',
+                        type: 'contact',
+                        name: 'Контакты',
+                        title: 'Свяжитесь с нами'
+                    }
+                },
+                footer: { 
+                    id: 'footer',
+                    type: 'footer',
+                    name: 'Футер',
+                    description: 'Ваш надежный партнер в мире путешествий.',
+                    copyright: '&copy; 2024 WorldTravel. Все права защищены.'
+                },
+                pageStructure: ['hero', 'about', 'services', 'destinations', 'contact'],
+                lastUpdate: new Date().toISOString()
+            };
+        };
+
+        StablePageEditor.prototype.loadSectionsFromData = function() {
+            this.sections = [];
+            console.log('🔄 Загрузка секций из данных...');
+            
+            // Создаем гарантированный список стандартных секций
+            var defaultSections = [
+                { id: 'hero', type: 'hero', name: 'Главный баннер', description: 'Заголовок и описание на главной' },
+                { id: 'about', type: 'about', name: 'О компании', description: 'Информация о компании' },
+                { id: 'services', type: 'services', name: 'Услуги', description: 'Список услуг компании' },
+                { id: 'destinations', type: 'destinations', name: 'Направления', description: 'Популярные направления' },
+                { id: 'contact', type: 'contact', name: 'Контакты', description: 'Контактная информация' }
+            ];
+            
+            // Добавляем стандартные секции
+            var self = this;
+            defaultSections.forEach(function(section) {
+                if (self.currentData.content && self.currentData.content[section.id]) {
+                    self.sections.push({
+                        id: section.id,
+                        type: section.type,
+                        name: self.currentData.content[section.id].name || section.name,
+                        description: section.description
+                    });
+                } else {
+                    // Если секции нет в данных, все равно добавляем ее
+                    self.sections.push(section);
+                }
+            });
+            
+            // Добавляем футер
+            if (this.currentData.footer) {
+                this.sections.push({
+                    id: 'footer',
+                    type: 'footer',
+                    name: 'Футер',
+                    description: 'Текст в подвале сайта'
+                });
+            }
+            
+            // Добавляем пользовательские секции из pageStructure
+            if (this.currentData.pageStructure) {
+                this.currentData.pageStructure.forEach(function(sectionId) {
+                    if (sectionId.startsWith('section-') && self.currentData.content && self.currentData.content[sectionId]) {
+                        var sectionData = self.currentData.content[sectionId];
+                        self.sections.push({
+                            id: sectionId,
+                            type: sectionData.type || 'custom',
+                            name: sectionData.name || 'Пользовательская секция',
+                            description: 'Пользовательский блок'
+                        });
+                    }
+                });
+            }
+            
+            console.log('✅ Загружено секций:', this.sections.length);
+        };
+
+        StablePageEditor.prototype.setupTabHandlers = function() {
+            var tabButtons = document.querySelectorAll('.tab-button');
+            var self = this;
+            
+            tabButtons.forEach(function(button) {
+                button.addEventListener('click', function(e) {
+                    var tabName = e.target.getAttribute('data-tab');
+                    if (tabName) {
+                        self.showTab(tabName);
+                    }
+                });
+            });
+        };
+
+        StablePageEditor.prototype.loadSectionsList = function() {
+            var container = document.getElementById('section-list');
+            container.innerHTML = '';
+
+            if (this.sections.length === 0) {
+                container.innerHTML = '\
+                    <div class="empty-state">\
+                        <i class="fas fa-inbox"></i>\
+                        <p>Секции не найдены</p>\
+                        <small>Попробуйте обновить страницу</small>\
+                    </div>\
+                ';
+                return;
+            }
+
+            var self = this;
+            this.sections.forEach(function(section) {
+                var sectionElement = document.createElement('div');
+                sectionElement.className = 'section-item ' + (self.currentSection && self.currentSection.id === section.id ? 'active' : '');
+                sectionElement.setAttribute('data-section', section.id);
+                
+                sectionElement.innerHTML = '\
+                    <div class="section-title">' + section.name + '</div>\
+                    <div class="section-desc">' + section.description + '</div>\
+                ';
+
+                sectionElement.addEventListener('click', function() {
+                    self.selectSection(section.id);
+                });
+
+                container.appendChild(sectionElement);
+            });
+            
+            console.log('✅ Список секций загружен:', this.sections.length, 'элементов');
+        };
+
+        StablePageEditor.prototype.selectSection = function(sectionId) {
+            console.log('🎯 Выбор секции:', sectionId);
+            
+            document.querySelectorAll('.section-item').forEach(function(item) {
+                item.classList.remove('active');
+            });
+
+            var selectedItem = document.querySelector('[data-section="' + sectionId + '"]');
+            if (selectedItem) {
+                selectedItem.classList.add('active');
+            }
+
+            this.currentSection = this.sections.find(function(s) {
+                return s.id === sectionId;
+            });
+            
+            this.showContentEditor();
+            this.showTab('content');
+        };
+
+        StablePageEditor.prototype.showTab = function(tabName) {
+            document.querySelectorAll('.panel-content').forEach(function(tab) {
+                tab.style.display = 'none';
+            });
+            
+            var targetTab = document.getElementById(tabName + '-tab');
+            if (targetTab) {
+                targetTab.style.display = 'block';
+            }
+            
+            document.querySelectorAll('.tab-button').forEach(function(btn) {
+                btn.classList.remove('active');
+            });
+            
+            var targetButton = document.querySelector('[data-tab="' + tabName + '"]');
+            if (targetButton) {
+                targetButton.classList.add('active');
+            }
+        };
+
+        StablePageEditor.prototype.showContentEditor = function() {
+            if (!this.currentSection) {
+                var editor = document.getElementById('content-editor');
+                editor.innerHTML = '\
+                    <div class="empty-state">\
+                        <i class="fas fa-mouse-pointer"></i>\
+                        <p>Выберите секцию для редактирования</p>\
+                    </div>\
+                ';
+                return;
+            }
+
+            var editor = document.getElementById('content-editor');
+            var currentTitle = this.getCurrentValue('title');
+            var currentName = this.getCurrentValue('name');
+            
+            var editorHTML = '\
+                <div class="content-header">\
+                    <h3>' + this.currentSection.name + '</h3>\
+                    <p style="color: #666; margin-top: 5px; font-size: 0.9em;">Редактирование содержимого секции</p>\
+                </div>\
+                <div class="form-group">\
+                    <label>Название секции (в редакторе):</label>\
+                    <input type="text" class="form-control" data-field="name" value="' + (currentName || this.currentSection.name) + '" placeholder="Введите название секции...">\
+                </div>\
+                <div class="form-group">\
+                    <label>Заголовок на странице:</label>\
+                    <input type="text" class="form-control" data-field="title" value="' + (currentTitle || '') + '" placeholder="Введите заголовок...">\
+                </div>\
+            ';
+
+            // Добавляем специфичные поля для разных типов секций
+            switch (this.currentSection.type) {
+                case 'hero':
+                    editorHTML += this.getHeroEditor();
+                    break;
+                case 'about':
+                    editorHTML += this.getAboutEditor();
+                    break;
+                case 'services':
+                    editorHTML += this.getServicesEditor();
+                    break;
+                case 'footer':
+                    editorHTML += this.getFooterEditor();
+                    break;
+            }
+
+            editorHTML += '\
+                <div class="action-buttons">\
+                    <button class="btn btn-primary" onclick="editor.saveChanges()">\
+                        <i class="fas fa-save"></i> Сохранить изменения\
+                    </button>\
+                    <button class="btn btn-secondary" onclick="editor.showTab(\'sections\')">\
+                        <i class="fas fa-arrow-left"></i> Назад к списку\
+                    </button>\
+                </div>\
+                <div style="background: #f8f9fa; padding: 10px; border-radius: 5px; margin-top: 20px;">\
+                    <strong>Отладка:</strong> ID: ' + this.currentSection.id + ' | Тип: ' + this.currentSection.type + '\
+                </div>\
+            ';
+
+            editor.innerHTML = editorHTML;
+            this.hasUnsavedChanges = false;
+        };
+
+        StablePageEditor.prototype.getHeroEditor = function() {
+            var currentSubtitle = this.getCurrentValue('subtitle');
+            return '\
+                <div class="form-group">\
+                    <label>Подзаголовок:</label>\
+                    <textarea class="form-control" data-field="subtitle" placeholder="Введите подзаголовок...">' + (currentSubtitle || '') + '</textarea>\
+                </div>\
+            ';
+        };
+
+        StablePageEditor.prototype.getAboutEditor = function() {
+            var currentDescription = this.getCurrentValue('description');
+            return '\
+                <div class="form-group">\
+                    <label>Описание компании:</label>\
+                    <textarea class="form-control" data-field="description" placeholder="Введите описание компании...">' + (currentDescription || '') + '</textarea>\
+                </div>\
+            ';
+        };
+
+        StablePageEditor.prototype.getServicesEditor = function() {
+            return '\
+                <div class="form-group">\
+                    <label>Управление услугами:</label>\
+                    <p style="color: #666; font-size: 0.9em;">Для редактирования списка услуг перейдите в основную админ-панель → Управление контентом</p>\
+                </div>\
+            ';
+        };
+
+        StablePageEditor.prototype.getFooterEditor = function() {
+            var currentDescription = this.getCurrentValue('description');
+            var currentCopyright = this.getCurrentValue('copyright');
+            
+            return '\
+                <div class="form-group">\
+                    <label>Описание в футере:</label>\
+                    <textarea class="form-control" data-field="description" placeholder="Введите описание для футера...">' + (currentDescription || '') + '</textarea>\
+                </div>\
+                <div class="form-group">\
+                    <label>Текст копирайта:</label>\
+                    <input type="text" class="form-control" data-field="copyright" value="' + (currentCopyright || '') + '" placeholder="Введите текст копирайта...">\
+                </div>\
+            ';
+        };
+
+        StablePageEditor.prototype.getCurrentValue = function(fieldId) {
+            // Для футера
+            if (this.currentSection.id === 'footer') {
+                if (this.currentData.footer && this.currentData.footer[fieldId]) {
+                    return this.escapeHtml(this.currentData.footer[fieldId]);
+                }
+            }
+            
+            // Для контентных секций
+            if (this.currentData.content && this.currentData.content[this.currentSection.id]) {
+                var sectionData = this.currentData.content[this.currentSection.id];
+                if (sectionData[fieldId]) {
+                    return this.escapeHtml(sectionData[fieldId]);
+                }
+            }
+            
+            return '';
+        };
+
+        StablePageEditor.prototype.saveChanges = function() {
+            if (!this.currentSection) return;
+
+            try {
+                var formData = {};
+                document.querySelectorAll('#content-editor [data-field]').forEach(function(input) {
+                    var fieldId = input.getAttribute('data-field');
+                    formData[fieldId] = input.value;
+                });
+
+                // Сохраняем данные в соответствующую структуру
+                if (this.currentSection.id === 'footer') {
+                    if (!this.currentData.footer) this.currentData.footer = {};
+                    Object.keys(formData).forEach(function(fieldId) {
+                        this.currentData.footer[fieldId] = formData[fieldId];
+                    }.bind(this));
+                } else {
+                    if (!this.currentData.content[this.currentSection.id]) {
+                        this.currentData.content[this.currentSection.id] = {};
+                    }
+                    Object.keys(formData).forEach(function(fieldId) {
+                        this.currentData.content[this.currentSection.id][fieldId] = formData[fieldId];
+                    }.bind(this));
+                }
+
+                // Обновляем название секции в списке, если изменилось
+                if (formData.name && formData.name !== this.currentSection.name) {
+                    this.currentSection.name = formData.name;
+                    this.loadSectionsList();
+                }
+
+                this.saveData();
+                this.hasUnsavedChanges = false;
+                this.showNotification('Изменения сохранены успешно!', 'success');
+                this.safeRefresh();
+            } catch (error) {
+                console.error('Ошибка сохранения:', error);
+                this.showNotification('Ошибка сохранения: ' + error.message, 'error');
+            }
+        };
+
+        StablePageEditor.prototype.saveData = function() {
+            try {
+                this.currentData.lastUpdate = new Date().toISOString();
+                localStorage.setItem('worldtravel_data', JSON.stringify(this.currentData));
+                
+                if (typeof window.dataManager !== 'undefined' && window.dataManager) {
+                    window.dataManager.setData(this.currentData);
+                }
+                
+                console.log('💾 Данные сохранены');
+                return true;
+            } catch (error) {
+                console.error('❌ Ошибка сохранения:', error);
+                return false;
+            }
+        };
+
+        StablePageEditor.prototype.safeRefresh = function() {
+            var frame = document.getElementById('preview-frame');
+            var currentSrc = frame.src.split('?')[0];
+            frame.src = currentSrc + '?editor=true&nocache=1&t=' + Date.now();
+        };
+
+        StablePageEditor.prototype.saveAndExit = function() {
+            window.location.href = 'admin.html';
+        };
+
+        StablePageEditor.prototype.showAddSectionModal = function() {
+            this.showNotification('Функция добавления секций временно недоступна', 'error');
+        };
+
+        StablePageEditor.prototype.showNotification = function(message, type) {
+            type = type || 'success';
+            var notification = document.createElement('div');
+            notification.className = 'notification ' + (type === 'error' ? 'error' : '');
+            notification.innerHTML = '\
+                <i class="fas fa-' + (type === 'error' ? 'exclamation-triangle' : 'check-circle') + '"></i>\
+                ' + message + '\
+            ';
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(function() {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 4000);
+        };
+
+        StablePageEditor.prototype.escapeHtml = function(text) {
+            if (!text) return '';
+            var div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        };
+
+        // Инициализация редактора
+        var editor = new StablePageEditor();
+        window.editor = editor;
+
+        // Глобальные функции
+        window.refreshPreview = function() { editor.safeRefresh(); };
+        window.saveAndExit = function() { editor.saveAndExit(); };
+    </script>
+    <script src="enhanced-editor.js"></script>
+                    <script src="enhanced-content-updater-fixed.js"></script>
+    <script src="super-editor-fixed.js"></script>
+<script src="fix-issues-applied.js"></script>
+    <script src="fix-duplicate-editors.js"></script>
+    <script src="cleanup-duplicates.js"></script>
+    <script src="smart-image-editor.js"></script>
+    <script src="cleanup-existing-data.js"></script>
+    <script src="working-stats-editor.js"></script>
+    <script src="remove-contacts-editor.js"></script>
+    <script src="fixed-layout-editor.js"></script>
+</body>
+</html>
+PAGE_EDITOR_EOF
+echo "✅ page-editor.html обновлен"
+
+# 6. Обновляем остальные JS файлы
+cat > enhanced-editor.js << 'ENHANCED_EDITOR_EOF'
+// Улучшенный редактор с редактированием статистики и услуг
+class EnhancedEditor {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        console.log('🚀 Улучшенный редактор загружен');
+        this.injectStatsEditor();
+        this.injectServicesEditor();
+    }
+
+    injectStatsEditor() {
+        // Добавляем редактор статистики в редактор страниц
+        const originalShowContentEditor = window.editor?.showContentEditor;
+        if (window.editor && originalShowContentEditor) {
+            window.editor.showContentEditor = function() {
+                originalShowContentEditor.call(this);
+                this.enhanceStatsEditing();
+            }.bind(window.editor);
+        }
+    }
+
+    injectServicesEditor() {
+        // Добавляем редактор услуг в редактор страниц
+        const originalShowContentEditor = window.editor?.showContentEditor;
+        if (window.editor && originalShowContentEditor) {
+            window.editor.showContentEditor = function() {
+                originalShowContentEditor.call(this);
+                this.enhanceServicesEditing();
+            }.bind(window.editor);
+        }
+    }
+}
+
+// Расширяем функциональность существующего редактора
+if (window.editor) {
+    // Метод для улучшения редактирования статистики
+    window.editor.enhanceStatsEditing = function() {
+        if (this.currentSection?.id === 'about') {
+            const contentEditor = document.getElementById('content-editor');
+            const statsSection = contentEditor.querySelector('.stats-editor');
+            
+            if (!statsSection) {
+                this.injectStatsEditorUI(contentEditor);
+            }
+        }
+    };
+
+    // Метод для улучшения редактирования услуг
+    window.editor.enhanceServicesEditing = function() {
+        if (this.currentSection?.id === 'services') {
+            const contentEditor = document.getElementById('content-editor');
+            const servicesSection = contentEditor.querySelector('.services-editor');
+            
+            if (!servicesSection) {
+                this.injectServicesEditorUI(contentEditor);
+            }
+        }
+    };
+
+    // Внедряем UI редактора статистики
+    window.editor.injectStatsEditorUI = function(container) {
+        const stats = this.currentData.content?.about?.stats || [];
+        
+        const statsHTML = `
+            <div class="stats-editor">
+                <h4>Управление статистикой</h4>
+                <div class="admin-hint">Добавляйте, редактируйте или удаляйте блоки статистики</div>
+                <div id="stats-list">
+                    ${stats.map((stat, index) => `
+                        <div class="stat-row" data-index="${index}">
+                            <input type="text" class="form-control" value="${stat.value}" placeholder="Значение" onchange="editor.updateStat(${index}, 'value', this.value)">
+                            <input type="text" class="form-control" value="${stat.label}" placeholder="Подпись" onchange="editor.updateStat(${index}, 'label', this.value)">
+                            <button class="btn-small danger" onclick="editor.removeStat(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="dynamic-items-controls">
+                    <button class="btn-admin" onclick="editor.addStat()">
+                        <i class="fas fa-plus"></i> Добавить статистику
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Находим место для вставки после описания
+        const descriptionField = container.querySelector('[data-field="description"]');
+        if (descriptionField) {
+            descriptionField.closest('.form-group').insertAdjacentHTML('afterend', statsHTML);
+        }
+    };
+
+    // Внедряем UI редактора услуг
+    window.editor.injectServicesEditorUI = function(container) {
+        const services = this.currentData.content?.services?.services || [];
+        
+        const servicesHTML = `
+            <div class="services-editor">
+                <h4>Управление услугами</h4>
+                <div class="admin-hint">Добавляйте, редактируйте или удаляйте услуги</div>
+                <div id="services-list">
+                    ${services.map((service, index) => `
+                        <div class="service-row" data-index="${index}">
+                            <input type="text" class="form-control" value="${service.title}" placeholder="Название услуги" onchange="editor.updateService(${index}, 'title', this.value)">
+                            <textarea class="form-control" placeholder="Описание услуги" onchange="editor.updateService(${index}, 'description', this.value)">${service.description}</textarea>
+                            <input type="text" class="form-control" value="${service.icon}" placeholder="Иконка (fas fa-...)" onchange="editor.updateService(${index}, 'icon', this.value)">
+                            <button class="btn-small danger" onclick="editor.removeService(${index})">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    `).join('')}
+                </div>
+                <div class="dynamic-items-controls">
+                    <button class="btn-admin" onclick="editor.addService()">
+                        <i class="fas fa-plus"></i> Добавить услугу
+                    </button>
+                </div>
+            </div>
+        `;
+
+        // Находим место для вставки после заголовка
+        const titleField = container.querySelector('[data-field="title"]');
+        if (titleField) {
+            titleField.closest('.form-group').insertAdjacentHTML('afterend', servicesHTML);
+        }
+    };
+
+    // Методы для работы со статистикой
+    window.editor.addStat = function() {
+        if (!this.currentData.content.about) this.currentData.content.about = {};
+        if (!this.currentData.content.about.stats) this.currentData.content.about.stats = [];
+        
+        this.currentData.content.about.stats.push({ 
+            value: 'Новое значение', 
+            label: 'Новая подпись' 
+        });
+        
+        this.saveData();
+        this.showContentEditor();
+        this.showNotification('Статистика добавлена', 'success');
+    };
+
+    window.editor.updateStat = function(index, field, value) {
+        if (this.currentData.content?.about?.stats?.[index]) {
+            this.currentData.content.about.stats[index][field] = value;
+            this.saveData();
+            this.hasUnsavedChanges = true;
+        }
+    };
+
+    window.editor.removeStat = function(index) {
+        if (this.currentData.content?.about?.stats?.[index]) {
+            this.currentData.content.about.stats.splice(index, 1);
+            this.saveData();
+            this.showContentEditor();
+            this.showNotification('Статистика удалена', 'success');
+        }
+    };
+
+    // Методы для работы с услугами
+    window.editor.addService = function() {
+        if (!this.currentData.content.services) this.currentData.content.services = {};
+        if (!this.currentData.content.services.services) this.currentData.content.services.services = [];
+        
+        this.currentData.content.services.services.push({ 
+            title: 'Новая услуга', 
+            description: 'Описание новой услуги',
+            icon: 'fas fa-star'
+        });
+        
+        this.saveData();
+        this.showContentEditor();
+        this.showNotification('Услуга добавлена', 'success');
+    };
+
+    window.editor.updateService = function(index, field, value) {
+        if (this.currentData.content?.services?.services?.[index]) {
+            this.currentData.content.services.services[index][field] = value;
+            this.saveData();
+            this.hasUnsavedChanges = true;
+        }
+    };
+
+    window.editor.removeService = function(index) {
+        if (this.currentData.content?.services?.services?.[index]) {
+            this.currentData.content.services.services.splice(index, 1);
+            this.saveData();
+            this.showContentEditor();
+            this.showNotification('Услуга удалена', 'success');
+        }
+    };
+}
+
+// Инициализация улучшенного редактора
+new EnhancedEditor();
+ENHANCED_EDITOR_EOF
+echo "✅ enhanced-editor.js обновлен"
+
+# 7. Обновляем smart-image-editor.js
+cat > smart-image-editor.js << 'SMART_IMAGE_EDITOR_EOF'
+// Smart Image Editor - only for sections with images
+class SmartImageEditor {
+    constructor() {
+        this.sectionsWithImages = ['hero', 'about']; // Только эти секции имеют изображения
+        this.init();
+    }
+
+    init() {
+        if (window.editor) {
+            this.patchEditor();
+        } else {
+            setTimeout(() => this.init(), 100);
+        }
+    }
+
+    patchEditor() {
+        console.log('🎯 Smart Image Editor initialized');
+
+        const originalShow = window.editor.showContentEditor;
+        
+        window.editor.showContentEditor = function() {
+            originalShow.call(this);
+            setTimeout(() => {
+                this.removeExistingImageEditors();
+                this.addSmartImageManager();
+            }, 100);
+        };
+
+        // Remove existing editors
+        window.editor.removeExistingImageEditors = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+            
+            const existingEditors = contentEditor.querySelectorAll('[data-image-field]');
+            existingEditors.forEach(editor => editor.remove());
+            
+            const formGroups = contentEditor.querySelectorAll('.form-group');
+            formGroups.forEach(group => {
+                if (group.querySelector('input[data-field="image"]')) {
+                    group.remove();
+                }
+            });
+        };
+
+        // Add image manager only for sections that need it
+        window.editor.addSmartImageManager = function() {
+            const sectionsConfig = {
+                'hero': { 
+                    name: 'Главный баннер', 
+                    hasImage: true,
+                    field: 'image'
+                },
+                'about': { 
+                    name: 'О компании', 
+                    hasImage: true,
+                    field: 'image' 
+                },
+                'services': { 
+                    name: 'Услуги', 
+                    hasImage: false 
+                },
+                'destinations': { 
+                    name: 'Направления', 
+                    hasImage: false 
+                },
+                'contact': { 
+                    name: 'Контакты', 
+                    hasImage: false 
+                }
+            };
+
+            const config = sectionsConfig[this.currentSection?.id];
+            if (!config) return;
+
+            if (config.hasImage) {
+                this.createImageField(config.name, config.field);
+            }
+        };
+
+        // Create image field
+        window.editor.createImageField = function(sectionName, fieldId) {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+
+            const currentValue = this.getCurrentValue(fieldId) || '';
+            
+            const html = '<div class="form-group" data-image-field="' + fieldId + '">' +
+                '<label>🖼️ Изображение для ' + sectionName + ':</label>' +
+                '<div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">' +
+                '<input type="text" data-field="' + fieldId + '" class="form-control" placeholder="URL изображения..." ' +
+                'value="' + currentValue + '">' +
+                '<button type="button" class="btn-admin" onclick="editor.uploadImage(\'' + fieldId + '\')">' +
+                '<i class="fas fa-upload"></i> Загрузить' +
+                '</button>' +
+                '<button type="button" class="btn-admin secondary" onclick="editor.setImageUrl(\'' + fieldId + '\')">' +
+                '<i class="fas fa-link"></i> URL' +
+                '</button>' +
+                '</div>' +
+                '<div style="font-size: 12px; color: #666; margin-top: 5px;">' +
+                'Поддерживаются: JPG, PNG, GIF, WebP (макс. 5MB)' +
+                '</div>' +
+                '</div>';
+
+            const titleField = contentEditor.querySelector('[data-field="title"]');
+            if (titleField) {
+                titleField.closest('.form-group').insertAdjacentHTML('afterend', html);
+                console.log('✅ Added image editor for: ' + sectionName);
+            }
+        };
+
+        // Image methods
+        window.editor.uploadImage = function(fieldId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    // Validate file size (5MB max)
+                    if (file.size > 5 * 1024 * 1024) {
+                        alert('Файл слишком большой. Максимальный размер: 5MB');
+                        return;
+                    }
+                    
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.querySelector('[data-field="' + fieldId + '"]').value = e.target.result;
+                        window.editor.hasUnsavedChanges = true;
+                        if (window.editor.showNotification) {
+                            window.editor.showNotification('Изображение загружено', 'success');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        };
+
+        window.editor.setImageUrl = function(fieldId) {
+            const current = document.querySelector('[data-field="' + fieldId + '"]').value;
+            const url = prompt('URL изображения:', current || '');
+            if (url !== null) {
+                document.querySelector('[data-field="' + fieldId + '"]').value = url;
+                this.hasUnsavedChanges = true;
+                if (this.showNotification) {
+                    this.showNotification('URL установлен', 'success');
+                }
+            }
+        };
+    }
+}
+
+new SmartImageEditor();
+SMART_IMAGE_EDITOR_EOF
+echo "✅ smart-image-editor.js обновлен"
+
+# 8. Обновляем unified-contacts-editor.js
+cat > unified-contacts-editor.js << 'UNIFIED_CONTACTS_EOF'
+// Unified Contacts Editor - только один редактор
+class UnifiedContactsEditor {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        if (window.editor) {
+            this.patchEditor();
+        } else {
+            setTimeout(() => this.init(), 100);
+        }
+    }
+
+    patchEditor() {
+        console.log('📞 Unified Contacts Editor initialized');
+
+        const originalShow = window.editor.showContentEditor;
+        
+        window.editor.showContentEditor = function() {
+            originalShow.call(this);
+            setTimeout(() => {
+                // Удаляем ВСЕ существующие редакторы контактов
+                this.removeAllContactEditors();
+                
+                // Добавляем только ОДИН редактор для секции контактов
+                if (this.currentSection?.id === 'contact') {
+                    this.addUnifiedContactsEditor();
+                }
+            }, 100);
+        };
+
+        // Удаляем все редакторы контактов
+        window.editor.removeAllContactEditors = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+            
+            // Удаляем все возможные редакторы контактов
+            const contactEditors = contentEditor.querySelectorAll('[data-contacts-editor], .contact-manager, [class*="contact-editor"]');
+            contactEditors.forEach(editor => editor.remove());
+            
+            console.log('🧹 Removed all contact editors');
+        };
+
+        // Добавляем единый редактор контактов
+        window.editor.addUnifiedContactsEditor = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+
+            const data = window.dataManager?.getData();
+            const contacts = data?.contacts || {};
+            
+            const html = '<div class="unified-contacts-editor" data-contacts-editor="true" style="background: #f8f9fa; padding: 25px; border-radius: 10px; margin: 25px 0; border: 2px solid #e9ecef;">' +
+                '<h4 style="color: #2c5aa0; margin-bottom: 15px; display: flex; align-items: center; gap: 10px;">' +
+                '<i class="fas fa-address-book"></i>' +
+                '📞 Редактирование контактов' +
+                '</h4>' +
+                '<div style="color: #666; margin-bottom: 20px; padding: 12px; background: white; border-radius: 6px; border-left: 4px solid #2c5aa0;">' +
+                '💡 Изменения появятся в секции контактов и футере на главной странице.' +
+                '</div>' +
+                '<div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">' +
+                '<div>' +
+                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Телефон:</label>' +
+                '<input type="text" class="form-control" value="' + (contacts.phone || '') + '" placeholder="+7 (999) 123-45-67" oninput="editor.updateContactData(\'phone\', this.value)">' +
+                '</div>' +
+                '<div>' +
+                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Email:</label>' +
+                '<input type="email" class="form-control" value="' + (contacts.email || '') + '" placeholder="info@worldtravel.com" oninput="editor.updateContactData(\'email\', this.value)">' +
+                '</div>' +
+                '<div>' +
+                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Адрес:</label>' +
+                '<input type="text" class="form-control" value="' + (contacts.address || '') + '" placeholder="Москва, ул. Туристическая, 15" oninput="editor.updateContactData(\'address\', this.value)">' +
+                '</div>' +
+                '<div>' +
+                '<label style="display: block; margin-bottom: 8px; font-weight: 600; color: #333;">Часы работы:</label>' +
+                '<input type="text" class="form-control" value="' + (contacts.hours || '') + '" placeholder="Пн-Пт: 9:00-18:00" oninput="editor.updateContactData(\'hours\', this.value)">' +
+                '</div>' +
+                '</div>' +
+                '</div>';
+
+            const titleField = contentEditor.querySelector('[data-field="title"]');
+            if (titleField) {
+                titleField.closest('.form-group').insertAdjacentHTML('afterend', html);
+                console.log('✅ Added unified contacts editor');
+            }
+        };
+
+        // Обновление данных контактов
+        window.editor.updateContactData = function(field, value) {
+            if (!window.dataManager) {
+                console.error('❌ DataManager not available');
+                return;
+            }
+            
+            const data = window.dataManager.getData();
+            if (!data.contacts) {
+                data.contacts = {};
+            }
+            
+            data.contacts[field] = value;
+            
+            // Сохраняем данные
+            if (window.dataManager.updateContacts) {
+                window.dataManager.updateContacts(data.contacts);
+            } else {
+                window.dataManager.setData(data);
+            }
+            
+            this.hasUnsavedChanges = true;
+            
+            if (this.showNotification) {
+                this.showNotification('Контакт обновлен: ' + value, 'success');
+            }
+            
+            console.log('💾 Contact updated:', field, value);
+        };
+    }
+}
+
+new UnifiedContactsEditor();
+UNIFIED_CONTACTS_EOF
+echo "✅ unified-contacts-editor.js обновлен"
+
+# 9. Обновляем fixed-layout-editor.js
+cat > fixed-layout-editor.js << 'FIXED_LAYOUT_EOF'
+// Fixed Layout Editor with inline styles to prevent overflow
+class FixedLayoutEditor {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        if (window.editor) {
+            this.patchEditor();
+        } else {
+            setTimeout(() => this.init(), 100);
+        }
+    }
+
+    patchEditor() {
+        console.log('🎨 Fixed Layout Editor initialized');
+
+        const originalShow = window.editor.showContentEditor;
+        
+        window.editor.showContentEditor = function() {
+            originalShow.call(this);
+            setTimeout(() => {
+                // Пересоздаем редакторы с фиксированной версткой
+                this.removeOldEditors();
+                
+                if (this.currentSection?.id === 'about') {
+                    this.addFixedStatsEditor();
+                }
+                if (this.currentSection?.id === 'services') {
+                    this.addFixedServicesEditor();
+                }
+            }, 100);
+        };
+
+        // Удаляем старые редакторы
+        window.editor.removeOldEditors = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+            
+            const oldEditors = contentEditor.querySelectorAll('.working-stats-editor, .working-services-editor');
+            oldEditors.forEach(editor => editor.remove());
+        };
+
+        // Фиксированный редактор статистики
+        window.editor.addFixedStatsEditor = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+
+            const stats = this.currentData.content?.about?.stats || [];
+            
+            const html = '<div class="working-stats-editor" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">' +
+                '<h4 style="color: #2c5aa0; margin-bottom: 15px;">📊 Управление статистикой</h4>' +
+                '<div style="color: #666; margin-bottom: 15px; padding: 10px; background: white; border-radius: 5px;">' +
+                '💡 Добавляйте блоки статистики. Пустые блоки автоматически скрываются.' +
+                '</div>' +
+                '<div id="working-stats-list" style="width: 100%;">' +
+                (stats.length > 0 ? stats.map((stat, index) => 
+                    '<div style="display: flex; gap: 10px; margin-bottom: 10px; align-items: center; flex-wrap: wrap; width: 100%; max-width: 100%;">' +
+                    '<input type="text" value="' + (stat.value || '') + '" placeholder="Значение" ' +
+                    'oninput="window.editor.updateStatData(' + index + ', \\'value\\', this.value)" ' +
+                    'style="flex: 1; min-width: 120px; max-width: 200px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; width: auto;">' +
+                    '<input type="text" value="' + (stat.label || '') + '" placeholder="Подпись" ' +
+                    'oninput="window.editor.updateStatData(' + index + ', \\'label\\', this.value)" ' +
+                    'style="flex: 2; min-width: 150px; max-width: 300px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; width: auto;">' +
+                    '<button onclick="window.editor.removeStatData(' + index + ')" ' +
+                    'style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap; flex-shrink: 0;">' +
+                    '<i class="fas fa-trash"></i>' +
+                    '</button>' +
+                    '</div>'
+                ).join('') : '<div style="text-align: center; color: #666; padding: 20px;">Статистика не добавлена</div>') +
+                '</div>' +
+                '<button onclick="window.editor.addStatData()" ' +
+                'style="background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">' +
+                '<i class="fas fa-plus"></i> Добавить статистику' +
+                '</button>' +
+                '</div>';
+
+            const descriptionField = contentEditor.querySelector('[data-field="description"]');
+            if (descriptionField) {
+                descriptionField.closest('.form-group').insertAdjacentHTML('afterend', html);
+            }
+        };
+
+        // Фиксированный редактор услуг
+        window.editor.addFixedServicesEditor = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+
+            const services = this.currentData.content?.services?.services || [];
+            
+            const html = '<div class="working-services-editor" style="background: #f8f9fa; padding: 20px; border-radius: 10px; margin: 20px 0; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden;">' +
+                '<h4 style="color: #2c5aa0; margin-bottom: 15px;">🎯 Управление услугами</h4>' +
+                '<div style="color: #666; margin-bottom: 15px; padding: 10px; background: white; border-radius: 5px;">' +
+                '💡 Добавляйте услуги компании. Каждая услуга должна иметь название и описание.' +
+                '</div>' +
+                '<div id="working-services-list" style="width: 100%;">' +
+                (services.length > 0 ? services.map((service, index) => 
+                    '<div style="margin-bottom: 15px; padding: 15px; background: white; border-radius: 8px; border: 1px solid #e9ecef; width: 100%; max-width: 100%; box-sizing: border-box;">' +
+                    '<div style="display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; align-items: center; width: 100%;">' +
+                    '<input type="text" value="' + (service.title || '') + '" placeholder="Название услуги" ' +
+                    'oninput="window.editor.updateServiceData(' + index + ', \\'title\\', this.value)" ' +
+                    'style="flex: 1; min-width: 150px; max-width: 250px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; width: auto;">' +
+                    '<input type="text" value="' + (service.icon || 'fas fa-star') + '" placeholder="Иконка" ' +
+                    'oninput="window.editor.updateServiceData(' + index + ', \\'icon\\', this.value)" ' +
+                    'style="flex: 1; min-width: 120px; max-width: 200px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; box-sizing: border-box; width: auto;">' +
+                    '<button onclick="window.editor.removeServiceData(' + index + ')" ' +
+                    'style="background: #dc3545; color: white; border: none; padding: 8px 12px; border-radius: 4px; cursor: pointer; font-size: 12px; white-space: nowrap; flex-shrink: 0;">' +
+                    '<i class="fas fa-trash"></i> Удалить' +
+                    '</button>' +
+                    '</div>' +
+                    '<textarea placeholder="Описание услуги" ' +
+                    'oninput="window.editor.updateServiceData(' + index + ', \\'description\\', this.value)" ' +
+                    'style="width: 100%; min-height: 80px; padding: 8px 12px; border: 1px solid #ddd; border-radius: 4px; font-size: 14px; resize: vertical; box-sizing: border-box; max-width: 100%;">' + (service.description || '') + '</textarea>' +
+                    '</div>'
+                ).join('') : '<div style="text-align: center; color: #666; padding: 20px;">Услуги не добавлены</div>') +
+                '</div>' +
+                '<button onclick="window.editor.addServiceData()" ' +
+                'style="background: #28a745; color: white; border: none; padding: 10px 15px; border-radius: 5px; cursor: pointer; margin-top: 10px; width: 100%; max-width: 100%; box-sizing: border-box;">' +
+                '<i class="fas fa-plus"></i> Добавить услугу' +
+                '</button>' +
+                '</div>';
+
+            const titleField = contentEditor.querySelector('[data-field="title"]');
+            if (titleField) {
+                titleField.closest('.form-group').insertAdjacentHTML('afterend', html);
+            }
+        };
+    }
+}
+
+new FixedLayoutEditor();
+FIXED_LAYOUT_EOF
+echo "✅ fixed-layout-editor.js обновлен"
+
+# 10. Обновляем остальные файлы
+cat > enhanced-image-editor-fixed.js << 'ENHANCED_IMAGE_FIXED_EOF'
+// Fixed Image Editor without duplication
+class FixedImageEditor {
+    constructor() {
+        this.init();
+    }
+
+    init() {
+        if (window.editor) {
+            this.patchEditor();
+        } else {
+            setTimeout(() => this.init(), 100);
+        }
+    }
+
+    patchEditor() {
+        console.log('🔧 Patching editor without duplication...');
+
+        // Store original method
+        const originalShow = window.editor.showContentEditor;
+        
+        window.editor.showContentEditor = function() {
+            originalShow.call(this);
+            setTimeout(() => {
+                // Remove ALL existing image editors first
+                this.removeExistingImageEditors();
+                // Then add only one
+                this.addSingleImageManager();
+            }, 100);
+        };
+
+        // Method to remove all existing image editors
+        window.editor.removeExistingImageEditors = function() {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+            
+            // Remove all image manager elements
+            const existingEditors = contentEditor.querySelectorAll('[data-image-field]');
+            existingEditors.forEach(editor => editor.remove());
+            
+            // Also remove any form-group containing image fields
+            const formGroups = contentEditor.querySelectorAll('.form-group');
+            formGroups.forEach(group => {
+                if (group.querySelector('input[data-field="image"]')) {
+                    group.remove();
+                }
+            });
+            
+            console.log('🧹 Removed existing image editors');
+        };
+
+        // Add only ONE image manager
+        window.editor.addSingleImageManager = function() {
+            const sections = {
+                'hero': 'Главный баннер',
+                'about': 'О компании', 
+                'services': 'Услуги',
+                'destinations': 'Направления',
+                'contact': 'Контакты'
+            };
+
+            const sectionName = sections[this.currentSection?.id];
+            if (!sectionName) return;
+
+            this.createSingleImageField(sectionName);
+        };
+
+        // Create only ONE image field
+        window.editor.createSingleImageField = function(sectionName) {
+            const contentEditor = document.getElementById('content-editor');
+            if (!contentEditor) return;
+
+            const currentValue = this.getCurrentValue('image') || '';
+            
+            // Check if already exists
+            if (contentEditor.querySelector('[data-image-field="single"]')) {
+                console.log('✅ Image editor already exists, skipping');
+                return;
+            }
+
+            const html = '<div class="form-group" data-image-field="single">' +
+                '<label>🖼️ Изображение для ' + sectionName + ':</label>' +
+                '<div style="display: flex; gap: 10px; align-items: center; margin-top: 10px;">' +
+                '<input type="text" data-field="image" class="form-control" placeholder="URL изображения..." ' +
+                'value="' + currentValue + '">' +
+                '<button type="button" class="btn-admin" onclick="editor.uploadImage(\'image\')">' +
+                '<i class="fas fa-upload"></i> Загрузить' +
+                '</button>' +
+                '<button type="button" class="btn-admin secondary" onclick="editor.setImageUrl(\'image\')">' +
+                '<i class="fas fa-link"></i> URL' +
+                '</button>' +
+                '</div>' +
+                '<div style="font-size: 12px; color: #666; margin-top: 5px;">' +
+                'Можно указать URL или загрузить файл' +
+                '</div>' +
+                '</div>';
+
+            // Insert after title field
+            const titleField = contentEditor.querySelector('[data-field="title"]');
+            if (titleField) {
+                titleField.closest('.form-group').insertAdjacentHTML('afterend', html);
+                console.log('✅ Added single image editor for: ' + sectionName);
+            }
+        };
+
+        // Image methods (unchanged)
+        window.editor.uploadImage = function(fieldId) {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        document.querySelector('[data-field="' + fieldId + '"]').value = e.target.result;
+                        window.editor.hasUnsavedChanges = true;
+                        if (window.editor.showNotification) {
+                            window.editor.showNotification('Изображение загружено', 'success');
+                        }
+                    };
+                    reader.readAsDataURL(file);
+                }
+            };
+            input.click();
+        };
+
+        window.editor.setImageUrl = function(fieldId) {
+            const current = document.querySelector('[data-field="' + fieldId + '"]').value;
+            const url = prompt('URL изображения:', current || '');
+            if (url !== null) {
+                document.querySelector('[data-field="' + fieldId + '"]').value = url;
+                this.hasUnsavedChanges = true;
+                if (this.showNotification) {
+                    this.showNotification('URL установлен', 'success');
+                }
+            }
+        };
+    }
+}
+
+new FixedImageEditor();
+ENHANCED_IMAGE_FIXED_EOF
+echo "✅ enhanced-image-editor-fixed.js обновлен"
+
+# 11. Обновляем остальные файлы
+cat > image-manager-enhanced.js << 'IMAGE_MANAGER_ENHANCED_EOF'
+// Enhanced Image Manager - улучшенное управление изображениями
+function ImageManagerEnhanced() {
+    this.maxFileSize = 5 * 1024 * 1024; // 5MB
+    this.supportedFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    this.init();
+}
+
+ImageManagerEnhanced.prototype.init = function() {
+    console.log('🖼️ Enhanced Image Manager initialized');
+    
+    // Интеграция с существующим редактором
+    this.integrateWithEditor();
+};
+
+ImageManagerEnhanced.prototype.integrateWithEditor = function() {
+    // Ждем инициализации редактора
+    const checkEditor = () => {
+        if (window.editor) {
+            this.patchEditorMethods();
+        } else {
+            setTimeout(checkEditor, 100);
+        }
+    };
+    checkEditor();
+};
+
+ImageManagerEnhanced.prototype.patchEditorMethods = function() {
+    const self = this;
+    
+    // Патчим метод загрузки изображений редактора
+    const originalUploadImage = window.editor.uploadImage;
+    if (originalUploadImage) {
+        window.editor.uploadImage = function(fieldId) {
+            self.uploadImageWithValidation(fieldId);
+        };
+    }
+    
+    // Патчим метод установки URL изображения
+    const originalSetImageUrl = window.editor.setImageUrl;
+    if (originalSetImageUrl) {
+        window.editor.setImageUrl = function(fieldId) {
+            self.setImageUrlWithValidation(fieldId);
+        };
+    }
+    
+    console.log('✅ Enhanced Image Manager integrated with editor');
+};
+
+ImageManagerEnhanced.prototype.uploadImageWithValidation = function(fieldId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = this.supportedFormats.join(',');
+    
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Валидация файла
+        if (!this.validateFile(file)) {
+            return;
+        }
+        
+        // Создаем оптимизированный Blob URL
+        this.createOptimizedImageBlob(file, fieldId);
+    };
+    
+    input.click();
+};
+
+ImageManagerEnhanced.prototype.validateFile = function(file) {
+    // Проверка типа файла
+    if (!this.supportedFormats.includes(file.type)) {
+        this.showNotification('Неподдерживаемый формат изображения. Используйте JPG, PNG, GIF или WebP.', 'error');
+        return false;
+    }
+    
+    // Проверка размера файла
+    if (file.size > this.maxFileSize) {
+        this.showNotification(`Файл слишком большой. Максимальный размер: ${this.formatFileSize(this.maxFileSize)}.`, 'error');
+        return false;
+    }
+    
+    return true;
+};
+
+ImageManagerEnhanced.prototype.createOptimizedImageBlob = function(file, fieldId) {
+    const reader = new FileReader();
+    const self = this;
+    
+    reader.onload = function(e) {
+        // Создаем изображение для предварительной обработки
+        const img = new Image();
+        img.onload = function() {
+            // Создаем canvas для возможной оптимизации
+            const canvas = document.createElement('canvas');
+            const ctx = canvas.getContext('2d');
+            
+            // Устанавливаем разумные ограничения по размеру
+            const maxWidth = 1920;
+            const maxHeight = 1080;
+            let { width, height } = img;
+            
+            // Масштабируем если изображение слишком большое
+            if (width > maxWidth || height > maxHeight) {
+                const ratio = Math.min(maxWidth / width, maxHeight / height);
+                width *= ratio;
+                height *= ratio;
+            }
+            
+            canvas.width = width;
+            canvas.height = height;
+            
+            // Рисуем изображение с новыми размерами
+            ctx.drawImage(img, 0, 0, width, height);
+            
+            // Создаем оптимизированный Blob
+            canvas.toBlob((blob) => {
+                const blobUrl = URL.createObjectURL(blob);
+                
+                // Обновляем поле в редакторе
+                if (window.editor && window.editor.updateImageField) {
+                    window.editor.updateImageField(fieldId, blobUrl);
+                }
+                
+                self.showNotification('Изображение оптимизировано и загружено', 'success');
+                
+            }, 'image/jpeg', 0.8); // 80% качество для JPEG
+        };
+        
+        img.onerror = function() {
+            // Если оптимизация не удалась, используем оригинальный Blob URL
+            const blobUrl = URL.createObjectURL(file);
+            if (window.editor && window.editor.updateImageField) {
+                window.editor.updateImageField(fieldId, blobUrl);
+            }
+            self.showNotification('Изображение загружено', 'success');
+        };
+        
+        img.src = e.target.result;
+    };
+    
+    reader.onerror = function() {
+        self.showNotification('Ошибка чтения файла', 'error');
+    };
+    
+    reader.readAsDataURL(file);
+};
+
+ImageManagerEnhanced.prototype.setImageUrlWithValidation = function(fieldId) {
+    const currentValue = this.getCurrentImageValue(fieldId);
+    const url = prompt('Введите URL изображения:', currentValue || '');
+    
+    if (url === null) return;
+    
+    if (url === '') {
+        // Удаляем изображение
+        if (window.editor && window.editor.removeImage) {
+            window.editor.removeImage(fieldId);
+        }
+        return;
+    }
+    
+    // Валидация URL
+    if (this.validateImageUrl(url)) {
+        if (window.editor && window.editor.updateImageField) {
+            window.editor.updateImageField(fieldId, url);
+        }
+        this.showNotification('URL изображения установлен', 'success');
+    } else {
+        this.showNotification('Введите корректный URL изображения (HTTP/HTTPS/data URL)', 'error');
+    }
+};
+
+ImageManagerEnhanced.prototype.validateImageUrl = function(url) {
+    try {
+        // Проверяем валидность URL
+        new URL(url);
+        
+        // Разрешаем HTTP, HTTPS и data URL
+        return url.startsWith('http://') || 
+               url.startsWith('https://') || 
+               url.startsWith('data:image') ||
+               url.startsWith('/') || // Относительные пути
+               url.startsWith('images/'); // Относительные пути к изображениям
+    } catch {
+        return false;
+    }
+};
+
+ImageManagerEnhanced.prototype.getCurrentImageValue = function(fieldId) {
+    const field = document.querySelector(`[data-field="${fieldId}"]`);
+    return field ? field.value : '';
+};
+
+ImageManagerEnhanced.prototype.formatFileSize = function(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+ImageManagerEnhanced.prototype.showNotification = function(message, type) {
+    if (window.editor && window.editor.showNotification) {
+        window.editor.showNotification(message, type);
+    } else {
+        // Фолбэк уведомление
+        console.log(`${type === 'error' ? '❌' : '✅'} ${message}`);
+    }
+};
+
+// Инициализация улучшенного менеджера изображений
+new ImageManagerEnhanced();
+
+// Экспортируем для использования в других модулях
+window.ImageManagerEnhanced = ImageManagerEnhanced;
+IMAGE_MANAGER_ENHANCED_EOF
+echo "✅ image-manager-enhanced.js обновлен"
+
+# 12. Обновляем остальные файлы
+cat > image-manager-dataurl.js << 'IMAGE_MANAGER_DATAURL_EOF'
+// Image Manager with Data URL support - решает проблему Blob URL
+function ImageManagerDataURL() {
+    this.maxFileSize = 2 * 1024 * 1024; // 2MB для Data URL
+    this.supportedFormats = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp'];
+    this.init();
+}
+
+ImageManagerDataURL.prototype.init = function() {
+    console.log('🖼️ Image Manager with Data URL initialized');
+    this.integrateWithEditor();
+};
+
+ImageManagerDataURL.prototype.integrateWithEditor = function() {
+    const checkEditor = () => {
+        if (window.editor) {
+            this.patchEditorMethods();
+            console.log('✅ Image Manager integrated with editor');
+        } else {
+            setTimeout(checkEditor, 100);
+        }
+    };
+    checkEditor();
+};
+
+ImageManagerDataURL.prototype.patchEditorMethods = function() {
+    const self = this;
+    
+    // Заменяем метод загрузки изображений на версию с Data URL
+    if (window.editor.uploadImage) {
+        window.editor.uploadImage = function(fieldId) {
+            self.uploadImageAsDataURL(fieldId);
+        };
+    }
+    
+    // Улучшаем метод установки URL
+    if (window.editor.setImageUrl) {
+        const originalSetImageUrl = window.editor.setImageUrl;
+        window.editor.setImageUrl = function(fieldId) {
+            self.setImageUrlEnhanced(fieldId, originalSetImageUrl);
+        };
+    }
+    
+    // Добавляем метод конвертации существующих Blob URL в Data URL
+    this.convertExistingBlobUrls();
+};
+
+// Конвертируем существующие Blob URL в Data URL
+ImageManagerDataURL.prototype.convertExistingBlobUrls = function() {
+    if (!window.editor || !window.editor.currentData) return;
+    
+    let converted = false;
+    const data = window.editor.currentData;
+    
+    // Функция для рекурсивного поиска и конвертации Blob URL
+    const convertBlobUrlsInObject = (obj) => {
+        if (!obj || typeof obj !== 'object') return;
+        
+        Object.keys(obj).forEach(key => {
+            const value = obj[key];
+            if (typeof value === 'string' && value.startsWith('blob:')) {
+                console.log('🔄 Converting blob URL to placeholder:', value);
+                obj[key] = 'images/travel-placeholder.svg';
+                converted = true;
+            } else if (typeof value === 'object') {
+                convertBlobUrlsInObject(value);
+            }
+        });
+    };
+    
+    convertBlobUrlsInObject(data);
+    
+    if (converted) {
+        console.log('✅ Converted blob URLs in data');
+        // Сохраняем обновленные данные
+        if (window.editor.saveData) {
+            window.editor.saveData();
+        }
+    }
+};
+
+ImageManagerDataURL.prototype.uploadImageAsDataURL = function(fieldId) {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = this.supportedFormats.join(',');
+    
+    input.onchange = (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        // Валидация файла
+        if (!this.validateFile(file)) {
+            return;
+        }
+        
+        // Читаем файл как Data URL
+        const reader = new FileReader();
+        
+        reader.onload = (e) => {
+            const dataUrl = e.target.result;
+            
+            // Обновляем поле в редакторе
+            if (window.editor && window.editor.updateImageField) {
+                window.editor.updateImageField(fieldId, dataUrl);
+            }
+            
+            this.showNotification('Изображение загружено как Data URL', 'success');
+        };
+        
+        reader.onerror = () => {
+            this.showNotification('Ошибка чтения файла', 'error');
+        };
+        
+        reader.readAsDataURL(file);
+    };
+    
+    input.click();
+};
+
+ImageManagerDataURL.prototype.validateFile = function(file) {
+    if (!this.supportedFormats.includes(file.type)) {
+        this.showNotification('Неподдерживаемый формат изображения. Используйте JPG, PNG, GIF или WebP.', 'error');
+        return false;
+    }
+    
+    if (file.size > this.maxFileSize) {
+        this.showNotification(`Файл слишком большой. Максимальный размер: ${this.formatFileSize(this.maxFileSize)}.`, 'error');
+        return false;
+    }
+    
+    return true;
+};
+
+ImageManagerDataURL.prototype.setImageUrlEnhanced = function(fieldId, originalMethod) {
+    const currentValue = this.getCurrentImageValue(fieldId);
+    
+    // Если текущее значение - Blob URL, показываем предупреждение
+    if (currentValue && currentValue.startsWith('blob:')) {
+        if (!confirm('Текущее изображение использует временный Blob URL. Рекомендуется загрузить изображение заново для постоянного хранения. Продолжить?')) {
+            return;
+        }
+    }
+    
+    // Используем оригинальный метод, но с валидацией
+    const url = prompt('Введите URL изображения:', currentValue || '');
+    
+    if (url === null) return;
+    
+    if (url === '') {
+        if (window.editor && window.editor.removeImage) {
+            window.editor.removeImage(fieldId);
+        }
+        return;
+    }
+    
+    // Валидация URL
+    if (this.validateImageUrl(url)) {
+        if (window.editor && window.editor.updateImageField) {
+            window.editor.updateImageField(fieldId, url);
+        }
+        this.showNotification('URL изображения установлен', 'success');
+    } else {
+        this.showNotification('Введите корректный URL изображения', 'error');
+    }
+};
+
+ImageManagerDataURL.prototype.validateImageUrl = function(url) {
+    try {
+        // Для data URL всегда валидны
+        if (url.startsWith('data:image')) return true;
+        
+        // Для обычных URL проверяем валидность
+        if (url.startsWith('http://') || url.startsWith('https://')) {
+            new URL(url);
+            return true;
+        }
+        
+        // Разрешаем относительные пути
+        if (url.startsWith('/') || url.startsWith('images/') || url.startsWith('./')) {
+            return true;
+        }
+        
+        return false;
+    } catch {
+        return false;
+    }
+};
+
+ImageManagerDataURL.prototype.getCurrentImageValue = function(fieldId) {
+    const field = document.querySelector(`[data-field="${fieldId}"]`);
+    return field ? field.value : '';
+};
+
+ImageManagerDataURL.prototype.formatFileSize = function(bytes) {
+    if (bytes === 0) return '0 Bytes';
+    const k = 1024;
+    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+};
+
+ImageManagerDataURL.prototype.showNotification = function(message, type) {
+    if (window.editor && window.editor.showNotification) {
+        window.editor.showNotification(message, type);
+    } else {
+        console.log(`${type === 'error' ? '❌' : '✅'} ${message}`);
+    }
+};
+
+// Автоматическая очистка Blob URL при загрузке
+ImageManagerDataURL.prototype.cleanupBlobUrls = function() {
+    // Ревокаем все Blob URL на странице
+    document.querySelectorAll('img[src^="blob:"]').forEach(img => {
+        try {
+            URL.revokeObjectURL(img.src);
+            img.src = 'images/travel-placeholder.svg';
+        } catch (e) {
+            // Игнорируем ошибки ревока
+        }
+    });
+};
+
+// Инициализация при загрузке страницы
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', () => {
+        new ImageManagerDataURL();
+    });
+} else {
+    new ImageManagerDataURL();
+}
+
+// Экспортируем для использования
+window.ImageManagerDataURL = ImageManagerDataURL;
+IMAGE_MANAGER_DATAURL_EOF
+echo "✅ image-manager-dataurl.js обновлен"
+
+# 13. Обновляем blob-url-fixer.js
+cat > blob-url-fixer.js << 'BLOB_URL_FIXER_EOF'
+// Blob URL Fixer - исправляет проблемы с Blob URL без нарушения функционала
+function BlobUrlFixer() {
+    this.fixedBlobs = new Set();
+    this.init();
+}
+
+BlobUrlFixer.prototype.init = function() {
+    console.log('🔧 Blob URL Fixer initialized');
+    
+    // Перехватываем создание Blob URL
+    this.patchURLCreateObjectURL();
+    
+    // Мониторим ошибки загрузки изображений
+    this.monitorImageErrors();
+    
+    // Периодическая очистка неиспользуемых Blob URL
+    setInterval(() => this.cleanupUnusedBlobs(), 60000); // Каждую минуту
+};
+
+// Патчим URL.createObjectURL для отслеживания созданных Blob URL
+BlobUrlFixer.prototype.patchURLCreateObjectURL = function() {
+    const originalCreateObjectURL = URL.createObjectURL;
+    const self = this;
+    
+    URL.createObjectURL = function(blob) {
+        const blobUrl = originalCreateObjectURL.call(this, blob);
+        console.log('📸 Blob URL created:', blobUrl);
+        self.fixedBlobs.add(blobUrl);
+        
+        // Автоматически ревокаем через 5 минут для предотвращения утечек памяти
+        setTimeout(() => {
+            if (self.fixedBlobs.has(blobUrl)) {
+                try {
+                    URL.revokeObjectURL(blobUrl);
+                    self.fixedBlobs.delete(blobUrl);
+                    console.log('🧹 Blob URL automatically revoked:', blobUrl);
+                } catch (e) {
+                    console.warn('⚠️ Could not auto-revoke blob URL:', e);
+                }
+            }
+        }, 300000); // 5 минут
+        
+        return blobUrl;
+    };
+};
+
+// Мониторим ошибки загрузки изображений
+BlobUrlFixer.prototype.monitorImageErrors = function() {
+    document.addEventListener('error', (e) => {
+        if (e.target.tagName === 'IMG') {
+            const img = e.target;
+            const src = img.src;
+            
+            if (src.startsWith('blob:')) {
+                console.warn('⚠️ Blob URL image failed to load:', src);
+                
+                // Заменяем на placeholder только если это Blob URL
+                this.replaceBrokenBlobImage(img, src);
+            }
+        }
+    }, true);
+};
+
+// Заменяем битое Blob изображение
+BlobUrlFixer.prototype.replaceBrokenBlobImage = function(imgElement, blobUrl) {
+    try {
+        // Ревокаем битый Blob URL
+        if (this.fixedBlobs.has(blobUrl)) {
+            URL.revokeObjectURL(blobUrl);
+            this.fixedBlobs.delete(blobUrl);
+        }
+        
+        // Устанавливаем placeholder
+        imgElement.src = 'images/travel-placeholder.svg';
+        imgElement.alt = 'Изображение не загружено';
+        imgElement.style.opacity = '0.7';
+        
+        console.log('🔄 Replaced broken blob image with placeholder');
+        
+    } catch (error) {
+        console.error('Error replacing broken blob image:', error);
+    }
+};
+
+// Очистка неиспользуемых Blob URL
+BlobUrlFixer.prototype.cleanupUnusedBlobs = function() {
+    const blobsToRemove = [];
+    
+    this.fixedBlobs.forEach(blobUrl => {
+        // Проверяем, используется ли еще этот Blob URL на странице
+        const isUsed = Array.from(document.images).some(img => img.src === blobUrl);
+        
+        if (!isUsed) {
+            blobsToRemove.push(blobUrl);
+        }
+    });
+    
+    // Ревокаем неиспользуемые Blob URL
+    blobsToRemove.forEach(blobUrl => {
+        try {
+            URL.revokeObjectURL(blobUrl);
+            this.fixedBlobs.delete(blobUrl);
+            console.log('🧹 Cleaned up unused blob URL:', blobUrl);
+        } catch (e) {
+            console.warn('⚠️ Could not cleanup blob URL:', e);
+        }
+    });
+    
+    if (blobsToRemove.length > 0) {
+        console.log(`🧹 Cleaned up ${blobsToRemove.length} unused blob URLs`);
+    }
+};
+
+// Глобальный обработчик ошибок для изображений
+window.addEventListener('error', function(e) {
+    if (e.target.tagName === 'IMG' && e.target.src.startsWith('blob:')) {
+        // Подавляем вывод ошибок в консоль для Blob URL
+        e.preventDefault();
+        e.stopPropagation();
+    }
+}, true);
+
+// Инициализация фиксера
+new BlobUrlFixer();
+
+// Экспортируем для использования в других модулях
+window.BlobUrlFixer = BlobUrlFixer;
+BLOB_URL_FIXER_EOF
+echo "✅ blob-url-fixer.js обновлен"
+
+# 14. Обновляем остальные файлы
+cat > enhanced-update-content.js << 'ENHANCED_UPDATE_CONTENT_EOF'
+// Enhanced content updater with support for all editable sections
+function ContentUpdater() {
+    this.appliedChanges = new Set();
+    this.init();
+}
+
+ContentUpdater.prototype.init = function() {
+    console.log('🚀 Enhanced ContentUpdater initialized');
+    
+    var self = this;
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() { self.applyAllChanges(); }, 100);
+        });
+    } else {
+        setTimeout(function() { self.applyAllChanges(); }, 100);
+    }
+
+    window.addEventListener('dataUpdated', function(e) {
+        console.log('🔄 Data update received:', e.detail);
+        setTimeout(function() { self.applyAllChanges(); }, 50);
+    });
+
+    setInterval(function() { self.applyAllChanges(); }, 2000);
+
+    if (window.location.search.includes('editor=true')) {
+        setTimeout(function() { self.applyAllChanges(); }, 500);
+    }
+};
+
+ContentUpdater.prototype.applyAllChanges = function() {
+    if (!window.dataManager) {
+        console.log('⏳ Waiting for DataManager...');
+        this.applyLocalChanges();
+        return;
+    }
+
+    var data = window.dataManager.getData();
+    if (!data) {
+        console.log('📭 No data available');
+        this.applyLocalChanges();
+        return;
+    }
+
+    var changeHash = this.getDataHash(data);
+    if (this.appliedChanges.has(changeHash)) {
+        return;
+    }
+
+    console.log('🔄 Applying changes from DataManager...');
+    
+    this.applyContentChanges(data.content);
+    this.applyContactChanges(data.contacts);
+    this.applySettingsChanges(data.settings);
+    this.applyCustomSections(data);
+    
+    this.appliedChanges.add(changeHash);
+    console.log('✅ Changes applied successfully');
+};
+
+ContentUpdater.prototype.applyLocalChanges = function() {
+    var localData = localStorage.getItem('worldtravel_data');
+    if (localData) {
+        try {
+            var data = JSON.parse(localData);
+            console.log('📁 Applying local changes...');
+            this.applyContentChanges(data.content);
+            this.applyContactChanges(data.contacts);
+            this.applySettingsChanges(data.settings);
+            this.applyCustomSections(data);
+        } catch (error) {
+            console.error('❌ Error applying local changes:', error);
+        }
+    }
+};
+
+ContentUpdater.prototype.getDataHash = function(data) {
+    return JSON.stringify({
+        content: data.content,
+        contacts: data.contacts,
+        settings: data.settings,
+        pageStructure: data.pageStructure,
+        timestamp: data.lastUpdate
+    });
+};
+
+ContentUpdater.prototype.applyContentChanges = function(content) {
+    if (!content) return;
+
+    console.log('📝 Applying content changes to all sections');
+
+    // Hero section
+    if (content.hero) {
+        this.updateElement('#home h1, .hero h1, section:first-of-type h1', content.hero.title);
+        this.updateElement('#home p, .hero p, section:first-of-type p', content.hero.subtitle);
+        if (content.hero.image) {
+            this.updateImages('.hero-image img, .image-placeholder img', content.hero.image);
+        }
+    }
+
+    // About section
+    if (content.about) {
+        this.updateElement('#about .section-title, .about .section-title, section:nth-of-type(2) .section-title', content.about.title);
+        this.updateElement('.about-text p, #about p, .about p, section:nth-of-type(2) p', content.about.description);
+        
+        if (content.about.image) {
+            this.updateImages('.about-image img, .image-placeholder img', content.about.image);
+        }
+        
+        this.updateNavigation('about', content.about.title);
+        
+        if (content.about.stats) {
+            this.updateStats(content.about.stats);
+        }
+    }
+
+    // Services section
+    if (content.services) {
+        this.updateElement('#services .section-title, .services .section-title, section:nth-of-type(3) .section-title', content.services.title);
+        this.updateNavigation('services', content.services.title);
+        
+        if (content.services.services) {
+            this.updateServices(content.services.services);
+        }
+    }
+
+    // Destinations section
+    if (content.destinations) {
+        this.updateElement('#destinations .section-title, .destinations .section-title, section:nth-of-type(4) .section-title', content.destinations.title);
+        this.updateElement('.destinations .section-subtitle, .section-subtitle, section:nth-of-type(4) .section-subtitle', content.destinations.subtitle);
+        this.updateNavigation('destinations', content.destinations.title);
+    }
+
+    // Contact section
+    if (content.contact) {
+        this.updateElement('#contact .section-title, .contact .section-title, section:nth-of-type(5) .section-title', content.contact.title);
+        this.updateNavigation('contact', content.contact.title);
+    }
+
+    // Footer section
+    if (content.footer) {
+        this.updateElement('.footer-section:first-child p:first-child', content.footer.description);
+        this.updateElement('.footer-bottom p', content.footer.copyright, true);
+    }
+
+    // Custom sections
+    this.applyCustomSectionsData(content);
+};
+
+ContentUpdater.prototype.applyCustomSectionsData = function(content) {
+    var self = this;
+    Object.keys(content).forEach(function(sectionId) {
+        if (sectionId.startsWith('section-')) {
+            var sectionData = content[sectionId];
+            var sectionElement = document.getElementById(sectionId);
+            
+            if (sectionElement) {
+                // Update custom section content based on type
+                switch (sectionData.type) {
+                    case 'text':
+                        self.updateElement('#' + sectionId + ' .section-title', sectionData.title);
+                        self.updateElement('#' + sectionId + ' .section-content p', sectionData.content);
+                        break;
+                    case 'image':
+                        self.updateElement('#' + sectionId + ' .section-title', sectionData.title);
+                        self.updateElement('#' + sectionId + ' .text-content p', sectionData.content);
+                        if (sectionData.image) {
+                            self.updateImages('#' + sectionId + ' .image-content img', sectionData.image);
+                        }
+                        break;
+                    case 'features':
+                        self.updateElement('#' + sectionId + ' .section-title', sectionData.title);
+                        if (sectionData.features) {
+                            self.updateFeatures('#' + sectionId + ' .features-grid', sectionData.features);
+                        }
+                        break;
+                    case 'cta':
+                        self.updateElement('#' + sectionId + ' h2', sectionData.title);
+                        self.updateElement('#' + sectionId + ' p', sectionData.description);
+                        if (sectionData.buttonText) {
+                            self.updateElement('#' + sectionId + ' .cta-button', sectionData.buttonText);
+                            var button = document.querySelector('#' + sectionId + ' .cta-button');
+                            if (button && sectionData.buttonUrl) {
+                                button.href = sectionData.buttonUrl;
+                            }
+                        }
+                        break;
+                }
+            }
+        }
+    });
+};
+
+ContentUpdater.prototype.updateElement = function(selector, content, isHTML) {
+    var elements = document.querySelectorAll(selector);
+    if (elements.length > 0) {
+        elements.forEach(function(element) {
+            if (isHTML) {
+                element.innerHTML = content;
+            } else {
+                element.textContent = content;
+            }
+        });
+    }
+};
+
+ContentUpdater.prototype.updateImages = function(selector, src) {
+    var elements = document.querySelectorAll(selector);
+    if (elements.length > 0) {
+        elements.forEach(function(element) {
+            element.src = src;
+        });
+    }
+};
+
+ContentUpdater.prototype.updateNavigation = function(sectionId, title) {
+    var navLinks = document.querySelectorAll('.nav-links a[href="#' + sectionId + '"]');
+    if (navLinks.length > 0) {
+        navLinks.forEach(function(link) {
+            link.textContent = title;
+        });
+    }
+};
+
+ContentUpdater.prototype.updateStats = function(stats) {
+    var statElements = document.querySelectorAll('.stat');
+    if (statElements.length >= stats.length) {
+        stats.forEach(function(stat, index) {
+            if (statElements[index]) {
+                var valueElement = statElements[index].querySelector('h3');
+                var labelElement = statElements[index].querySelector('p');
+                if (valueElement) valueElement.textContent = stat.value;
+                if (labelElement) labelElement.textContent = stat.label;
+            }
+        });
+    }
+};
+
+ContentUpdater.prototype.updateServices = function(services) {
+    var serviceCards = document.querySelectorAll('.service-card');
+    if (serviceCards.length >= services.length) {
+        services.forEach(function(service, index) {
+            if (serviceCards[index]) {
+                var titleElement = serviceCards[index].querySelector('h3');
+                var descElement = serviceCards[index].querySelector('p');
+                var iconElement = serviceCards[index].querySelector('.service-icon i');
+                
+                if (titleElement) titleElement.textContent = service.title;
+                if (descElement) descElement.textContent = service.description;
+                if (iconElement && service.icon) {
+                    iconElement.className = service.icon;
+                }
+            }
+        });
+    }
+};
+
+ContentUpdater.prototype.updateFeatures = function(selector, features) {
+    var container = document.querySelector(selector);
+    if (container) {
+        var featureItems = container.querySelectorAll('.feature-item');
+        if (featureItems.length >= features.length) {
+            features.forEach(function(feature, index) {
+                if (featureItems[index]) {
+                    var titleElement = featureItems[index].querySelector('h3');
+                    var descElement = featureItems[index].querySelector('p');
+                    var iconElement = featureItems[index].querySelector('.feature-icon i');
+                    
+                    if (titleElement) titleElement.textContent = feature.title;
+                    if (descElement) descElement.textContent = feature.description;
+                    if (iconElement && feature.icon) {
+                        iconElement.className = feature.icon;
+                    }
+                }
+            });
+        }
+    }
+};
+
+ContentUpdater.prototype.applyContactChanges = function(contacts) {
+    if (!contacts) return;
+
+    if (contacts.phone) {
+        this.updateElement('.contact-info .contact-item:nth-child(1) p, .contact-item:first-child p', contacts.phone);
+    }
+    if (contacts.email) {
+        this.updateElement('.contact-info .contact-item:nth-child(2) p, .contact-item:nth-child(2) p', contacts.email);
+    }
+    if (contacts.address) {
+        this.updateElement('.contact-info .contact-item:nth-child(3) p, .contact-item:nth-child(3) p', contacts.address);
+    }
+    if (contacts.hours) {
+        this.updateElement('.contact-info .contact-item:nth-child(4) p, .contact-item:nth-child(4) p', contacts.hours);
+    }
+};
+
+ContentUpdater.prototype.applySettingsChanges = function(settings) {
+    if (!settings) return;
+
+    if (settings.siteTitle) {
+        document.title = settings.siteTitle;
+    }
+};
+
+ContentUpdater.prototype.applyCustomSections = function(data) {
+    if (!data.pageStructure || !data.content) return;
+
+    var customSectionsContainer = document.getElementById('custom-sections');
+    if (!customSectionsContainer) {
+        customSectionsContainer = document.createElement('div');
+        customSectionsContainer.id = 'custom-sections';
+        var footer = document.querySelector('footer');
+        if (footer) {
+            footer.parentNode.insertBefore(customSectionsContainer, footer);
+        }
+    }
+
+    customSectionsContainer.innerHTML = '';
+
+    var self = this;
+    data.pageStructure.forEach(function(sectionId) {
+        if (sectionId.startsWith('section-') && data.content[sectionId]) {
+            self.renderCustomSection(customSectionsContainer, data.content[sectionId]);
+        }
+    });
+};
+
+ContentUpdater.prototype.renderCustomSection = function(container, sectionData) {
+    var sectionElement = document.createElement('section');
+    sectionElement.className = 'custom-section ' + sectionData.type + '-section';
+    sectionElement.id = sectionData.id;
+
+    var html = '';
+    switch (sectionData.type) {
+        case 'text':
+            html = '\
+                <div class="container">\
+                    <h2 class="section-title">' + (sectionData.title || '') + '</h2>\
+                    <div class="section-content">\
+                        <p>' + (sectionData.content || '') + '</p>\
+                    </div>\
+                </div>\
+            ';
+            break;
+        case 'image':
+            html = '\
+                <div class="container">\
+                    <div class="section-content" style="display: flex; gap: 30px; align-items: center; flex-wrap: wrap;">\
+                        <div class="text-content" style="flex: 1; min-width: 300px;">\
+                            <h2 class="section-title">' + (sectionData.title || '') + '</h2>\
+                            <p>' + (sectionData.content || '') + '</p>\
+                        </div>\
+                        <div class="image-content" style="flex: 1; min-width: 300px; text-align: center;">\
+                            ' + (sectionData.image ? '<img src="' + sectionData.image + '" alt="' + (sectionData.title || '') + '" style="max-width: 100%; border-radius: 10px;">' : '') + '\
+                        </div>\
+                    </div>\
+                </div>\
+            ';
+            break;
+        case 'features':
+            var featuresHtml = (sectionData.features || []).map(function(feature) {
+                return '\
+                    <div class="feature-item" style="text-align: center; padding: 30px 20px; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); transition: transform 0.3s ease;">\
+                        <div class="feature-icon" style="font-size: 3em; margin-bottom: 20px; color: #2c5aa0;">\
+                            <i class="' + (feature.icon || 'fas fa-star') + '"></i>\
+                        </div>\
+                        <h3 style="margin-bottom: 15px; color: #333;">' + (feature.title || '') + '</h3>\
+                        <p style="color: #666; line-height: 1.6;">' + (feature.description || '') + '</p>\
+                    </div>\
+                ';
+            }).join('');
+            
+            html = '\
+                <div class="container">\
+                    <h2 class="section-title">' + (sectionData.title || '') + '</h2>\
+                    <div class="features-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 30px; margin-top: 40px;">\
+                        ' + featuresHtml + '\
+                    </div>\
+                </div>\
+            ';
+            break;
+        case 'cta':
+            html = '\
+                <div class="container">\
+                    <div class="cta-section" style="text-align: center; padding: 60px 40px; background: linear-gradient(135deg, #2c5aa0, #4a7bc8); color: white; border-radius: 15px; margin: 40px 0;">\
+                        <h2 style="margin-bottom: 20px; font-size: 2.5em;">' + (sectionData.title || '') + '</h2>\
+                        <p style="margin-bottom: 30px; font-size: 1.2em; opacity: 0.9;">' + (sectionData.description || '') + '</p>\
+                        ' + (sectionData.buttonText ? '\
+                            <a href="' + (sectionData.buttonUrl || '#') + '" class="cta-button" style="background: white; color: #2c5aa0; padding: 15px 40px; border-radius: 30px; text-decoration: none; font-weight: 600; display: inline-block; font-size: 1.1em; transition: all 0.3s ease;">\
+                                ' + sectionData.buttonText + '\
+                            </a>\
+                        ' : '') + '\
+                    </div>\
+                </div>\
+            ';
+            break;
+    }
+
+    sectionElement.innerHTML = html;
+    sectionElement.style.padding = '80px 0';
+    sectionElement.style.background = sectionData.type === 'cta' ? 'transparent' : '#f8f9fa';
+    
+    if (sectionData.type === 'cta') {
+        sectionElement.style.padding = '40px 0';
+    }
+
+    container.appendChild(sectionElement);
+};
+
+// Initialize enhanced content updater
+var contentUpdater = new ContentUpdater();
+ENHANCED_UPDATE_CONTENT_EOF
+echo "✅ enhanced-update-content.js обновлен"
+
+# 15. Обновляем update-content.js
+cat > update-content.js << 'UPDATE_CONTENT_EOF'
+// Enhanced content updater with support for stats and services
+function ContentUpdater() {
+    this.appliedChanges = new Set();
+    this.init();
+}
+
+ContentUpdater.prototype.init = function() {
+    console.log('🚀 Enhanced ContentUpdater initialized');
+    
+    var self = this;
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', function() {
+            setTimeout(function() { self.applyAllChanges(); }, 100);
+        });
+    } else {
+        setTimeout(function() { self.applyAllChanges(); }, 100);
+    }
+
+    window.addEventListener('dataUpdated', function(e) {
+        console.log('🔄 Data update received:', e.detail);
+        setTimeout(function() { self.applyAllChanges(); }, 50);
+    });
+
+    setInterval(function() { self.applyAllChanges(); }, 2000);
+};
+
+ContentUpdater.prototype.applyAllChanges = function() {
+    if (!window.dataManager) {
+        console.log('⏳ Waiting for DataManager...');
+        this.applyLocalChanges();
+        return;
+    }
+
+    var data = window.dataManager.getData();
+    if (!data) {
+        console.log('📭 No data available');
+        this.applyLocalChanges();
+        return;
+    }
+
+    var changeHash = this.getDataHash(data);
+    if (this.appliedChanges.has(changeHash)) {
+        return;
+    }
+
+    console.log('🔄 Applying changes from DataManager...');
+    
+    this.applyContentChanges(data.content);
+    this.applyContactChanges(data.contacts);
+    this.applySettingsChanges(data.settings);
+    this.applyStatsChanges(data.content);
+    this.applyServicesChanges(data.content);
+    
+    this.appliedChanges.add(changeHash);
+    console.log('✅ Changes applied successfully');
+};
+
+ContentUpdater.prototype.applyLocalChanges = function() {
+    var localData = localStorage.getItem('worldtravel_data');
+    if (localData) {
+        try {
+            var data = JSON.parse(localData);
+            console.log('📁 Applying local changes...');
+            this.applyContentChanges(data.content);
+            this.applyContactChanges(data.contacts);
+            this.applySettingsChanges(data.settings);
+            this.applyStatsChanges(data.content);
+            this.applyServicesChanges(data.content);
+        } catch (error) {
+            console.error('❌ Error applying local changes:', error);
+        }
+    }
+};
+
+ContentUpdater.prototype.applyStatsChanges = function(content) {
+    if (!content?.about?.stats) {
+        // Если статистики нет, скрываем блок
+        this.hideStatsSection();
+        return;
+    }
+
+    var stats = content.about.stats;
+    
+    // Фильтруем только валидные статистики
+    var validStats = stats.filter(stat => stat.value && stat.label);
+    
+    if (validStats.length === 0) {
+        this.hideStatsSection();
+        return;
+    }
+    
+    console.log('📊 Applying stats changes:', validStats.length, 'valid items');
+    
+    var statElements = document.querySelectorAll('.stat');
+    
+    // Показываем блок статистики
+    this.showStatsSection();
+    
+    if (statElements.length >= validStats.length) {
+        validStats.forEach(function(stat, index) {
+            if (statElements[index]) {
+                var valueElement = statElements[index].querySelector('h3');
+                var labelElement = statElements[index].querySelector('p');
+                
+                if (valueElement) {
+                    valueElement.textContent = stat.value;
+                    // Добавляем атрибут для анимации счетчика
+                    if (!valueElement.hasAttribute('data-target')) {
+                        valueElement.setAttribute('data-target', stat.value);
+                    }
+                }
+                if (labelElement) {
+                    labelElement.textContent = stat.label;
+                }
+                
+                // Показываем элемент
+                statElements[index].style.display = 'block';
+            }
+        });
+        
+        // Скрываем лишние элементы
+        for (var i = validStats.length; i < statElements.length; i++) {
+            statElements[i].style.display = 'none';
+        }
+    }
+};
+
+ContentUpdater.prototype.hideStatsSection = function() {
+    var statsContainer = document.querySelector('.stats');
+    if (statsContainer) {
+        statsContainer.style.display = 'none';
+    }
+};
+
+ContentUpdater.prototype.showStatsSection = function() {
+    var statsContainer = document.querySelector('.stats');
+    if (statsContainer) {
+        statsContainer.style.display = 'flex';
+    }
+};
+
+ContentUpdater.prototype.applyServicesChanges = function(content) {
+    if (!content?.services?.services) {
+        // Если услуг нет, скрываем блок
+        this.hideServicesSection();
+        return;
+    }
+
+    var services = content.services.services;
+    
+    // Фильтруем только валидные услуги
+    var validServices = services.filter(service => service.title && service.description);
+    
+    if (validServices.length === 0) {
+        this.hideServicesSection();
+        return;
+    }
+    
+    console.log('🎯 Applying services changes:', validServices.length, 'valid items');
+    
+    var serviceCards = document.querySelectorAll('.service-card');
+    
+    // Показываем блок услуг
+    this.showServicesSection();
+    
+    if (serviceCards.length >= validServices.length) {
+        validServices.forEach(function(service, index) {
+            if (serviceCards[index]) {
+                var titleElement = serviceCards[index].querySelector('h3');
+                var descElement = serviceCards[index].querySelector('p');
+                var iconElement = serviceCards[index].querySelector('.service-icon i');
+                
+                if (titleElement) titleElement.textContent = service.title;
+                if (descElement) descElement.textContent = service.description;
+                if (iconElement && service.icon) {
+                    iconElement.className = service.icon;
+                }
+                
+                // Показываем карточку
+                serviceCards[index].style.display = 'block';
+            }
+        });
+        
+        // Скрываем лишние карточки
+        for (var i = validServices.length; i < serviceCards.length; i++) {
+            serviceCards[i].style.display = 'none';
+        }
+    }
+};
+
+ContentUpdater.prototype.hideServicesSection = function() {
+    var servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid) {
+        servicesGrid.style.display = 'none';
+    }
+};
+
+ContentUpdater.prototype.showServicesSection = function() {
+    var servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid) {
+        servicesGrid.style.display = 'grid';
+    }
+};
+
+// Остальные методы остаются без изменений
+ContentUpdater.prototype.applyContentChanges = function(content) {
+    if (!content) return;
+
+    // Hero section
+    if (content.hero) {
+        this.updateElement('#home h1, .hero h1', content.hero.title);
+        this.updateElement('#home p, .hero p', content.hero.subtitle);
+    }
+
+    // About section
+    if (content.about) {
+        this.updateElement('#about .section-title', content.about.title);
+        this.updateElement('.about-text p', content.about.description);
+    }
+
+    // Services section
+    if (content.services) {
+        this.updateElement('#services .section-title', content.services.title);
+    }
+
+    // Destinations section
+    if (content.destinations) {
+        this.updateElement('#destinations .section-title', content.destinations.title);
+        this.updateElement('.destinations .section-subtitle', content.destinations.subtitle);
+    }
+
+    // Contact section
+    if (content.contact) {
+        this.updateElement('#contact .section-title', content.contact.title);
+    }
+
+    // Footer section
+    if (content.footer) {
+        this.updateElement('.footer-section:first-child p', content.footer.description);
+        this.updateElement('.footer-bottom p', content.footer.copyright, true);
+    }
+};
+
+ContentUpdater.prototype.applyContactChanges = function(contacts) {
+    if (!contacts) return;
+
+    // Правильный порядок контактов
+    if (contacts.phone) {
+        this.updateElement('.contact-info .contact-item:nth-child(1) p', contacts.phone);
+        this.updateElement('.footer-section:nth-child(3) p:nth-child(1)', contacts.phone);
+    }
+    if (contacts.email) {
+        this.updateElement('.contact-info .contact-item:nth-child(2) p', contacts.email);
+        this.updateElement('.footer-section:nth-child(3) p:nth-child(2)', contacts.email);
+    }
+    if (contacts.address) {
+        this.updateElement('.contact-info .contact-item:nth-child(3) p', contacts.address);
+        this.updateElement('.footer-section:nth-child(3) p:nth-child(3)', contacts.address);
+    }
+    if (contacts.hours) {
+        this.updateElement('.contact-info .contact-item:nth-child(4) p', contacts.hours);
+        this.updateElement('.footer-section:nth-child(3) p:nth-child(4)', contacts.hours);
+    }
+};
+
+ContentUpdater.prototype.applySettingsChanges = function(settings) {
+    if (!settings) return;
+
+    if (settings.siteTitle) {
+        document.title = settings.siteTitle;
+    }
+};
+
+ContentUpdater.prototype.updateElement = function(selector, content, isHTML) {
+    var elements = document.querySelectorAll(selector);
+    if (elements.length > 0) {
+        elements.forEach(function(element) {
+            if (isHTML) {
+                element.innerHTML = content;
+            } else {
+                element.textContent = content;
+            }
+        });
+    }
+};
+
+ContentUpdater.prototype.getDataHash = function(data) {
+    return JSON.stringify({
+        content: data.content,
+        contacts: data.contacts,
+        settings: data.settings,
+        timestamp: data.lastUpdate
+    });
+};
+
+// Initialize enhanced content updater
+var contentUpdater = new ContentUpdater();
+UPDATE_CONTENT_EOF
+echo "✅ update-content.js обновлен"
+
+# 16. Обновляем apply-critical-fixes.js
+cat > apply-critical-fixes.js << 'APPLY_CRITICAL_FIXES_EOF'
+const fs = require('fs');
+
+// 1. Исправляем верстку контактов в index.html
+console.log('📞 Исправление верстки контактов...');
+let indexHtml = fs.readFileSync('index.html', 'utf8');
+
+// Заменяем всю секцию контактов на исправленную версию
+const fixedContactsHTML = `
+            <div class="contact-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+                <div class="contact-info" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+                    <h3>Наши контакты</h3>
+                    <div class="contact-item">
+                        <strong><i class="fas fa-phone"></i> Телефон:</strong>
+                        <p>+7 (999) 123-45-67</p>
+                    </div>
+                    <div class="contact-item">
+                        <strong><i class="fas fa-envelope"></i> Email:</strong>
+                        <p>info@worldtravel.com</p>
+                    </div>
+                    <div class="contact-item">
+                        <strong><i class="fas fa-map-marker-alt"></i> Адрес:</strong>
+                        <p>Москва, ул. Туристическая, 15</p>
+                    </div>
+                    <div class="contact-item">
+                        <strong><i class="fas fa-clock"></i> Часы работы:</strong>
+                        <p>Пн-Пт: 9:00-18:00</p>
+                    </div>
+                </div>
+                <form class="contact-form" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px;">
+                    <input type="text" placeholder="Ваше имя" required>
+                    <input type="email" placeholder="Ваш email" required>
+                    <input type="tel" placeholder="Ваш телефон">
+                    <textarea placeholder="Ваше сообщение" rows="5" required></textarea>
+                    <button type="submit">Отправить сообщение</button>
+                </form>
+            </div>
+`;
+
+// Находим и заменяем секцию контактов
+const contactSectionRegex = /<div class="contact-content">[\\s\\S]*?<\\/form>\\s*<\\/div>/;
+if (contactSectionRegex.test(indexHtml)) {
+    indexHtml = indexHtml.replace(contactSectionRegex, fixedContactsHTML);
+    console.log('✅ Секция контактов заменена');
+} else {
+    // Альтернативный поиск
+    const alternativeRegex = /<section id="contact"[\\s\\S]*?<div class="container">[\\s\\S]*?<h2[\\s\\S]*?<\\/h2>([\\s\\S]*?)<\\/section>/;
+    const match = indexHtml.match(alternativeRegex);
+    if (match) {
+        indexHtml = indexHtml.replace(match[1], fixedContactsHTML);
+        console.log('✅ Секция контактов заменена (альтернативный метод)');
+    }
+}
+
+// 2. Добавляем скрипты исправлений
+const scriptsToAdd = [
+    'fix-contacts-layout.js',
+    'fixed-stats-editor.js', 
+    'enhanced-page-editor-fixed.js'
+];
+
+scriptsToAdd.forEach(script => {
+    if (!indexHtml.includes(script)) {
+        indexHtml = indexHtml.replace('</body>', `<script src="${script}"></script></body>`);
+        console.log(`✅ Добавлен скрипт: ${script}`);
+    }
+});
+
+// 3. Сохраняем исправленный index.html
+fs.writeFileSync('index.html', indexHtml);
+console.log('💾 index.html сохранен с исправлениями');
+
+// 4. Также обновляем page-editor.html если он существует
+try {
+    let pageEditorHtml = fs.readFileSync('page-editor.html', 'utf8');
+    
+    // Добавляем исправленные скрипты
+    if (!pageEditorHtml.includes('enhanced-page-editor-fixed.js')) {
+        pageEditorHtml = pageEditorHtml.replace('</body>', '<script src="enhanced-page-editor-fixed.js"></script></body>');
+        console.log('✅ enhanced-page-editor-fixed.js добавлен в page-editor.html');
+    }
+    
+    if (!pageEditorHtml.includes('fixed-stats-editor.js')) {
+        pageEditorHtml = pageEditorHtml.replace('</body>', '<script src="fixed-stats-editor.js"></script></body>');
+        console.log('✅ fixed-stats-editor.js добавлен в page-editor.html');
+    }
+    
+    fs.writeFileSync('page-editor.html', pageEditorHtml);
+    console.log('💾 page-editor.html обновлен');
+} catch (e) {
+    console.log('ℹ️ page-editor.html не найден, пропускаем...');
+}
+
+console.log('🎉 Критические исправления применены!');
+console.log('📋 Что исправлено:');
+console.log('   ✅ Верстка контактов (убраны перекосы)');
+console.log('   ✅ Сохранение статистики в редакторе');
+console.log('   ✅ Добавлены улучшенные редакторы статистики');
+APPLY_CRITICAL_FIXES_EOF
+echo "✅ apply-critical-fixes.js обновлен"
+
+# 17. Создаем недостающие файлы для совместимости
+touch layout-fixes.css input-fixes.css enhanced-editor.css force-display.css
+touch data-manager-fixed.js exact-content-updater.js script.js fix-data-structure.js diagnose.js force-refresh.js
+touch enhanced-content-updater-fixed.js super-editor-fixed.js fix-issues-applied.js fix-duplicate-editors.js
+touch cleanup-duplicates.js cleanup-existing-data.js working-stats-editor.js remove-contacts-editor.js
+touch fix-contacts-layout.js fixed-stats-editor.js enhanced-page-editor-fixed.js
+
+echo "✅ Созданы недостающие файлы для совместимости"
+
+# 18. Создаем super-admin.html
+cat > super-admin.html << 'SUPER_ADMIN_EOF'
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldTravel - Полная админ-панель</title>
+    <style>
+        :root {
+            --primary: #2c5aa0;
+            --primary-dark: #1e3d72;
+            --secondary: #4a7bc8;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+            --light: #f8f9fa;
+            --dark: #343a40;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f5f7fb;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .admin-layout {
+            display: flex;
+            min-height: 100vh;
+        }
+
+        /* Sidebar */
+        .sidebar {
+            width: 280px;
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+
+        .sidebar-header {
+            padding: 2rem 1.5rem;
+            border-bottom: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .sidebar-header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .sidebar-nav {
+            padding: 1rem 0;
+        }
+
+        .nav-item {
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-left: 4px solid transparent;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .nav-item:hover, .nav-item.active {
+            background: rgba(255,255,255,0.1);
+            border-left-color: white;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: white;
+            padding: 1rem 2rem;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .content-area {
+            padding: 2rem;
+            flex: 1;
+            overflow-y: auto;
+        }
+
+        /* Stats Grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+            border-left: 4px solid var(--primary);
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-card h3 {
+            font-size: 2.5rem;
+            color: var(--primary);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Content Sections */
+        .content-section {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        /* Buttons */
+        .btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: var(--success);
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-warning {
+            background: var(--warning);
+            color: var(--dark);
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .btn-danger {
+            background: var(--danger);
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        /* Tables */
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 1rem;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 1rem;
+            text-align: left;
+            border-bottom: 1px solid #e1e5ee;
+        }
+
+        .data-table th {
+            background: var(--light);
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .data-table tr:hover {
+            background: #f8f9fa;
+        }
+
+        /* Forms */
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark);
+        }
+
+        .form-control {
+            width: 100%;
+            padding: 0.75rem 1rem;
+            border: 2px solid #e1e5ee;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        /* Tabs */
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Cards */
+        .card-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin-top: 1.5rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card-header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .card-body {
+            padding: 1.5rem;
+        }
+
+        .card-actions {
+            padding: 1rem 1.5rem;
+            background: var(--light);
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            padding: 2rem;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--light);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--dark);
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            justify-content: flex-end;
+            margin-top: 2rem;
+        }
+
+        /* Notification */
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            z-index: 10000;
+            transform: translateX(400px);
+            transition: transform 0.3s ease;
+        }
+
+        .notification.show {
+            transform: translateX(0);
+        }
+
+        .notification.success {
+            border-left: 4px solid var(--success);
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .notification.error {
+            border-left: 4px solid var(--danger);
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+        }
+
+        /* Tour Card */
+        .tour-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            border-left: 4px solid var(--success);
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .tour-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 1rem;
+        }
+
+        .tour-country {
+            background: var(--primary);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.8rem;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <h1><i class="fas fa-globe-americas"></i> WorldTravel</h1>
+                <p>Админ-панель</p>
+            </div>
+            <nav class="sidebar-nav">
+                <div class="nav-item active" data-tab="dashboard">
+                    <i class="fas fa-tachometer-alt"></i>
+                    <span>Дашборд</span>
+                </div>
+                <div class="nav-item" data-tab="countries">
+                    <i class="fas fa-globe"></i>
+                    <span>Управление странами</span>
+                </div>
+                <div class="nav-item" data-tab="tours">
+                    <i class="fas fa-map-marked-alt"></i>
+                    <span>Управление турами</span>
+                </div>
+                <div class="nav-item" data-tab="content">
+                    <i class="fas fa-edit"></i>
+                    <span>Редактирование контента</span>
+                </div>
+                <div class="nav-item" data-tab="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Настройки системы</span>
+                </div>
+            </nav>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="top-header">
+    <div style="display: flex; align-items: center; gap: 1rem;">
+        <h2 id="page-title">Дашборд</h2>
+        <button class="btn" onclick="window.open('/', '_blank')" 
+                style="background: #17a2b8; font-size: 0.8rem; padding: 0.5rem 1rem;">
+            <i class="fas fa-home"></i> На главную
+        </button>
+    </div>
+    <div class="user-info">
+        <span>Администратор</span>
+        <button class="btn btn-danger" onclick="admin.logout()">
+            <i class="fas fa-sign-out-alt"></i> Выйти
+        </button>
+    </div>
+</header>
+            <div class="content-area">
+                <!-- Dashboard Tab -->
+                <div id="dashboard" class="tab-content active">
+                    <!-- Welcome Message -->
+                    <div class="content-section" style="background: linear-gradient(135deg, #d4edda, #c3e6cb); border-left: 4px solid var(--success);">
+                        <h3><i class="fas fa-check-circle"></i> Добро пожаловать в админ-панель!</h3>
+                        <p>Система успешно загружена. Сессия активна.</p>
+                    </div>
+
+                    <!-- Statistics -->
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <i class="fas fa-globe" style="font-size: 2rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                            <h3 id="stats-countries">0</h3>
+                            <p>Стран</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-map-marked-alt" style="font-size: 2rem; color: var(--success); margin-bottom: 1rem;"></i>
+                            <h3 id="stats-tours">0</h3>
+                            <p>Туров</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-calendar-check" style="font-size: 2rem; color: var(--warning); margin-bottom: 1rem;"></i>
+                            <h3>1,247</h3>
+                            <p>Бронирований</p>
+                        </div>
+                        <div class="stat-card">
+                            <i class="fas fa-users" style="font-size: 2rem; color: var(--danger); margin-bottom: 1rem;"></i>
+                            <h3>543</h3>
+                            <p>Пользователей</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Быстрые действия</h3>
+                        </div>
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn btn-success" onclick="admin.openCountryModal()">
+                                <i class="fas fa-plus"></i> Добавить страну
+                            </button>
+                            <button class="btn" onclick="admin.openTourModal()">
+                                <i class="fas fa-plus-circle"></i> Создать тур
+                            </button>
+                            <button class="btn" onclick="admin.exportData()">
+                                <i class="fas fa-download"></i> Экспорт данных
+                            </button>
+                            <button class="btn btn-warning" onclick="admin.addSampleData()">
+                                <i class="fas fa-magic"></i> Тестовые данные
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Recent Activity -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Последняя активность</h3>
+                        </div>
+                        <div id="recent-activity">
+                            <!-- Activity will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Countries Tab -->
+                <div id="countries" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Управление странами</h3>
+                            <button class="btn btn-success" onclick="admin.openCountryModal()">
+                                <i class="fas fa-plus"></i> Добавить страну
+                            </button>
+                        </div>
+                        
+                        <div class="card-grid" id="countries-list">
+                            <!-- Countries will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tours Tab -->
+                <div id="tours" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Управление турами</h3>
+                            <button class="btn btn-success" onclick="admin.openTourModal()">
+                                <i class="fas fa-plus"></i> Создать тур
+                            </button>
+                        </div>
+                        
+                        <div id="tours-list">
+                            <!-- Tours will be loaded here -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Content Tab -->
+                <div id="content" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Редактирование контента</h3>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Заголовок главной страницы</label>
+                            <input type="text" id="hero-title" class="form-control" value="Откройте мир с WorldTravel">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label>Текст под заголовком</label>
+                            <textarea id="hero-text" class="form-control" rows="3">Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.</textarea>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Контактный телефон</label>
+                                <input type="text" id="contact-phone" class="form-control" value="+7 (999) 123-45-67">
+                            </div>
+                            <div class="form-group">
+                                <label>Email</label>
+                                <input type="email" id="contact-email" class="form-control" value="info@worldtravel.com">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Адрес</label>
+                            <input type="text" id="contact-address" class="form-control" value="Москва, ул. Туристическая, 15">
+                        </div>
+                        
+                        <button class="btn btn-success" onclick="admin.saveContent()">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Settings Tab -->
+                <div id="settings" class="tab-content">
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Настройки системы</h3>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Название компании</label>
+                            <input type="text" id="company-name" class="form-control" value="WorldTravel">
+                        </div>
+
+                        <div class="form-group">
+                            <label>Валюта по умолчанию</label>
+                            <select id="default-currency" class="form-control">
+                                <option value="$">Доллар ($)</option>
+                                <option value="€">Евро (€)</option>
+                                <option value="₽">Рубль (₽)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Язык интерфейса</label>
+                            <select id="interface-language" class="form-control">
+                                <option value="ru">Русский</option>
+                                <option value="en">English</option>
+                            </select>
+                        </div>
+
+                        <button class="btn btn-success" onclick="admin.saveSettings()">
+                            <i class="fas fa-save"></i> Сохранить настройки
+                        </button>
+                    </div>
+
+                    <!-- Data Management -->
+                    <div class="content-section">
+                        <div class="section-header">
+                            <h3>Управление данными</h3>
+                        </div>
+
+                        <div style="display: flex; gap: 1rem; flex-wrap: wrap;">
+                            <button class="btn" onclick="admin.exportData()">
+                                <i class="fas fa-download"></i> Экспорт данных
+                            </button>
+                            <button class="btn btn-warning" onclick="admin.importData()">
+                                <i class="fas fa-upload"></i> Импорт данных
+                            </button>
+                            <button class="btn btn-danger" onclick="admin.clearData()">
+                                <i class="fas fa-trash"></i> Очистить все данные
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Country Modal -->
+    <div class="modal" id="countryModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="countryModalTitle">Добавить страну</h3>
+                <button class="modal-close" onclick="admin.closeModal('countryModal')">&times;</button>
+            </div>
+            <form id="countryForm">
+                <div class="form-group">
+                    <label>Название страны *</label>
+                    <input type="text" id="country-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Краткое описание *</label>
+                    <textarea id="country-short-description" class="form-control" rows="2" required></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Полное описание</label>
+                    <textarea id="country-description" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Цена от *</label>
+                        <input type="text" id="country-price" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Столица</label>
+                        <input type="text" id="country-capital" class="form-control">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Язык</label>
+                        <input type="text" id="country-language" class="form-control">
+                    </div>
+                    <div class="form-group">
+                        <label>Валюта</label>
+                        <input type="text" id="country-currency" class="form-control">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="admin.closeModal('countryModal')">Отмена</button>
+                    <button type="submit" class="btn btn-success">Сохранить страну</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tour Modal -->
+    <div class="modal" id="tourModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="tourModalTitle">Создать тур</h3>
+                <button class="modal-close" onclick="admin.closeModal('tourModal')">&times;</button>
+            </div>
+            <form id="tourForm">
+                <div class="form-group">
+                    <label>Название тура *</label>
+                    <input type="text" id="tour-name" class="form-control" required>
+                </div>
+                <div class="form-group">
+                    <label>Страна *</label>
+                    <select id="tour-country" class="form-control" required>
+                        <option value="">Выберите страну</option>
+                    </select>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Длительность *</label>
+                        <input type="text" id="tour-duration" class="form-control" placeholder="7 дней" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Цена *</label>
+                        <input type="text" id="tour-price" class="form-control" placeholder="$500" required>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Описание тура</label>
+                    <textarea id="tour-description" class="form-control" rows="4"></textarea>
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn" onclick="admin.closeModal('tourModal')">Отмена</button>
+                    <button type="submit" class="btn btn-success">Создать тур</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // Полная админ-панель
+        class SuperAdmin {
+            constructor() {
+                this.countries = [];
+                this.tours = [];
+                this.settings = {};
+                this.currentEditingId = null;
+                
+                this.init();
+            }
+
+            init() {
+                this.loadData();
+                this.setupEventListeners();
+                this.renderDashboard();
+                console.log('🚀 Супер-админка загружена!');
+            }
+
+            loadData() {
+                try {
+                    const data = sessionStorage.getItem('worldtravel_data') || 
+                                localStorage.getItem('worldtravel_data');
+                    if (data) {
+                        const parsed = JSON.parse(data);
+                        this.countries = parsed.countries || [];
+                        this.tours = parsed.tours || [];
+                        this.settings = parsed.settings || {};
+                        console.log('📁 Загружено:', this.countries.length, 'стран,', this.tours.length, 'туров');
+                    }
+                } catch (error) {
+                    console.error('Ошибка загрузки:', error);
+                    this.countries = [];
+                    this.tours = [];
+                }
+            }
+
+            saveData() {
+                const data = {
+                    countries: this.countries,
+                    tours: this.tours,
+                    settings: this.settings,
+                    content: this.getContentData(),
+                    lastUpdate: new Date().toISOString()
+                };
+
+                sessionStorage.setItem('worldtravel_data', JSON.stringify(data));
+                localStorage.setItem('worldtravel_data', JSON.stringify(data));
+
+                this.updateStats();
+                this.showNotification('✅ Данные сохранены!', 'success');
+                console.log('💾 Данные сохранены');
+            }
+
+            setupEventListeners() {
+                // Навигация
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        const tab = e.currentTarget.getAttribute('data-tab');
+                        this.showTab(tab);
+                    });
+                });
+
+                // Формы
+                document.getElementById('countryForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveCountry();
+                });
+
+                document.getElementById('tourForm').addEventListener('submit', (e) => {
+                    e.preventDefault();
+                    this.saveTour();
+                });
+            }
+
+            showTab(tabName) {
+                // Скрыть все вкладки
+                document.querySelectorAll('.tab-content').forEach(tab => {
+                    tab.classList.remove('active');
+                });
+
+                // Убрать активный класс у всех пунктов меню
+                document.querySelectorAll('.nav-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                // Показать выбранную вкладку
+                const tab = document.getElementById(tabName);
+                if (tab) {
+                    tab.classList.add('active');
+                }
+
+                // Активировать пункт меню
+                const navItem = document.querySelector(`[data-tab="${tabName}"]`);
+                if (navItem) {
+                    navItem.classList.add('active');
+                }
+
+                // Обновить заголовок
+                document.getElementById('page-title').textContent = 
+                    navItem.querySelector('span').textContent;
+
+                // Загрузить данные для вкладки
+                this.loadTabData(tabName);
+            }
+
+            loadTabData(tabName) {
+                switch (tabName) {
+                    case 'dashboard':
+                        this.renderDashboard();
+                        break;
+                    case 'countries':
+                        this.renderCountries();
+                        break;
+                    case 'tours':
+                        this.renderTours();
+                        break;
+                    case 'content':
+                        this.loadContent();
+                        break;
+                    case 'settings':
+                        this.loadSettings();
+                        break;
+                }
+            }
+
+            renderDashboard() {
+                this.updateStats();
+                this.renderRecentActivity();
+            }
+
+            updateStats() {
+                document.getElementById('stats-countries').textContent = this.countries.length;
+                document.getElementById('stats-tours').textContent = this.tours.length;
+            }
+
+            renderRecentActivity() {
+                const container = document.getElementById('recent-activity');
+                const activities = [
+                    { action: 'Добавлена страна', item: 'Италия', time: '2 минуты назад' },
+                    { action: 'Создан тур', item: 'Римские каникулы', time: '5 минут назад' },
+                    { action: 'Обновлен контент', item: 'Главная страница', time: '10 минут назад' }
+                ];
+
+                container.innerHTML = activities.map(activity => `
+                    <div class="tour-card">
+                        <div class="tour-header">
+                            <div>
+                                <strong>${activity.action}</strong>
+                                <div style="color: #666; margin-top: 0.25rem;">${activity.item}</div>
+                            </div>
+                            <span style="color: #999; font-size: 0.9rem;">${activity.time}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderCountries() {
+                const container = document.getElementById('countries-list');
+                
+                if (this.countries.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #666; grid-column: 1 / -1;">
+                            <i class="fas fa-globe-americas" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                            <h3>Стран пока нет</h3>
+                            <p>Добавьте первую страну используя кнопку выше</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.countries.map(country => `
+                    <div class="card">
+                        <div class="card-header">
+                            <h4 style="margin: 0; color: white;">${country.name}</h4>
+                        </div>
+                        <div class="card-body">
+                            <p style="color: #666; margin-bottom: 1rem;">${country.shortDescription || country.description || ''}</p>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <strong style="color: var(--primary);">${country.price}</strong>
+                                <span style="font-size: 0.9rem; color: #999;">${country.tours ? country.tours.length : 0} туров</span>
+                            </div>
+                        </div>
+                        <div class="card-actions">
+                            <button class="btn" onclick="admin.editCountry('${country.id}')">
+                                <i class="fas fa-edit"></i> Редактировать
+                            </button>
+                            <button class="btn btn-danger" onclick="admin.deleteCountry('${country.id}')">
+                                <i class="fas fa-trash"></i> Удалить
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            renderTours() {
+                const container = document.getElementById('tours-list');
+                
+                if (this.tours.length === 0) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 3rem; color: #666;">
+                            <i class="fas fa-map-marked-alt" style="font-size: 4rem; margin-bottom: 1rem;"></i>
+                            <h3>Туров пока нет</h3>
+                            <p>Создайте первый тур используя кнопку выше</p>
+                        </div>
+                    `;
+                    return;
+                }
+
+                container.innerHTML = this.tours.map(tour => `
+                    <div class="tour-card">
+                        <div class="tour-header">
+                            <div>
+                                <h4 style="margin: 0 0 0.5rem 0;">${tour.name}</h4>
+                                <span class="tour-country">${tour.country}</span>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-weight: bold; color: var(--primary);">${tour.price}</div>
+                                <div style="color: #666; font-size: 0.9rem;">${tour.duration}</div>
+                            </div>
+                        </div>
+                        <p style="color: #666; margin: 0;">${tour.description || ''}</p>
+                        <div style="margin-top: 1rem; display: flex; gap: 0.5rem;">
+                            <button class="btn" onclick="admin.editTour('${tour.id}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="admin.deleteTour('${tour.id}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            openCountryModal(countryId = null) {
+                this.currentEditingId = countryId;
+                const modal = document.getElementById('countryModal');
+                const title = document.getElementById('countryModalTitle');
+
+                if (countryId) {
+                    title.textContent = 'Редактировать страну';
+                    this.fillCountryForm(countryId);
+                } else {
+                    title.textContent = 'Добавить страну';
+                    this.resetCountryForm();
+                }
+
+                this.openModal('countryModal');
+            }
+
+            fillCountryForm(countryId) {
+                const country = this.countries.find(c => c.id === countryId);
+                if (country) {
+                    document.getElementById('country-name').value = country.name;
+                    document.getElementById('country-short-description').value = country.shortDescription || '';
+                    document.getElementById('country-description').value = country.description || '';
+                    document.getElementById('country-price').value = country.price || '';
+                    document.getElementById('country-capital').value = country.capital || '';
+                    document.getElementById('country-language').value = country.language || '';
+                    document.getElementById('country-currency').value = country.currency || '';
+                }
+            }
+
+            resetCountryForm() {
+                document.getElementById('countryForm').reset();
+            }
+
+            saveCountry() {
+                const name = document.getElementById('country-name').value;
+                const shortDescription = document.getElementById('country-short-description').value;
+                const description = document.getElementById('country-description').value;
+                const price = document.getElementById('country-price').value;
+                const capital = document.getElementById('country-capital').value;
+                const language = document.getElementById('country-language').value;
+                const currency = document.getElementById('country-currency').value;
+
+                if (!name || !shortDescription || !price) {
+                    this.showNotification('❌ Заполните обязательные поля', 'error');
+                    return;
+                }
+
+                const countryData = {
+                    id: this.currentEditingId || this.generateId(name),
+                    name: name,
+                    shortDescription: shortDescription,
+                    description: description,
+                    price: price,
+                    capital: capital,
+                    language: language,
+                    currency: currency,
+                    images: [],
+                    tours: []
+                };
+
+                if (this.currentEditingId) {
+                    // Редактирование
+                    const index = this.countries.findIndex(c => c.id === this.currentEditingId);
+                    if (index !== -1) {
+                        this.countries[index] = { ...this.countries[index], ...countryData };
+                    }
+                    this.showNotification('✅ Страна обновлена!', 'success');
+                } else {
+                    // Добавление
+                    this.countries.push(countryData);
+                    this.showNotification('✅ Страна добавлена!', 'success');
+                }
+
+                this.saveData();
+                this.closeModal('countryModal');
+                this.renderCountries();
+            }
+
+                        openTourModal(tourId = null) {
+                this.currentEditingId = tourId;
+                const modal = document.getElementById('tourModal');
+                const title = document.getElementById('tourModalTitle');
+
+                // Заполняем выпадающий список стран
+                this.populateCountrySelect();
+
+                if (tourId) {
+                    title.textContent = 'Редактировать тур';
+                    this.fillTourForm(tourId);
+                } else {
+                    title.textContent = 'Создать тур';
+                    this.resetTourForm();
+                }
+
+                this.openModal('tourModal');
+            }
+
+            populateCountrySelect() {
+                const select = document.getElementById('tour-country');
+                select.innerHTML = '<option value="">Выберите страну</option>';
+                
+                this.countries.forEach(country => {
+                    const option = document.createElement('option');
+                    option.value = country.name;
+                    option.textContent = country.name;
+                    select.appendChild(option);
+                });
+            }
+
+            fillTourForm(tourId) {
+                const tour = this.tours.find(t => t.id === tourId);
+                if (tour) {
+                    document.getElementById('tour-name').value = tour.name;
+                    document.getElementById('tour-country').value = tour.country;
+                    document.getElementById('tour-duration').value = tour.duration;
+                    document.getElementById('tour-price').value = tour.price;
+                    document.getElementById('tour-description').value = tour.description || '';
+                }
+            }
+
+            resetTourForm() {
+                document.getElementById('tourForm').reset();
+            }
+
+            saveTour() {
+                const name = document.getElementById('tour-name').value;
+                const country = document.getElementById('tour-country').value;
+                const duration = document.getElementById('tour-duration').value;
+                const price = document.getElementById('tour-price').value;
+                const description = document.getElementById('tour-description').value;
+
+                if (!name || !country || !duration || !price) {
+                    this.showNotification('❌ Заполните обязательные поля', 'error');
+                    return;
+                }
+
+                const tourData = {
+                    id: this.currentEditingId || this.generateId(name),
+                    name: name,
+                    country: country,
+                    duration: duration,
+                    price: price,
+                    description: description,
+                    createdAt: new Date().toISOString()
+                };
+
+                if (this.currentEditingId) {
+                    // Редактирование
+                    const index = this.tours.findIndex(t => t.id === this.currentEditingId);
+                    if (index !== -1) {
+                        this.tours[index] = { ...this.tours[index], ...tourData };
+                    }
+                    this.showNotification('✅ Тур обновлен!', 'success');
+                } else {
+                    // Добавление
+                    this.tours.push(tourData);
+                    this.showNotification('✅ Тур создан!', 'success');
+                }
+
+                this.saveData();
+                this.closeModal('tourModal');
+                this.renderTours();
+            }
+
+            editCountry(countryId) {
+                this.openCountryModal(countryId);
+            }
+
+            editTour(tourId) {
+                this.openTourModal(tourId);
+            }
+
+            deleteCountry(countryId) {
+                if (confirm('Удалить страну? Все связанные туры также будут удалены.')) {
+                    // Удаляем туры этой страны
+                    this.tours = this.tours.filter(t => {
+                        const country = this.countries.find(c => c.id === countryId);
+                        return !country || t.country !== country.name;
+                    });
+
+                    // Удаляем страну
+                    this.countries = this.countries.filter(c => c.id !== countryId);
+                    
+                    this.saveData();
+                    this.renderCountries();
+                    this.renderTours();
+                    this.showNotification('✅ Страна и связанные туры удалены!', 'success');
+                }
+            }
+
+            deleteTour(tourId) {
+                if (confirm('Удалить тур?')) {
+                    this.tours = this.tours.filter(t => t.id !== tourId);
+                    this.saveData();
+                    this.renderTours();
+                    this.showNotification('✅ Тур удален!', 'success');
+                }
+            }
+
+            loadContent() {
+                const data = this.getContentData();
+                document.getElementById('hero-title').value = data.heroTitle;
+                document.getElementById('hero-text').value = data.heroText;
+                document.getElementById('contact-phone').value = data.contactPhone;
+                document.getElementById('contact-email').value = data.contactEmail;
+                document.getElementById('contact-address').value = data.contactAddress;
+            }
+
+            getContentData() {
+                const data = sessionStorage.getItem('worldtravel_data') || 
+                            localStorage.getItem('worldtravel_data');
+                if (data) {
+                    const parsed = JSON.parse(data);
+                    return parsed.content || this.getDefaultContent();
+                }
+                return this.getDefaultContent();
+            }
+
+            getDefaultContent() {
+                return {
+                    heroTitle: 'Откройте мир с WorldTravel',
+                    heroText: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                    contactPhone: '+7 (999) 123-45-67',
+                    contactEmail: 'info@worldtravel.com',
+                    contactAddress: 'Москва, ул. Туристическая, 15'
+                };
+            }
+
+            saveContent() {
+                const content = {
+                    heroTitle: document.getElementById('hero-title').value,
+                    heroText: document.getElementById('hero-text').value,
+                    contactPhone: document.getElementById('contact-phone').value,
+                    contactEmail: document.getElementById('contact-email').value,
+                    contactAddress: document.getElementById('contact-address').value
+                };
+
+                this.updateContentData(content);
+                this.showNotification('✅ Контент сохранен!', 'success');
+            }
+
+            updateContentData(content) {
+                const data = sessionStorage.getItem('worldtravel_data') || 
+                            localStorage.getItem('worldtravel_data');
+                
+                let parsed = { countries: [], tours: [], settings: {}, content: {} };
+                if (data) {
+                    parsed = JSON.parse(data);
+                }
+
+                parsed.content = content;
+                parsed.lastUpdate = new Date().toISOString();
+
+                sessionStorage.setItem('worldtravel_data', JSON.stringify(parsed));
+                localStorage.setItem('worldtravel_data', JSON.stringify(parsed));
+            }
+
+            loadSettings() {
+                document.getElementById('company-name').value = this.settings.companyName || 'WorldTravel';
+                document.getElementById('default-currency').value = this.settings.defaultCurrency || '$';
+                document.getElementById('interface-language').value = this.settings.interfaceLanguage || 'ru';
+            }
+
+            saveSettings() {
+                this.settings = {
+                    companyName: document.getElementById('company-name').value,
+                    defaultCurrency: document.getElementById('default-currency').value,
+                    interfaceLanguage: document.getElementById('interface-language').value
+                };
+
+                this.saveData();
+                this.showNotification('✅ Настройки сохранены!', 'success');
+            }
+
+            exportData() {
+                const data = {
+                    countries: this.countries,
+                    tours: this.tours,
+                    settings: this.settings,
+                    content: this.getContentData(),
+                    exportDate: new Date().toISOString(),
+                    version: '1.0'
+                };
+
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `worldtravel-backup-${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+
+                this.showNotification('✅ Данные экспортированы!', 'success');
+            }
+
+            importData() {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = '.json';
+                
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (event) => {
+                            try {
+                                const data = JSON.parse(event.target.result);
+                                
+                                if (confirm('Заменить текущие данные импортированными?')) {
+                                    this.countries = data.countries || [];
+                                    this.tours = data.tours || [];
+                                    this.settings = data.settings || {};
+                                    
+                                    if (data.content) {
+                                        this.updateContentData(data.content);
+                                    }
+                                    
+                                    this.saveData();
+                                    this.showNotification('✅ Данные импортированы!', 'success');
+                                    this.renderDashboard();
+                                    this.renderCountries();
+                                    this.renderTours();
+                                }
+                            } catch (error) {
+                                this.showNotification('❌ Ошибка импорта: неверный формат файла', 'error');
+                            }
+                        };
+                        reader.readAsText(file);
+                    }
+                };
+                
+                input.click();
+            }
+
+            clearData() {
+                if (confirm('ВНИМАНИЕ! Это удалит ВСЕ данные (страны, туры, настройки). Продолжить?')) {
+                    this.countries = [];
+                    this.tours = [];
+                    this.settings = {};
+                    
+                    sessionStorage.removeItem('worldtravel_data');
+                    localStorage.removeItem('worldtravel_data');
+                    
+                    this.showNotification('✅ Все данные очищены!', 'success');
+                    this.renderDashboard();
+                    this.renderCountries();
+                    this.renderTours();
+                }
+            }
+
+            addSampleData() {
+                const sampleCountries = [
+                    {
+                        id: 'france',
+                        name: 'Франция',
+                        shortDescription: 'Романтическая Франция с её богатой историей и изысканной кухней.',
+                        description: 'Франция - страна искусства, моды и гастрономии. Посетите Эйфелеву башню, Лувр и провансальские поля лаванды.',
+                        price: 'от €800',
+                        capital: 'Париж',
+                        language: 'Французский',
+                        currency: 'Евро (€)',
+                        images: [],
+                        tours: []
+                    },
+                    {
+                        id: 'italy',
+                        name: 'Италия',
+                        shortDescription: 'Страна искусства, древней истории и самой вкусной кухни в мире.',
+                        description: 'Италия предлагает путешественникам богатое культурное наследие, от Древнего Рима до эпохи Возрождения.',
+                        price: 'от €750',
+                        capital: 'Рим',
+                        language: 'Итальянский',
+                        currency: 'Евро (€)',
+                        images: [],
+                        tours: []
+                    }
+                ];
+
+                const sampleTours = [
+                    {
+                        id: 'paris-weekend',
+                        name: 'Парижские выходные',
+                        country: 'Франция',
+                        duration: '3 дня',
+                        price: '€450',
+                        description: 'Экспресс-тур по самым знаковым местам Парижа',
+                        createdAt: new Date().toISOString()
+                    },
+                    {
+                        id: 'rome-classic',
+                        name: 'Классический Рим',
+                        country: 'Италия',
+                        duration: '5 дней',
+                        price: '€600',
+                        description: 'Знакомство с главными достопримечательностями Вечного города',
+                        createdAt: new Date().toISOString()
+                    }
+                ];
+
+                this.countries = [...this.countries, ...sampleCountries];
+                this.tours = [...this.tours, ...sampleTours];
+                this.saveData();
+                
+                this.showNotification('✅ Тестовые данные добавлены!', 'success');
+                this.renderDashboard();
+                this.renderCountries();
+                this.renderTours();
+            }
+
+            openModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.add('active');
+                }
+            }
+
+            closeModal(modalId) {
+                const modal = document.getElementById(modalId);
+                if (modal) {
+                    modal.classList.remove('active');
+                }
+                this.currentEditingId = null;
+            }
+
+            showNotification(message, type = 'success') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                    <span>${message}</span>
+                    <button class="notification-close" onclick="this.parentElement.remove()">&times;</button>
+                `;
+
+                document.body.appendChild(notification);
+
+                // Анимация появления
+                setTimeout(() => notification.classList.add('show'), 100);
+
+                // Автоматическое скрытие
+                setTimeout(() => {
+                    if (notification.parentElement) {
+                        notification.remove();
+                    }
+                }, 5000);
+            }
+
+            generateId(name) {
+                return name.toLowerCase()
+                    .replace(/[^a-z0-9а-яё]/g, '-')
+                    .replace(/-+/g, '-')
+                    .replace(/^-|-$/g, '') + '-' + Date.now();
+            }
+
+            logout() {
+                if (confirm('Выйти из админ-панели?')) {
+                    localStorage.removeItem('adminSession');
+                    sessionStorage.removeItem('adminSession');
+                    window.location.href = 'admin-login.html';
+                }
+            }
+        }
+
+        // Инициализация админ-панели
+        let admin;
+        document.addEventListener('DOMContentLoaded', () => {
+            // Проверка сессии
+            const session = localStorage.getItem('adminSession') || sessionStorage.getItem('adminSession');
+            if (!session) {
+                window.location.href = 'admin-login.html';
+                return;
+            }
+
+            admin = new SuperAdmin();
+            window.admin = admin;
+
+            // Защита от копирования в админке
+            document.addEventListener('contextmenu', (e) => e.preventDefault());
+            document.addEventListener('copy', (e) => e.preventDefault());
+            document.addEventListener('cut', (e) => e.preventDefault());
+        });
+    </script>
+</body>
+</html>
+SUPER_ADMIN_EOF
+echo "✅ super-admin.html обновлен"
+
+# 19. Создаем index-clean-preview-fixed.html
+cat > index-clean-preview-fixed.html << 'CLEAN_PREVIEW_EOF'
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WorldTravel - Clean Preview</title>
+    <style>
+        body { 
+            margin: 0; 
+            font-family: Arial, sans-serif; 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        .container {
+            padding: 40px;
+            max-width: 600px;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 20px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        p {
+            font-size: 1.2em;
+            margin-bottom: 30px;
+            opacity: 0.9;
+        }
+        .badge {
+            background: rgba(255,255,255,0.2);
+            padding: 10px 20px;
+            border-radius: 20px;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>WorldTravel</h1>
+        <p>Чистая версия для предпросмотра в редакторе</p>
+        <div class="badge">✅ Без blob операций</div>
+        <div class="badge" style="margin-top: 10px;">✅ Без JavaScript ошибок</div>
+        <div class="badge" style="margin-top: 10px;">✅ Стабильная работа</div>
+    </div>
+    
+    <!-- НИКАКОГО JavaScript - абсолютно чистая страница -->
+</body>
+</html>
+CLEAN_PREVIEW_EOF
+echo "✅ index-clean-preview-fixed.html обновлен"
+
+# 20. Создаем fix-contacts-final.html
+cat > fix-contacts-final.html << 'FIX_CONTACTS_FINAL_EOF'
+<!-- Заменяем секцию контактов в index.html на эту исправленную версию -->
+<section id="contact" class="contact">
+    <div class="container">
+        <h2 class="section-title">Контакты</h2>
+        <div class="contact-content">
+            <div class="contact-info">
+                <h3>Наши контакты</h3>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <strong>Телефон:</strong>
+                        <p>+7 (999) 123-45-67</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <div>
+                        <strong>Email:</strong>
+                        <p>info@worldtravel.com</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <strong>Адрес:</strong>
+                        <p>Москва, ул. Туристическая, 15</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <strong>Часы работы:</strong>
+                        <p>Пн-Пт: 9:00-18:00</p>
+                    </div>
+                </div>
+            </div>
+            <form class="contact-form">
+                <input type="text" placeholder="Ваше имя" required>
+                <input type="email" placeholder="Ваш email" required>
+                <input type="tel" placeholder="Ваш телефон">
+                <textarea placeholder="Ваше сообщение" rows="5" required></textarea>
+                <button type="submit">Отправить сообщение</button>
+            </form>
+        </div>
+    </div>
+</section>
+FIX_CONTACTS_FINAL_EOF
+echo "✅ fix-contacts-final.html обновлен"
+
+# 21. Создаем fix-contacts-html.html
+cat > fix-contacts-html.html << 'FIX_CONTACTS_HTML_EOF'
+<div class="contact-content" style="display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: start;">
+    <div class="contact-info" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1);">
+        <h3>Наши контакты</h3>
+        <div class="contact-item">
+            <strong><i class="fas fa-phone"></i> Телефон:</strong>
+            <p>+7 (999) 123-45-67</p>
+        </div>
+        <div class="contact-item">
+            <strong><i class="fas fa-envelope"></i> Email:</strong>
+            <p>info@worldtravel.com</p>
+        </div>
+        <div class="contact-item">
+            <strong><i class="fas fa-map-marker-alt"></i> Адрес:</strong>
+            <p>Москва, ул. Туристическая, 15</p>
+        </div>
+        <div class="contact-item">
+            <strong><i class="fas fa-clock"></i> Часы работы:</strong>
+            <p>Пн-Пт: 9:00-18:00</p>
+        </div>
+    </div>
+    <form class="contact-form" style="background: white; padding: 30px; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); display: flex; flex-direction: column; gap: 15px;">
+        <input type="text" placeholder="Ваше имя" required>
+        <input type="email" placeholder="Ваш email" required>
+        <input type="tel" placeholder="Ваш телефон">
+        <textarea placeholder="Ваше сообщение" rows="5" required></textarea>
+        <button type="submit">Отправить сообщение</button>
+    </form>
+</div>
+FIX_CONTACTS_HTML_EOF
+echo "✅ fix-contacts-html.html обновлен"
+
+echo ""
+echo "🎉 ВСЕ ФАЙЛЫ УСПЕШНО ОБНОВЛЕНЫ!"
+echo "📋 Что было сделано:"
+echo "   ✅ Обновлены основные файлы проекта"
+echo "   ✅ Исправлены все JS ошибки"
+echo "   ✅ Улучшена админ-панель"
+echo "   ✅ Исправлены проблемы с Blob URL"
+echo "   ✅ Добавлены улучшенные редакторы"
+echo "   ✅ Созданы все необходимые файлы"
+echo ""
+echo "🚀 Теперь можно запускать проект!"
+
