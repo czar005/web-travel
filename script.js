@@ -76,18 +76,18 @@ function loadCountriesData() {
                     showNoCountriesMessage();
                 }
             } else {
-////                throw new Error('Data manager not available');
-////            }
-////        } catch (err) {
-////            console.error('Error loading countries:', err);
-////            if (loading) loading.style.display = 'none';
-////            if (error) error.style.display = 'block';
-////        }
-    }, 1000);
-}
-
-function displayCountries(countries) {
-    const grid = document.getElementById('destinations-grid');
+//////                throw new Error('Data manager not available');
+//////            }
+//////        } catch (err) {
+//////            console.error('Error loading countries:', err);
+//////            if (loading) loading.style.display = 'none';
+//////            if (error) error.style.display = 'block';
+//////        }
+//    }, 1000);
+//}
+//
+//function displayCountries(countries) {
+//    const grid = document.getElementById('destinations-grid');
     if (!grid) return;
 
     grid.innerHTML = countries.map(country => {
