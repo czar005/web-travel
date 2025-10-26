@@ -1,0 +1,19 @@
+--- a/index.html
++++ b/index.html
+@@ -220,6 +220,9 @@
+     <script src="data-manager-fixed.js"></script>
+     <script src="simple-sync.js"></script>
+     <script>
++        console.log('✅ INLINE SCRIPT EXECUTING');
++        alert('Inline script working!');
++        
+         // Inline test commands
+         console.log('🧪 INLINE TEST COMMANDS LOADED');
+ 
+@@ -247,6 +250,7 @@
+ 
+         console.log('✅ Test commands ready: testSave(), checkData()');
+     </script>
++    <script src="script.js?v=4"></script>
+ </body>
+ </html>

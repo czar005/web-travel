@@ -1,0 +1,356 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Админ-панель - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css?v=3">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 15px 20px;
+            border-radius: 5px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 300px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            color: white;
+        }
+        .notification.success { background: #28a745; }
+        .notification.error { background: #dc3545; }
+        .notification.warning { background: #ffc107; color: #000; }
+        .notification.info { background: #007bff; }
+        
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        
+        .debug-panel {
+            position: fixed;
+            bottom: 10px;
+            right: 10px;
+            background: #333;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            font-size: 12px;
+            z-index: 1000;
+        }
+    </style>
+</head>
+<body>
+    <div class="admin-container">
+        <header class="admin-header">
+            <h1><i class="fas fa-cog"></i> Панель администратора WorldTravel</h1>
+            <nav class="admin-nav">
+                <a href="page-editor.html" class="btn-admin" style="background: #9c27b0;">
+                    <i class="fas fa-edit"></i> Редактор страниц
+                </a>
+                <a href="index.html?fromAdmin=true" class="btn-admin secondary" target="_blank">
+                    <i class="fas fa-eye"></i> Посмотреть сайт
+                </a>
+                <button onclick="logout()" class="btn-admin danger">
+                    <i class="fas fa-sign-out-alt"></i> Выйти
+                </button>
+            </nav>
+        </header>
+
+        <div class="admin-tabs">
+            <button class="tab-button active" data-tab="countries"><i class="fas fa-globe"></i> Страны</button>
+            <button class="tab-button" data-tab="tours"><i class="fas fa-map-marked-alt"></i> Туры</button>
+            <button class="tab-button" data-tab="contacts"><i class="fas fa-address-book"></i> Контакты</button>
+            <button class="tab-button" data-tab="settings"><i class="fas fa-cogs"></i> Настройки</button>
+        </div>
+
+        <div class="tab-content">
+            <!-- Вкладка стран -->
+            <div id="countries-tab" class="tab-pane active">
+                <div class="admin-section">
+                    <h3><i class="fas fa-plus-circle"></i> Добавить новую страну</h3>
+                    <form id="add-country-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="country-name">Название страны *</label>
+                            <input type="text" id="country-name" name="name" required placeholder="Например: Франция">
+                        </div>
+                        <div class="form-group">
+                            <label for="country-description">Описание страны *</label>
+                            <textarea id="country-description" name="description" rows="3" required placeholder="Краткое описание страны для туристов"></textarea>
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-plus"></i> Добавить страну</button>
+                    </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3><i class="fas fa-list"></i> Управление странами</h3>
+                    <div class="table-container">
+                        <table id="countries-table" class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Описание</th>
+                                    <th>Кол-во туров</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Данные загружаются через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка туров -->
+            <div id="tours-tab" class="tab-pane">
+                <div class="admin-section">
+                    <h3><i class="fas fa-plus-circle"></i> Добавить новый тур</h3>
+                    <form id="add-tour-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="tour-country">Выберите страну *</label>
+                            <select id="tour-country" name="country" required>
+                                <option value="">-- Выберите страну --</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="tour-name">Название тура *</label>
+                            <input type="text" id="tour-name" name="name" required placeholder="Например: Романтический Париж">
+                        </div>
+                        <div class="form-group">
+                            <label for="tour-price">Цена *</label>
+                            <input type="text" id="tour-price" name="price" required placeholder="$500">
+                        </div>
+                        <div class="form-group">
+                            <label for="tour-duration">Длительность *</label>
+                            <input type="text" id="tour-duration" name="duration" required placeholder="7 дней">
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-plus"></i> Добавить тур</button>
+                    </form>
+                </div>
+
+                <div class="admin-section">
+                    <h3><i class="fas fa-list"></i> Все туры</h3>
+                    <div class="table-container">
+                        <table id="tours-table" class="admin-table">
+                            <thead>
+                                <tr>
+                                    <th>Тур</th>
+                                    <th>Страна</th>
+                                    <th>Цена</th>
+                                    <th>Длительность</th>
+                                    <th>Действия</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Данные загружаются через JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Вкладка контактов -->
+            <div id="contacts-tab" class="tab-pane">
+                <div class="admin-section">
+                    <h3><i class="fas fa-address-card"></i> Контактная информация</h3>
+                    <p class="admin-hint">Изменения сохраняются автоматически и сразу отображаются на сайте</p>
+                    <form id="contact-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="contact-phone">Телефон *</label>
+                            <input type="text" id="contact-phone" name="phone" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-email">Email *</label>
+                            <input type="email" id="contact-email" name="email" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-address">Адрес *</label>
+                            <input type="text" id="contact-address" name="address" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="contact-hours">Часы работы *</label>
+                            <input type="text" id="contact-hours" name="hours" required placeholder="Пн-Пт: 9:00-18:00">
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-save"></i> Сохранить контакты</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Вкладка настроек -->
+            <div id="settings-tab" class="tab-pane">
+                <div class="admin-section">
+                    <h3><i class="fas fa-wrench"></i> Настройки сайта</h3>
+                    <p class="admin-hint">Изменения сохраняются автоматически и сразу отображаются на сайте</p>
+                    <form id="settings-form" class="admin-form">
+                        <div class="form-group">
+                            <label for="site-title">Заголовок сайта *</label>
+                            <input type="text" id="site-title" name="siteTitle" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="company-name">Название компании *</label>
+                            <input type="text" id="company-name" name="companyName" required>
+                        </div>
+                        <button type="submit" class="btn-admin"><i class="fas fa-save"></i> Сохранить настройки</button>
+                    </form>
+                </div>
+                
+                <div class="admin-section">
+                    <h3><i class="fas fa-database"></i> Управление данными</h3>
+                    <div class="admin-actions">
+                        <button onclick="resetToDefault()" class="btn-admin warning">
+                            <i class="fas fa-undo"></i> Сбросить к стандартным данным
+                        </button>
+                        <button onclick="exportData()" class="btn-admin secondary">
+                            <i class="fas fa-download"></i> Экспорт данных
+                        </button>
+                        <button onclick="importData()" class="btn-admin secondary">
+                            <i class="fas fa-upload"></i> Импорт данных
+                        </button>
+                        <button onclick="forceRefreshData()" class="btn-admin secondary">
+                            <i class="fas fa-sync-alt"></i> Обновить данные
+                        </button>
+                        <button onclick="debugAdmin()" class="btn-admin" style="background: #6f42c1;">
+                            <i class="fas fa-bug"></i> Debug
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Debug Panel -->
+    <div class="debug-panel">
+        <div>Admin v3.0</div>
+        <div id="debug-info">Loading...</div>
+    </div>
+
+    <script src="fix-recursion.js"></script>
+    <script src="data-manager.js?v=3"></script>
+    <script src="admin.js?v=3"></script>
+    <script>
+    <script src="admin-simple-save.js"></script>
+    <script src="admin-save-fix.js"></script>
+    <script src="admin-nav-fix.js"></script>
+    <script src="admin-debug-fix.js"></script>
+    <script src="admin-save-fix.js"></script>
+    <script src="admin-nav-fix.js"></script>
+    <script src="admin-debug-fix.js"></script>
+    <script src="admin-data-interceptor.js"></script>
+    <script src="fix-admin-saving.js"></script>
+        function logout() {
+            if (confirm('Вы уверены, что хотите выйти из админ-панели?')) {
+                window.location.href = 'index.html';
+            }
+        }
+        
+        function resetToDefault() {
+            if (confirm('ВНИМАНИЕ! Это действие удалит все текущие данные и восстановит стандартные настройки. Продолжить?')) {
+                if (window.dataManager) {
+                    window.dataManager.setDefaultData();
+                    showNotification('Данные сброшены к стандартным!', 'success');
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1000);
+                }
+            }
+        }
+        
+        function exportData() {
+            if (window.dataManager) {
+                const data = window.dataManager.getData();
+                const dataStr = JSON.stringify(data, null, 2);
+                const dataBlob = new Blob([dataStr], {type: 'application/json'});
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'worldtravel-backup.json';
+                link.click();
+                URL.revokeObjectURL(url);
+                showNotification('Данные экспортированы!', 'success');
+            }
+        }
+        
+        function importData() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = e => {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    try {
+                        const data = JSON.parse(e.target.result);
+                        if (window.dataManager) {
+                            localStorage.setItem('worldtravel_data', JSON.stringify(data));
+                            showNotification('Данные успешно импортированы!', 'success');
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 1000);
+                        }
+                    } catch (error) {
+                        showNotification('Ошибка: неверный формат файла', 'error');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+        
+        function showNotification(message, type = 'info') {
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            document.body.appendChild(notification);
+            setTimeout(() => {
+                if (notification.parentElement) {
+                    notification.remove();
+                }
+            }, 5000);
+        }
+        
+        // Update debug info
+        function updateDebugInfo() {
+            const debugEl = document.getElementById('debug-info');
+            if (debugEl && window.dataManager) {
+                const data = window.dataManager.getData();
+                debugEl.innerHTML = `
+                    Countries: ${data?.countries?.length || 0} | 
+                    Tours: ${window.dataManager.getAllTours().length} |
+                    Updated: ${data?.lastUpdate ? new Date(data.lastUpdate).toLocaleTimeString() : 'never'}
+                `;
+            }
+        }
+        
+        // Update debug info every 5 seconds
+        setInterval(updateDebugInfo, 5000);
+        setTimeout(updateDebugInfo, 1000);
+
+        // Инициализация вкладок
+        document.addEventListener('DOMContentLoaded', function() {
+            const tabButtons = document.querySelectorAll('.tab-button');
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            
+            tabButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const tabName = this.getAttribute('data-tab');
+                    
+                    // Убираем активный класс у всех кнопок и вкладок
+                    tabButtons.forEach(btn => btn.classList.remove('active'));
+                    tabPanes.forEach(pane => pane.classList.remove('active'));
+                    
+                    // Добавляем активный класс текущей кнопке и вкладке
+                    this.classList.add('active');
+                    document.getElementById(`${tabName}-tab`).classList.add('active');
+                });
+            });
+        });
+    </script>
+<script src="fix-issues-applied.js"></script>
+    <script src="enhanced-image-editor-fixed.js"></script>
+</body>
+</html>

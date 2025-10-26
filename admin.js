@@ -1,4 +1,4 @@
-// Improved Admin JavaScript with better error handling and force refresh
+// Improved Admin JavaScript
 console.log('🔄 Admin JS loading...');
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -90,7 +90,7 @@ function setupAdminEventListeners() {
     refreshBtn.style.marginLeft = '10px';
     refreshBtn.onclick = forceRefreshData;
     
-    const headerActions = document.querySelector('.editor-actions');
+    const headerActions = document.querySelector('.admin-header');
     if (headerActions) {
         headerActions.appendChild(refreshBtn);
     }

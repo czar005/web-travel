@@ -1,25 +1,9 @@
 {
-  "name": "worldtravel-admin",
-  "version": "1.0.0",
-  "description": "Admin panel with email 2FA",
-  "main": "server.js",
+  "name": "worldtravel",
+  "version": "2.0.0",
+  "description": "Travel Agency Website",
+  "main": "index.html",
   "scripts": {
-    "start": "node server.js",
-    "dev": "nodemon server.js"
-  },
-  "dependencies": {
-    "body-parser": "^1.20.2",
-    "cors": "^2.8.5",
-    "crypto": "^1.0.1",
-    "dotenv": "^16.6.1",
-    "express": "^4.21.2",
-    "nodemailer": "^6.10.1"
-  },
-  "devDependencies": {
-    "nodemon": "^3.0.1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "type": "commonjs"
+    "start": "python3 -m http.server 8000"
+  }
 }

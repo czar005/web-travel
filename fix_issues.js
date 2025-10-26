@@ -133,7 +133,6 @@ function updateFooterContacts(contacts) {
     const footerSection = document.querySelector('.footer-section:nth-child(3)');
     if (!footerSection) return;
     
-    const paragraphs = footerSection.querySelectorAll('p');
     
     if (paragraphs.length >= 4) {
         paragraphs[0].innerHTML = `<i class="fas fa-phone"></i> ${contacts.phone}`;
@@ -148,7 +147,6 @@ function fixFooterDuplication() {
     const footerSection = document.querySelector('.footer-section:nth-child(3)');
     if (!footerSection) return;
     
-    const paragraphs = footerSection.querySelectorAll('p');
     const uniqueContacts = new Set();
     
     // Удаляем дубликаты
