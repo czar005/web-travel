@@ -1,12 +1,32 @@
-// Main script for WorldTravel website - Clean Version
+// Main script for WorldTravel website - Safe Image Loading
 console.log('🎯 WorldTravel script loading...');
 
-// Safe initialization with error handling
+// Safe image loader with fallback
+function safeImageLoader(imgElement, src, fallbackSrc = 'images/travel-placeholder.svg') {
+    if (!imgElement || !src) return;
+    
+    // Validate source
+    if (src === 'undefined' || src.includes('undefined')) {
+        console.warn('⚠️ Invalid image source detected, using fallback:', src);
+        imgElement.src = fallbackSrc;
+        return;
+    }
+    
+    const img = new Image();
+    img.onload = function() {
+        imgElement.src = src;
+    };
+    img.onerror = function() {
+        console.warn('⚠️ Image load failed, using fallback:', src);
+        imgElement.src = fallbackSrc;
+    };
+    img.src = src;
+}
+
 function initializeWorldTravel() {
     try {
         console.log('🚀 Initializing WorldTravel website...');
         
-        // Wait for DataManager to be ready
         const checkDataManager = setInterval(() => {
             if (window.dataManager && window.dataManager.initialized) {
                 clearInterval(checkDataManager);
@@ -14,7 +34,6 @@ function initializeWorldTravel() {
             }
         }, 100);
 
-        // Timeout fallback
         setTimeout(() => {
             clearInterval(checkDataManager);
             if (!window.dataManager) {
@@ -54,7 +73,6 @@ function initializeNavigation() {
             });
         }
 
-        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
@@ -73,7 +91,6 @@ function initializeNavigation() {
             });
         });
 
-        // Header background on scroll
         window.addEventListener('scroll', function() {
             const header = document.querySelector('.header');
             if (header) {
@@ -205,10 +222,17 @@ function createCountryCard(country) {
     const popularBadge = country.popular ? '<div class="popular-badge"><i class="fas fa-star"></i> Популярное</div>' : '';
     const toursCount = country.tours ? country.tours.length : 0;
     
+    // Safe image handling
+    const countryImage = country.image && country.image !== 'undefined' ? country.image : 'images/travel-placeholder.svg';
+    
     return `
         <div class="country-card" data-country="${country.name.toLowerCase()}" data-popular="${country.popular}">
             <div class="country-card-image">
-                <img src="${country.image}" alt="${country.name}" loading="lazy" onerror="this.src='images/travel-placeholder.svg'">
+                <img src="images/travel-placeholder.svg" 
+                     data-src="${countryImage}"
+                     alt="${country.name}" 
+                     loading="lazy"
+                     class="country-image">
                 <div class="country-card-overlay">
                     ${popularBadge}
                     <div class="country-flag">${country.flag}</div>
@@ -276,6 +300,13 @@ function initializeCardAnimations() {
             entries.forEach(entry => {
                 if (entry.isIntersecting) {
                     entry.target.style.animation = 'fadeInUp 0.6s ease-out forwards';
+                    
+                    // Load images when card becomes visible
+                    const img = entry.target.querySelector('.country-image');
+                    if (img && img.dataset.src) {
+                        safeImageLoader(img, img.dataset.src);
+                    }
+                    
                     observer.unobserve(entry.target);
                 }
             });
@@ -389,6 +420,7 @@ function scrollToDestinations() {
 // Global functions
 window.loadDestinations = loadDestinations;
 window.scrollToDestinations = scrollToDestinations;
+window.safeImageLoader = safeImageLoader;
 
 // Initialize when DOM is ready
 if (document.readyState === 'loading') {

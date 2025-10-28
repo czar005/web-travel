@@ -3,6 +3,7 @@ class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
         this.initialized = false;
+        this.defaultImage = 'images/travel-placeholder.svg';
         this.init();
     }
 
@@ -10,7 +11,6 @@ class DataManager {
         console.log('🚀 DataManager initializing...');
         
         try {
-            // Ensure we don't double-initialize
             if (this.initialized) {
                 console.log('⚠️ DataManager already initialized');
                 return;
@@ -21,7 +21,6 @@ class DataManager {
             console.log('✅ DataManager initialized successfully');
         } catch (error) {
             console.error('❌ DataManager initialization failed:', error);
-            // Try to recover
             this.emergencyRecovery();
         }
     }
@@ -65,7 +64,7 @@ class DataManager {
                     id: 1,
                     name: "Турция",
                     description: "Страна на стыке Европы и Азии с богатой историей и прекрасными пляжами Средиземноморья.",
-                    image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
                     flag: "🇹🇷",
                     popular: true,
                     season: "Круглый год",
@@ -78,13 +77,39 @@ class DataManager {
                     id: 2,
                     name: "Египет",
                     description: "Древняя страна пирамид, фараонов и красочных коралловых рифов Красного моря.",
-                    image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-                    flag: "��🇬",
+                    image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
+                    flag: "🇪🇬",
                     popular: true,
                     season: "Октябрь - Апрель",
                     tours: [
                         { id: 1, name: "Хургада - Дайвинг тур", price: "52,000 ₽", duration: "8 ночей", rating: 4.9 },
                         { id: 2, name: "Шарм-эль-Шейх - Райский отдых", price: "48,000 ₽", duration: "7 ночей", rating: 4.7 }
+                    ]
+                },
+                {
+                    id: 3,
+                    name: "Таиланд",
+                    description: "Экзотическая страна улыбок, древних храмов и тропических островов.",
+                    image: "https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
+                    flag: "🇹🇭",
+                    popular: true,
+                    season: "Ноябрь - Февраль",
+                    tours: [
+                        { id: 1, name: "Пхукет - Пляжный рай", price: "65,000 ₽", duration: "10 ночей", rating: 4.8 },
+                        { id: 2, name: "Бангкок - Столица контрастов", price: "58,000 ₽", duration: "8 ночей", rating: 4.5 }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "Италия",
+                    description: "Колыбель искусства, моды и самой вкусной кухни в сердце Средиземноморья.",
+                    image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=600&q=80",
+                    flag: "🇮🇹",
+                    popular: false,
+                    season: "Апрель - Октябрь",
+                    tours: [
+                        { id: 1, name: "Рим - Вечный город", price: "78,000 ₽", duration: "6 ночей", rating: 4.9 },
+                        { id: 2, name: "Венеция - Город на воде", price: "82,000 ₽", duration: "5 ночей", rating: 4.7 }
                     ]
                 }
             ],
@@ -102,7 +127,7 @@ class DataManager {
                 },
                 about: {
                     title: "О нас",
-                    description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
+                    description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемны на создании индивидуальных маршрутов и уникальных travel-решений.",
                     image: "images/travel-placeholder.svg",
                     stats: [
                         { value: "5000", label: "Довольных клиентов" },
@@ -150,13 +175,18 @@ class DataManager {
             
             const parsed = JSON.parse(data);
             
-            // Validate data structure
             if (typeof parsed !== 'object' || parsed === null) {
                 console.error('❌ Invalid data structure in localStorage');
                 return null;
             }
             
-            if (!parsed.countries) {
+            // Ensure all country images are valid
+            if (parsed.countries && Array.isArray(parsed.countries)) {
+                parsed.countries = parsed.countries.map(country => ({
+                    ...country,
+                    image: country.image && country.image !== 'undefined' ? country.image : this.defaultImage
+                }));
+            } else {
                 parsed.countries = [];
             }
             
@@ -173,15 +203,19 @@ class DataManager {
                 throw new Error('Invalid data provided to setData');
             }
 
-            // Ensure countries exists
-            if (!Array.isArray(data.countries)) {
+            // Validate and clean country images before saving
+            if (Array.isArray(data.countries)) {
+                data.countries = data.countries.map(country => ({
+                    ...country,
+                    image: country.image && country.image !== 'undefined' ? country.image : this.defaultImage
+                }));
+            } else {
                 data.countries = [];
             }
 
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             
-            // Dispatch custom event for synchronization
             const event = new CustomEvent('worldtravelDataUpdated', { 
                 detail: { 
                     data: data, 
@@ -190,7 +224,6 @@ class DataManager {
                 }
             });
             
-            // Use setTimeout to avoid blocking the main thread
             setTimeout(() => {
                 try {
                     window.dispatchEvent(event);
@@ -207,11 +240,16 @@ class DataManager {
         }
     }
 
-    // Country management methods with error handling
     getCountries() {
         try {
             const data = this.getData();
-            return data?.countries || [];
+            const countries = data?.countries || [];
+            
+            // Final validation before returning
+            return countries.map(country => ({
+                ...country,
+                image: country.image && country.image !== 'undefined' ? country.image : this.defaultImage
+            }));
         } catch (error) {
             console.error('❌ Error getting countries:', error);
             return [];
@@ -234,7 +272,7 @@ class DataManager {
                 id: Date.now(),
                 name: countryData.name || 'Новая страна',
                 description: countryData.description || '',
-                image: countryData.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                image: (countryData.image && countryData.image !== 'undefined') ? countryData.image : this.defaultImage,
                 flag: countryData.flag || "🇺🇳",
                 popular: countryData.popular || false,
                 season: countryData.season || "Круглый год",
@@ -249,7 +287,6 @@ class DataManager {
         }
     }
 
-    // Other methods with similar error handling...
     getAllTours() {
         try {
             const countries = this.getCountries();
@@ -309,7 +346,6 @@ class DataManager {
         }
     }
 
-    // Content management
     getContent() {
         try {
             const data = this.getData();
@@ -337,7 +373,6 @@ class DataManager {
         }
     }
 
-    // Contacts management
     getContacts() {
         try {
             const data = this.getData();
@@ -361,7 +396,6 @@ class DataManager {
         }
     }
 
-    // Settings management
     getSettings() {
         try {
             const data = this.getData();
@@ -385,7 +419,6 @@ class DataManager {
         }
     }
 
-    // Utility methods
     forceRefresh() {
         try {
             const data = this.getData();
@@ -450,9 +483,38 @@ class DataManager {
             return false;
         }
     }
+
+    // New method to fix image URLs
+    fixAllImages() {
+        try {
+            const data = this.getData();
+            if (!data || !Array.isArray(data.countries)) return false;
+
+            let fixed = false;
+            data.countries = data.countries.map(country => {
+                if (!country.image || country.image === 'undefined' || country.image.includes('undefined')) {
+                    fixed = true;
+                    return {
+                        ...country,
+                        image: this.defaultImage
+                    };
+                }
+                return country;
+            });
+
+            if (fixed) {
+                console.log('🖼️ Fixed broken image URLs');
+                return this.setData(data);
+            }
+            
+            return true;
+        } catch (error) {
+            console.error('❌ Error fixing images:', error);
+            return false;
+        }
+    }
 }
 
-// Safe initialization with error handling
 function initializeDataManager() {
     try {
         if (window.dataManager && window.dataManager.initialized) {
@@ -462,7 +524,13 @@ function initializeDataManager() {
         
         window.dataManager = new DataManager();
         
-        // Add global error handler for DataManager
+        // Fix any broken images on startup
+        setTimeout(() => {
+            if (window.dataManager.fixAllImages) {
+                window.dataManager.fixAllImages();
+            }
+        }, 1000);
+        
         window.addEventListener('error', function(e) {
             if (e.message && e.message.includes('dataManager')) {
                 console.error('🚨 Global error caught for DataManager:', e);
@@ -473,7 +541,6 @@ function initializeDataManager() {
     } catch (error) {
         console.error('❌ Critical error initializing DataManager:', error);
         
-        // Create emergency fallback
         window.dataManager = {
             initialized: false,
             getData: () => ({ countries: [], contacts: {}, content: {}, settings: {} }),
@@ -486,6 +553,5 @@ function initializeDataManager() {
     }
 }
 
-// Initialize when script loads
 initializeDataManager();
 console.log('✅ DataManager setup completed');
