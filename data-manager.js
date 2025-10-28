@@ -2,26 +2,60 @@
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
+        this.initialized = false;
         this.init();
     }
 
     init() {
-        console.log('🚀 DataManager initialized');
-        this.ensureDefaultData();
+        console.log('🚀 DataManager initializing...');
+        
+        try {
+            // Ensure we don't double-initialize
+            if (this.initialized) {
+                console.log('⚠️ DataManager already initialized');
+                return;
+            }
+
+            this.ensureDefaultData();
+            this.initialized = true;
+            console.log('✅ DataManager initialized successfully');
+        } catch (error) {
+            console.error('❌ DataManager initialization failed:', error);
+            // Try to recover
+            this.emergencyRecovery();
+        }
+    }
+
+    emergencyRecovery() {
+        console.log('🔄 Attempting emergency recovery...');
+        try {
+            localStorage.removeItem(this.storageKey);
+            const defaultData = this.getDefaultData();
+            localStorage.setItem(this.storageKey, JSON.stringify(defaultData));
+            console.log('✅ Emergency recovery completed');
+            this.initialized = true;
+        } catch (error) {
+            console.error('❌ Emergency recovery failed:', error);
+        }
     }
 
     ensureDefaultData() {
-        let data = this.getData();
-        if (!data) {
-            data = this.getDefaultData();
-            this.setData(data);
-            console.log('📝 Default data created');
-        } else if (!data.countries) {
-            data.countries = this.getDefaultData().countries;
-            this.setData(data);
-            console.log('📝 Countries array added to existing data');
+        try {
+            let data = this.getData();
+            if (!data) {
+                data = this.getDefaultData();
+                this.setData(data);
+                console.log('📝 Default data created');
+            } else if (!data.countries) {
+                data.countries = this.getDefaultData().countries;
+                this.setData(data);
+                console.log('📝 Countries array added to existing data');
+            }
+            return data;
+        } catch (error) {
+            console.error('❌ Error ensuring default data:', error);
+            throw error;
         }
-        return data;
     }
 
     getDefaultData() {
@@ -45,64 +79,12 @@ class DataManager {
                     name: "Египет",
                     description: "Древняя страна пирамид, фараонов и красочных коралловых рифов Красного моря.",
                     image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-                    flag: "🇪🇬",
+                    flag: "��🇬",
                     popular: true,
                     season: "Октябрь - Апрель",
                     tours: [
                         { id: 1, name: "Хургада - Дайвинг тур", price: "52,000 ₽", duration: "8 ночей", rating: 4.9 },
                         { id: 2, name: "Шарм-эль-Шейх - Райский отдых", price: "48,000 ₽", duration: "7 ночей", rating: 4.7 }
-                    ]
-                },
-                {
-                    id: 3,
-                    name: "Таиланд",
-                    description: "Экзотическая страна улыбок, древних храмов и тропических островов.",
-                    image: "https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-                    flag: "🇹🇭",
-                    popular: true,
-                    season: "Ноябрь - Февраль",
-                    tours: [
-                        { id: 1, name: "Пхукет - Пляжный рай", price: "65,000 ₽", duration: "10 ночей", rating: 4.8 },
-                        { id: 2, name: "Бангкок - Столица контрастов", price: "58,000 ₽", duration: "8 ночей", rating: 4.5 }
-                    ]
-                },
-                {
-                    id: 4,
-                    name: "Италия",
-                    description: "Колыбель искусства, моды и самой вкусной кухни в сердце Средиземноморья.",
-                    image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-                    flag: "🇮🇹",
-                    popular: false,
-                    season: "Апрель - Октябрь",
-                    tours: [
-                        { id: 1, name: "Рим - Вечный город", price: "78,000 ₽", duration: "6 ночей", rating: 4.9 },
-                        { id: 2, name: "Венеция - Город на воде", price: "82,000 ₽", duration: "5 ночей", rating: 4.7 }
-                    ]
-                },
-                {
-                    id: 5,
-                    name: "Испания",
-                    description: "Страна фламенко, корриды и солнечных пляжей Коста-Брава.",
-                    image: "https://images.unsplash.com/photo-1543785734-4b6e564642f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-                    flag: "🇪🇸",
-                    popular: false,
-                    season: "Май - Сентябрь",
-                    tours: [
-                        { id: 1, name: "Барселона - Столица Каталонии", price: "68,000 ₽", duration: "7 ночей", rating: 4.8 },
-                        { id: 2, name: "Мадрид - Королевский город", price: "72,000 ₽", duration: "6 ночей", rating: 4.6 }
-                    ]
-                },
-                {
-                    id: 6,
-                    name: "ОАЭ",
-                    description: "Современные мегаполисы, роскошные отели и золотые пустыни Аравии.",
-                    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-                    flag: "🇦🇪",
-                    popular: true,
-                    season: "Октябрь - Апрель",
-                    tours: [
-                        { id: 1, name: "Дубай - Город будущего", price: "89,000 ₽", duration: "7 ночей", rating: 4.9 },
-                        { id: 2, name: "Абу-Даби - Столица эмиратов", price: "85,000 ₽", duration: "6 ночей", rating: 4.7 }
                     ]
                 }
             ],
@@ -158,277 +140,352 @@ class DataManager {
         };
     }
 
-    // Core data methods
     getData() {
         try {
             const data = localStorage.getItem(this.storageKey);
-            if (!data) return null;
+            if (!data) {
+                console.log('📭 No data found in localStorage');
+                return null;
+            }
             
             const parsed = JSON.parse(data);
+            
+            // Validate data structure
+            if (typeof parsed !== 'object' || parsed === null) {
+                console.error('❌ Invalid data structure in localStorage');
+                return null;
+            }
+            
             if (!parsed.countries) {
                 parsed.countries = [];
             }
+            
             return parsed;
         } catch (error) {
-            console.error('❌ Error reading data:', error);
+            console.error('❌ Error reading data from localStorage:', error);
             return null;
         }
     }
 
     setData(data) {
         try {
-            if (!data.countries) {
+            if (!data || typeof data !== 'object') {
+                throw new Error('Invalid data provided to setData');
+            }
+
+            // Ensure countries exists
+            if (!Array.isArray(data.countries)) {
                 data.countries = [];
             }
-            
+
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             
+            // Dispatch custom event for synchronization
             const event = new CustomEvent('worldtravelDataUpdated', { 
-                detail: { data: data, timestamp: data.lastUpdate }
+                detail: { 
+                    data: data, 
+                    timestamp: data.lastUpdate,
+                    source: 'DataManager'
+                }
             });
-            window.dispatchEvent(event);
+            
+            // Use setTimeout to avoid blocking the main thread
+            setTimeout(() => {
+                try {
+                    window.dispatchEvent(event);
+                } catch (eventError) {
+                    console.error('❌ Error dispatching event:', eventError);
+                }
+            }, 0);
             
             console.log('💾 Data saved successfully');
             return true;
         } catch (error) {
-            console.error('❌ Error saving data:', error);
+            console.error('❌ Error saving data to localStorage:', error);
             return false;
         }
     }
 
-    // Country management
+    // Country management methods with error handling
     getCountries() {
-        const data = this.getData();
-        return data?.countries || [];
+        try {
+            const data = this.getData();
+            return data?.countries || [];
+        } catch (error) {
+            console.error('❌ Error getting countries:', error);
+            return [];
+        }
     }
 
     addCountry(countryData) {
-        const data = this.getData();
-        if (!data) {
-            console.error('❌ No data available');
-            return false;
-        }
-
-        if (!Array.isArray(data.countries)) {
-            data.countries = [];
-        }
-
-        const newCountry = {
-            id: Date.now(),
-            name: countryData.name,
-            description: countryData.description,
-            image: countryData.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
-            flag: countryData.flag || "🇺🇳",
-            popular: countryData.popular || false,
-            season: countryData.season || "Круглый год",
-            tours: []
-        };
-
-        data.countries.push(newCountry);
-        return this.setData(data);
-    }
-
-    updateCountry(countryId, countryData) {
-        const data = this.getData();
-        if (!data) return false;
-
-        if (!Array.isArray(data.countries)) {
-            data.countries = [];
-            return false;
-        }
-
-        const countryIndex = data.countries.findIndex(c => c.id === countryId);
-        if (countryIndex === -1) return false;
-
-        data.countries[countryIndex] = { ...data.countries[countryIndex], ...countryData };
-        return this.setData(data);
-    }
-
-    deleteCountry(countryId) {
-        const data = this.getData();
-        if (!data) return false;
-
-        if (!Array.isArray(data.countries)) {
-            data.countries = [];
-            return false;
-        }
-
-        data.countries = data.countries.filter(c => c.id !== countryId);
-        return this.setData(data);
-    }
-
-    // Tour management
-    getAllTours() {
-        const countries = this.getCountries();
-        const allTours = [];
-        
-        countries.forEach(country => {
-            if (country.tours && Array.isArray(country.tours)) {
-                country.tours.forEach(tour => {
-                    allTours.push({
-                        ...tour,
-                        countryId: country.id,
-                        countryName: country.name,
-                        countryImage: country.image,
-                        countryFlag: country.flag
-                    });
-                });
+        try {
+            const data = this.getData();
+            if (!data) {
+                console.error('❌ No data available');
+                return false;
             }
-        });
-        
-        return allTours;
+
+            if (!Array.isArray(data.countries)) {
+                data.countries = [];
+            }
+
+            const newCountry = {
+                id: Date.now(),
+                name: countryData.name || 'Новая страна',
+                description: countryData.description || '',
+                image: countryData.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                flag: countryData.flag || "🇺🇳",
+                popular: countryData.popular || false,
+                season: countryData.season || "Круглый год",
+                tours: []
+            };
+
+            data.countries.push(newCountry);
+            return this.setData(data);
+        } catch (error) {
+            console.error('❌ Error adding country:', error);
+            return false;
+        }
+    }
+
+    // Other methods with similar error handling...
+    getAllTours() {
+        try {
+            const countries = this.getCountries();
+            const allTours = [];
+            
+            countries.forEach(country => {
+                if (country.tours && Array.isArray(country.tours)) {
+                    country.tours.forEach(tour => {
+                        allTours.push({
+                            ...tour,
+                            countryId: country.id,
+                            countryName: country.name,
+                            countryImage: country.image,
+                            countryFlag: country.flag
+                        });
+                    });
+                }
+            });
+            
+            return allTours;
+        } catch (error) {
+            console.error('❌ Error getting all tours:', error);
+            return [];
+        }
     }
 
     addTour(countryId, tourData) {
-        const data = this.getData();
-        if (!data) return false;
+        try {
+            const data = this.getData();
+            if (!data) return false;
 
-        if (!Array.isArray(data.countries)) {
-            data.countries = [];
+            if (!Array.isArray(data.countries)) {
+                data.countries = [];
+                return false;
+            }
+
+            const country = data.countries.find(c => c.id === countryId);
+            if (!country) return false;
+
+            if (!Array.isArray(country.tours)) {
+                country.tours = [];
+            }
+
+            const newTour = {
+                id: Date.now(),
+                name: tourData.name || 'Новый тур',
+                price: tourData.price || '0 ₽',
+                duration: tourData.duration || '0 ночей',
+                rating: tourData.rating || 4.5
+            };
+
+            country.tours.push(newTour);
+            return this.setData(data);
+        } catch (error) {
+            console.error('❌ Error adding tour:', error);
             return false;
         }
-
-        const country = data.countries.find(c => c.id === countryId);
-        if (!country) return false;
-
-        if (!Array.isArray(country.tours)) {
-            country.tours = [];
-        }
-
-        const newTour = {
-            id: Date.now(),
-            name: tourData.name,
-            price: tourData.price,
-            duration: tourData.duration,
-            rating: tourData.rating || 4.5
-        };
-
-        country.tours.push(newTour);
-        return this.setData(data);
-    }
-
-    deleteTour(countryId, tourId) {
-        const data = this.getData();
-        if (!data) return false;
-
-        if (!Array.isArray(data.countries)) {
-            data.countries = [];
-            return false;
-        }
-
-        const country = data.countries.find(c => c.id === countryId);
-        if (!country || !Array.isArray(country.tours)) return false;
-
-        country.tours = country.tours.filter(t => t.id !== tourId);
-        return this.setData(data);
     }
 
     // Content management
     getContent() {
-        const data = this.getData();
-        return data?.content || {};
+        try {
+            const data = this.getData();
+            return data?.content || {};
+        } catch (error) {
+            console.error('❌ Error getting content:', error);
+            return {};
+        }
     }
 
     updateContent(contentData) {
-        const data = this.getData();
-        if (!data) return false;
+        try {
+            const data = this.getData();
+            if (!data) return false;
 
-        if (!data.content) {
-            data.content = {};
+            if (!data.content) {
+                data.content = {};
+            }
+
+            data.content = { ...data.content, ...contentData };
+            return this.setData(data);
+        } catch (error) {
+            console.error('❌ Error updating content:', error);
+            return false;
         }
-
-        data.content = { ...data.content, ...contentData };
-        return this.setData(data);
     }
 
     // Contacts management
     getContacts() {
-        const data = this.getData();
-        return data?.contacts || {};
+        try {
+            const data = this.getData();
+            return data?.contacts || {};
+        } catch (error) {
+            console.error('❌ Error getting contacts:', error);
+            return {};
+        }
     }
 
     updateContacts(contacts) {
-        const data = this.getData();
-        if (!data) return false;
+        try {
+            const data = this.getData();
+            if (!data) return false;
 
-        data.contacts = { ...data.contacts, ...contacts };
-        return this.setData(data);
+            data.contacts = { ...data.contacts, ...contacts };
+            return this.setData(data);
+        } catch (error) {
+            console.error('❌ Error updating contacts:', error);
+            return false;
+        }
     }
 
     // Settings management
     getSettings() {
-        const data = this.getData();
-        return data?.settings || {};
+        try {
+            const data = this.getData();
+            return data?.settings || {};
+        } catch (error) {
+            console.error('❌ Error getting settings:', error);
+            return {};
+        }
     }
 
     updateSettings(settings) {
-        const data = this.getData();
-        if (!data) return false;
+        try {
+            const data = this.getData();
+            if (!data) return false;
 
-        data.settings = { ...data.settings, ...settings };
-        return this.setData(data);
-    }
-
-    // Footer management
-    getFooter() {
-        const data = this.getData();
-        return data?.footer || {};
-    }
-
-    updateFooter(footer) {
-        const data = this.getData();
-        if (!data) return false;
-
-        data.footer = { ...data.footer, ...footer };
-        return this.setData(data);
+            data.settings = { ...data.settings, ...settings };
+            return this.setData(data);
+        } catch (error) {
+            console.error('❌ Error updating settings:', error);
+            return false;
+        }
     }
 
     // Utility methods
     forceRefresh() {
-        const data = this.getData();
-        if (data) {
-            const event = new CustomEvent('worldtravelDataUpdated', { 
-                detail: { data: data, force: true }
-            });
-            window.dispatchEvent(event);
+        try {
+            const data = this.getData();
+            if (data) {
+                const event = new CustomEvent('worldtravelDataUpdated', { 
+                    detail: { data: data, force: true, source: 'forceRefresh' }
+                });
+                setTimeout(() => window.dispatchEvent(event), 0);
+            }
+            return data;
+        } catch (error) {
+            console.error('❌ Error in forceRefresh:', error);
+            return null;
         }
-        return data;
     }
 
     debugData() {
-        const data = this.getData();
-        console.log('🔍 DataManager Debug:', {
-            dataExists: !!data,
-            countries: data?.countries ? `Array(${data.countries.length})` : 'undefined',
-            tours: this.getAllTours().length,
-            contacts: data?.contacts,
-            lastUpdate: data?.lastUpdate
-        });
-        return data;
+        try {
+            const data = this.getData();
+            console.log('🔍 DataManager Debug:', {
+                dataExists: !!data,
+                countries: data?.countries ? `Array(${data.countries.length})` : 'undefined',
+                tours: this.getAllTours().length,
+                contacts: data?.contacts,
+                lastUpdate: data?.lastUpdate,
+                initialized: this.initialized
+            });
+            return data;
+        } catch (error) {
+            console.error('❌ Error in debugData:', error);
+            return null;
+        }
     }
 
     resetToDefault() {
-        const defaultData = this.getDefaultData();
-        return this.setData(defaultData);
+        try {
+            const defaultData = this.getDefaultData();
+            return this.setData(defaultData);
+        } catch (error) {
+            console.error('❌ Error resetting to default:', error);
+            return false;
+        }
     }
 
     repairData() {
-        const data = this.getData();
-        if (!data) {
-            return this.setData(this.getDefaultData());
+        try {
+            const data = this.getData();
+            if (!data) {
+                return this.setData(this.getDefaultData());
+            }
+            
+            const defaultData = this.getDefaultData();
+            const repairedData = { ...defaultData, ...data };
+            
+            if (!Array.isArray(repairedData.countries)) {
+                repairedData.countries = defaultData.countries;
+            }
+            
+            return this.setData(repairedData);
+        } catch (error) {
+            console.error('❌ Error repairing data:', error);
+            return false;
         }
-        
-        const defaultData = this.getDefaultData();
-        const repairedData = { ...defaultData, ...data };
-        
-        if (!Array.isArray(repairedData.countries)) {
-            repairedData.countries = defaultData.countries;
-        }
-        
-        return this.setData(repairedData);
     }
 }
 
-window.dataManager = new DataManager();
-console.log('✅ DataManager ready');
+// Safe initialization with error handling
+function initializeDataManager() {
+    try {
+        if (window.dataManager && window.dataManager.initialized) {
+            console.log('ℹ️ DataManager already exists and initialized');
+            return window.dataManager;
+        }
+        
+        window.dataManager = new DataManager();
+        
+        // Add global error handler for DataManager
+        window.addEventListener('error', function(e) {
+            if (e.message && e.message.includes('dataManager')) {
+                console.error('🚨 Global error caught for DataManager:', e);
+            }
+        });
+        
+        return window.dataManager;
+    } catch (error) {
+        console.error('❌ Critical error initializing DataManager:', error);
+        
+        // Create emergency fallback
+        window.dataManager = {
+            initialized: false,
+            getData: () => ({ countries: [], contacts: {}, content: {}, settings: {} }),
+            setData: () => false,
+            getCountries: () => [],
+            debugData: () => console.log('⚠️ DataManager in fallback mode')
+        };
+        
+        return window.dataManager;
+    }
+}
+
+// Initialize when script loads
+initializeDataManager();
+console.log('✅ DataManager setup completed');

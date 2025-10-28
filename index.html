@@ -4,9 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WorldTravel - Туристическая компания</title>
-    <link rel="stylesheet" href="style.css?v=6">
+    <link rel="stylesheet" href="style.css?v=7">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
+    <!-- Preload critical resources -->
+    <link rel="preload" href="data-manager.js" as="script">
+    <link rel="preload" href="script.js" as="script">
 </head>
 <body>
     <!-- Header -->
@@ -45,7 +49,7 @@
             <div class="floating-element element-2"><i class="fas fa-map-marked-alt"></i></div>
             <div class="floating-element element-3"><i class="fas fa-passport"></i></div>
             <div class="image-placeholder pulse-animation">
-                <img src="images/travel-placeholder.svg" alt="Путешествия" class="hero-img">
+                <img src="images/travel-placeholder.svg" alt="Путешествия" class="hero-img" loading="lazy">
             </div>
         </div>
     </section>
@@ -74,7 +78,7 @@
                 </div>
                 <div class="about-image">
                     <div class="image-placeholder rotate-animation">
-                        <img src="images/travel-placeholder.svg" alt="Команда WorldTravel" class="about-img">
+                        <img src="images/travel-placeholder.svg" alt="Команда WorldTravel" class="about-img" loading="lazy">
                     </div>
                 </div>
             </div>
@@ -211,9 +215,12 @@
         </div>
     </footer>
 
-    <!-- Scripts -->
+    <!-- Scripts with proper order and error handling -->
     <script src="data-manager.js"></script>
     <script src="content-sync.js"></script>
     <script src="script.js"></script>
+    
+    <!-- Debug script - remove in production -->
+    <script src="debug-404.js"></script>
 </body>
 </html>
