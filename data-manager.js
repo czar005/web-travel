@@ -17,7 +17,6 @@ class DataManager {
             this.setData(data);
             console.log('📝 Default data created');
         } else if (!data.countries) {
-            // Если данные есть, но countries отсутствует - добавляем
             data.countries = this.getDefaultData().countries;
             this.setData(data);
             console.log('📝 Countries array added to existing data');
@@ -31,28 +30,79 @@ class DataManager {
                 {
                     id: 1,
                     name: "Турция",
-                    description: "Страна на стыке Европы и Азии с богатой историей и прекрасными пляжами.",
+                    description: "Страна на стыке Европы и Азии с богатой историей и прекрасными пляжами Средиземноморья.",
+                    image: "https://images.unsplash.com/photo-1578683010236-d716f9a3f461?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    flag: "🇹🇷",
+                    popular: true,
+                    season: "Круглый год",
                     tours: [
-                        { id: 1, name: "Анталия - Все включено", price: "45,000 ₽", duration: "7 ночей" },
-                        { id: 2, name: "Стамбул - Город контрастов", price: "38,000 ₽", duration: "5 ночей" }
+                        { id: 1, name: "Анталия - Все включено", price: "45,000 ₽", duration: "7 ночей", rating: 4.8 },
+                        { id: 2, name: "Стамбул - Город контрастов", price: "38,000 ₽", duration: "5 ночей", rating: 4.6 }
                     ]
                 },
                 {
                     id: 2,
                     name: "Египет",
-                    description: "Древняя страна пирамид и красочных коралловых рифов.",
+                    description: "Древняя страна пирамид, фараонов и красочных коралловых рифов Красного моря.",
+                    image: "https://images.unsplash.com/photo-1539650116574-75c0c6d73f7e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    flag: "🇪🇬",
+                    popular: true,
+                    season: "Октябрь - Апрель",
                     tours: [
-                        { id: 1, name: "Хургада - Дайвинг тур", price: "52,000 ₽", duration: "8 ночей" },
-                        { id: 2, name: "Шарм-эль-Шейх - Райский отдых", price: "48,000 ₽", duration: "7 ночей" }
+                        { id: 1, name: "Хургада - Дайвинг тур", price: "52,000 ₽", duration: "8 ночей", rating: 4.9 },
+                        { id: 2, name: "Шарм-эль-Шейх - Райский отдых", price: "48,000 ₽", duration: "7 ночей", rating: 4.7 }
                     ]
                 },
                 {
                     id: 3,
                     name: "Таиланд",
-                    description: "Экзотическая страна улыбок, храмов и тропических островов.",
+                    description: "Экзотическая страна улыбок, древних храмов и тропических островов.",
+                    image: "https://images.unsplash.com/photo-1528181304800-259b08848526?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    flag: "🇹🇭",
+                    popular: true,
+                    season: "Ноябрь - Февраль",
                     tours: [
-                        { id: 1, name: "Пхукет - Пляжный рай", price: "65,000 ₽", duration: "10 ночей" },
-                        { id: 2, name: "Бангкок - Столица контрастов", price: "58,000 ₽", duration: "8 ночей" }
+                        { id: 1, name: "Пхукет - Пляжный рай", price: "65,000 ₽", duration: "10 ночей", rating: 4.8 },
+                        { id: 2, name: "Бангкок - Столица контрастов", price: "58,000 ₽", duration: "8 ночей", rating: 4.5 }
+                    ]
+                },
+                {
+                    id: 4,
+                    name: "Италия",
+                    description: "Колыбель искусства, моды и самой вкусной кухни в сердце Средиземноморья.",
+                    image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    flag: "🇮🇹",
+                    popular: false,
+                    season: "Апрель - Октябрь",
+                    tours: [
+                        { id: 1, name: "Рим - Вечный город", price: "78,000 ₽", duration: "6 ночей", rating: 4.9 },
+                        { id: 2, name: "Венеция - Город на воде", price: "82,000 ₽", duration: "5 ночей", rating: 4.7 }
+                    ]
+                },
+                {
+                    id: 5,
+                    name: "Испания",
+                    description: "Страна фламенко, корриды и солнечных пляжей Коста-Брава.",
+                    image: "https://images.unsplash.com/photo-1543785734-4b6e564642f8?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    flag: "🇪🇸",
+                    popular: false,
+                    season: "Май - Сентябрь",
+                    tours: [
+                        { id: 1, name: "Барселона - Столица Каталонии", price: "68,000 ₽", duration: "7 ночей", rating: 4.8 },
+                        { id: 2, name: "Мадрид - Королевский город", price: "72,000 ₽", duration: "6 ночей", rating: 4.6 }
+                    ]
+                },
+                {
+                    id: 6,
+                    name: "ОАЭ",
+                    description: "Современные мегаполисы, роскошные отели и золотые пустыни Аравии.",
+                    image: "https://images.unsplash.com/photo-1512453979798-5ea266f8880c?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+                    flag: "🇦🇪",
+                    popular: true,
+                    season: "Октябрь - Апрель",
+                    tours: [
+                        { id: 1, name: "Дубай - Город будущего", price: "89,000 ₽", duration: "7 ночей", rating: 4.9 },
+                        { id: 2, name: "Абу-Даби - Столица эмиратов", price: "85,000 ₽", duration: "6 ночей", rating: 4.7 }
                     ]
                 }
             ],
@@ -115,7 +165,6 @@ class DataManager {
             if (!data) return null;
             
             const parsed = JSON.parse(data);
-            // Гарантируем что countries всегда существует
             if (!parsed.countries) {
                 parsed.countries = [];
             }
@@ -128,7 +177,6 @@ class DataManager {
 
     setData(data) {
         try {
-            // Гарантируем что countries всегда существует
             if (!data.countries) {
                 data.countries = [];
             }
@@ -136,7 +184,6 @@ class DataManager {
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             
-            // Dispatch custom event for synchronization
             const event = new CustomEvent('worldtravelDataUpdated', { 
                 detail: { data: data, timestamp: data.lastUpdate }
             });
@@ -163,7 +210,6 @@ class DataManager {
             return false;
         }
 
-        // Гарантируем что countries существует
         if (!Array.isArray(data.countries)) {
             data.countries = [];
         }
@@ -172,6 +218,10 @@ class DataManager {
             id: Date.now(),
             name: countryData.name,
             description: countryData.description,
+            image: countryData.image || "https://images.unsplash.com/photo-1488646953014-85cb44e25828?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=1200&q=80",
+            flag: countryData.flag || "🇺🇳",
+            popular: countryData.popular || false,
+            season: countryData.season || "Круглый год",
             tours: []
         };
 
@@ -219,7 +269,9 @@ class DataManager {
                     allTours.push({
                         ...tour,
                         countryId: country.id,
-                        countryName: country.name
+                        countryName: country.name,
+                        countryImage: country.image,
+                        countryFlag: country.flag
                     });
                 });
             }
@@ -248,7 +300,8 @@ class DataManager {
             id: Date.now(),
             name: tourData.name,
             price: tourData.price,
-            duration: tourData.duration
+            duration: tourData.duration,
+            rating: tourData.rating || 4.5
         };
 
         country.tours.push(newTour);
@@ -355,24 +408,20 @@ class DataManager {
         return data;
     }
 
-    // Reset to default data if needed
     resetToDefault() {
         const defaultData = this.getDefaultData();
         return this.setData(defaultData);
     }
 
-    // Repair data structure
     repairData() {
         const data = this.getData();
         if (!data) {
             return this.setData(this.getDefaultData());
         }
         
-        // Ensure all required fields exist
         const defaultData = this.getDefaultData();
         const repairedData = { ...defaultData, ...data };
         
-        // Ensure arrays are properly initialized
         if (!Array.isArray(repairedData.countries)) {
             repairedData.countries = defaultData.countries;
         }
@@ -381,6 +430,5 @@ class DataManager {
     }
 }
 
-// Initialize global data manager
 window.dataManager = new DataManager();
 console.log('✅ DataManager ready');
