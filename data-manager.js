@@ -16,6 +16,11 @@ class DataManager {
             data = this.getDefaultData();
             this.setData(data);
             console.log('📝 Default data created');
+        } else if (!data.countries) {
+            // Если данные есть, но countries отсутствует - добавляем
+            data.countries = this.getDefaultData().countries;
+            this.setData(data);
+            console.log('📝 Countries array added to existing data');
         }
         return data;
     }
@@ -107,7 +112,14 @@ class DataManager {
     getData() {
         try {
             const data = localStorage.getItem(this.storageKey);
-            return data ? JSON.parse(data) : null;
+            if (!data) return null;
+            
+            const parsed = JSON.parse(data);
+            // Гарантируем что countries всегда существует
+            if (!parsed.countries) {
+                parsed.countries = [];
+            }
+            return parsed;
         } catch (error) {
             console.error('❌ Error reading data:', error);
             return null;
@@ -116,6 +128,11 @@ class DataManager {
 
     setData(data) {
         try {
+            // Гарантируем что countries всегда существует
+            if (!data.countries) {
+                data.countries = [];
+            }
+            
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             
@@ -146,8 +163,8 @@ class DataManager {
             return false;
         }
 
-        // Ensure countries array exists
-        if (!data.countries) {
+        // Гарантируем что countries существует
+        if (!Array.isArray(data.countries)) {
             data.countries = [];
         }
 
@@ -166,8 +183,7 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
-        // Ensure countries array exists
-        if (!data.countries) {
+        if (!Array.isArray(data.countries)) {
             data.countries = [];
             return false;
         }
@@ -183,8 +199,7 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
-        // Ensure countries array exists
-        if (!data.countries) {
+        if (!Array.isArray(data.countries)) {
             data.countries = [];
             return false;
         }
@@ -199,7 +214,7 @@ class DataManager {
         const allTours = [];
         
         countries.forEach(country => {
-            if (country.tours) {
+            if (country.tours && Array.isArray(country.tours)) {
                 country.tours.forEach(tour => {
                     allTours.push({
                         ...tour,
@@ -217,8 +232,7 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
-        // Ensure countries array exists
-        if (!data.countries) {
+        if (!Array.isArray(data.countries)) {
             data.countries = [];
             return false;
         }
@@ -226,7 +240,9 @@ class DataManager {
         const country = data.countries.find(c => c.id === countryId);
         if (!country) return false;
 
-        if (!country.tours) country.tours = [];
+        if (!Array.isArray(country.tours)) {
+            country.tours = [];
+        }
 
         const newTour = {
             id: Date.now(),
@@ -243,14 +259,13 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
-        // Ensure countries array exists
-        if (!data.countries) {
+        if (!Array.isArray(data.countries)) {
             data.countries = [];
             return false;
         }
 
         const country = data.countries.find(c => c.id === countryId);
-        if (!country || !country.tours) return false;
+        if (!country || !Array.isArray(country.tours)) return false;
 
         country.tours = country.tours.filter(t => t.id !== tourId);
         return this.setData(data);
@@ -331,7 +346,8 @@ class DataManager {
     debugData() {
         const data = this.getData();
         console.log('🔍 DataManager Debug:', {
-            countries: data?.countries?.length || 0,
+            dataExists: !!data,
+            countries: data?.countries ? `Array(${data.countries.length})` : 'undefined',
             tours: this.getAllTours().length,
             contacts: data?.contacts,
             lastUpdate: data?.lastUpdate
@@ -343,6 +359,25 @@ class DataManager {
     resetToDefault() {
         const defaultData = this.getDefaultData();
         return this.setData(defaultData);
+    }
+
+    // Repair data structure
+    repairData() {
+        const data = this.getData();
+        if (!data) {
+            return this.setData(this.getDefaultData());
+        }
+        
+        // Ensure all required fields exist
+        const defaultData = this.getDefaultData();
+        const repairedData = { ...defaultData, ...data };
+        
+        // Ensure arrays are properly initialized
+        if (!Array.isArray(repairedData.countries)) {
+            repairedData.countries = defaultData.countries;
+        }
+        
+        return this.setData(repairedData);
     }
 }
 
