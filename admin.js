@@ -26,6 +26,11 @@ function initializeAdmin() {
         if (!window.dataManager) {
             console.error('❌ DataManager not available, using fallback');
             showAdminNotification('Ошибка загрузки данных. Обновите страницу.', 'error');
+            // Try to initialize data manager manually
+            if (typeof DataManager !== 'undefined') {
+                window.dataManager = new DataManager();
+                loadAdminData();
+            }
         }
     }, 5000);
 }
@@ -65,6 +70,17 @@ function setupAdminEventListeners() {
         button.addEventListener('click', function() {
             const tabName = this.getAttribute('data-tab');
             console.log('📑 Switching to tab:', tabName);
+            
+            // Update active tab UI
+            tabButtons.forEach(btn => btn.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show/hide tab content
+            document.querySelectorAll('.tab-pane').forEach(pane => {
+                pane.classList.remove('active');
+            });
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
             switch(tabName) {
                 case 'countries':
                     loadCountriesTable();
@@ -90,9 +106,31 @@ function setupAdminEventListeners() {
     refreshBtn.style.marginLeft = '10px';
     refreshBtn.onclick = forceRefreshData;
     
-    const headerActions = document.querySelector('.admin-header');
+    const headerActions = document.querySelector('.admin-nav');
     if (headerActions) {
         headerActions.appendChild(refreshBtn);
+    }
+
+    // Reset data button for emergencies
+    const resetBtn = document.createElement('button');
+    resetBtn.className = 'btn-admin danger';
+    resetBtn.innerHTML = '<i class="fas fa-redo"></i> Сбросить данные';
+    resetBtn.style.marginLeft = '10px';
+    resetBtn.onclick = resetData;
+    resetBtn.title = 'Восстановить стандартные данные';
+    
+    if (headerActions) {
+        headerActions.appendChild(resetBtn);
+    }
+}
+
+function resetData() {
+    if (confirm('Вы уверены, что хотите сбросить все данные к стандартным? Это удалит все добавленные страны и туры.')) {
+        if (window.dataManager && window.dataManager.resetToDefault) {
+            window.dataManager.resetToDefault();
+            loadAdminData();
+            showAdminNotification('Данные сброшены к стандартным', 'success');
+        }
     }
 }
 
@@ -127,10 +165,11 @@ function loadAdminData() {
         loadToursTable();
         loadContactsForm();
         loadSettingsForm();
-        showAdminNotification('Данные успешно загружены', 'success');
+        console.log('✅ Admin data loaded successfully');
     } else {
         showAdminNotification('Данные не найдены, создаем стандартные', 'warning');
-        window.dataManager.setDefaultData();
+        // Try to ensure default data exists
+        window.dataManager.ensureDefaultData();
         setTimeout(loadAdminData, 500);
     }
 }
@@ -316,16 +355,21 @@ function handleAddCountry(e) {
         return;
     }
     
-    const result = window.dataManager.addCountry(countryData);
-    if (result) {
-        form.reset();
-        loadCountriesTable();
-        loadCountrySelect();
-        showAdminNotification(`Страна "${countryData.name}" успешно добавлена!`, 'success');
-        console.log('✅ Country added:', countryData.name);
-    } else {
-        showAdminNotification('Ошибка при добавлении страны', 'error');
-        console.error('❌ Failed to add country');
+    try {
+        const result = window.dataManager.addCountry(countryData);
+        if (result) {
+            form.reset();
+            loadCountriesTable();
+            loadCountrySelect();
+            showAdminNotification(`Страна "${countryData.name}" успешно добавлена!`, 'success');
+            console.log('✅ Country added:', countryData.name);
+        } else {
+            showAdminNotification('Ошибка при добавлении страны', 'error');
+            console.error('❌ Failed to add country');
+        }
+    } catch (error) {
+        console.error('❌ Error adding country:', error);
+        showAdminNotification('Ошибка при добавлении страны: ' + error.message, 'error');
     }
 }
 
@@ -370,15 +414,20 @@ function handleAddTour(e) {
         return;
     }
     
-    const result = window.dataManager.addTour(countryId, tourData);
-    if (result) {
-        form.reset();
-        loadToursTable();
-        showAdminNotification(`Тур "${tourData.name}" успешно добавлен!`, 'success');
-        console.log('✅ Tour added:', tourData.name);
-    } else {
-        showAdminNotification('Ошибка при добавлении тура', 'error');
-        console.error('❌ Failed to add tour');
+    try {
+        const result = window.dataManager.addTour(countryId, tourData);
+        if (result) {
+            form.reset();
+            loadToursTable();
+            showAdminNotification(`Тур "${tourData.name}" успешно добавлен!`, 'success');
+            console.log('✅ Tour added:', tourData.name);
+        } else {
+            showAdminNotification('Ошибка при добавлении тура', 'error');
+            console.error('❌ Failed to add tour');
+        }
+    } catch (error) {
+        console.error('❌ Error adding tour:', error);
+        showAdminNotification('Ошибка при добавлении тура: ' + error.message, 'error');
     }
 }
 
@@ -401,9 +450,14 @@ function handleUpdateContacts(e) {
         return;
     }
     
-    window.dataManager.updateContacts(contactData);
-    showAdminNotification('Контактная информация обновлена!', 'success');
-    console.log('✅ Contacts updated');
+    try {
+        window.dataManager.updateContacts(contactData);
+        showAdminNotification('Контактная информация обновлена!', 'success');
+        console.log('✅ Contacts updated');
+    } catch (error) {
+        console.error('❌ Error updating contacts:', error);
+        showAdminNotification('Ошибка обновления контактов: ' + error.message, 'error');
+    }
 }
 
 function handleUpdateSettings(e) {
@@ -423,9 +477,14 @@ function handleUpdateSettings(e) {
         return;
     }
     
-    window.dataManager.updateSettings(settingsData);
-    showAdminNotification('Настройки сайта обновлены!', 'success');
-    console.log('✅ Settings updated');
+    try {
+        window.dataManager.updateSettings(settingsData);
+        showAdminNotification('Настройки сайта обновлены!', 'success');
+        console.log('✅ Settings updated');
+    } catch (error) {
+        console.error('❌ Error updating settings:', error);
+        showAdminNotification('Ошибка обновления настроек: ' + error.message, 'error');
+    }
 }
 
 // Country management functions
@@ -445,15 +504,20 @@ function editCountry(countryId) {
         if (newDesc === null) return;
         
         if (newName.trim()) {
-            window.dataManager.updateCountry(countryId, {
-                name: newName.trim(),
-                description: newDesc.trim()
-            });
-            loadCountriesTable();
-            loadCountrySelect();
-            loadToursTable();
-            showAdminNotification('Страна обновлена!', 'success');
-            console.log('✅ Country updated');
+            try {
+                window.dataManager.updateCountry(countryId, {
+                    name: newName.trim(),
+                    description: newDesc.trim()
+                });
+                loadCountriesTable();
+                loadCountrySelect();
+                loadToursTable();
+                showAdminNotification('Страна обновлена!', 'success');
+                console.log('✅ Country updated');
+            } catch (error) {
+                console.error('❌ Error updating country:', error);
+                showAdminNotification('Ошибка обновления страны', 'error');
+            }
         } else {
             showAdminNotification('Название страны не может быть пустым', 'error');
         }
@@ -476,14 +540,19 @@ function deleteCountry(countryId) {
         : `Вы уверены, что хотите удалить страну "${country.name}"?`;
     
     if (confirm(message)) {
-        if (window.dataManager.deleteCountry(countryId)) {
-            loadCountriesTable();
-            loadToursTable();
-            loadCountrySelect();
-            showAdminNotification('Страна удалена!', 'success');
-            console.log('✅ Country deleted');
-        } else {
-            showAdminNotification('Ошибка при удалении страны', 'error');
+        try {
+            if (window.dataManager.deleteCountry(countryId)) {
+                loadCountriesTable();
+                loadToursTable();
+                loadCountrySelect();
+                showAdminNotification('Страна удалена!', 'success');
+                console.log('✅ Country deleted');
+            } else {
+                showAdminNotification('Ошибка при удалении страны', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error deleting country:', error);
+            showAdminNotification('Ошибка удаления страны', 'error');
         }
     }
 }
@@ -508,16 +577,21 @@ function editTour(countryId, tourId) {
         if (newDuration === null) return;
         
         if (newName.trim() && newPrice && newDuration.trim()) {
-            // Delete old tour and create new one
-            if (window.dataManager.deleteTour(countryId, tourId)) {
-                window.dataManager.addTour(countryId, {
-                    name: newName.trim(),
-                    price: newPrice.trim(),
-                    duration: newDuration.trim()
-                });
-                loadToursTable();
-                showAdminNotification('Тур обновлен!', 'success');
-                console.log('✅ Tour updated');
+            try {
+                // Delete old tour and create new one
+                if (window.dataManager.deleteTour(countryId, tourId)) {
+                    window.dataManager.addTour(countryId, {
+                        name: newName.trim(),
+                        price: newPrice.trim(),
+                        duration: newDuration.trim()
+                    });
+                    loadToursTable();
+                    showAdminNotification('Тур обновлен!', 'success');
+                    console.log('✅ Tour updated');
+                }
+            } catch (error) {
+                console.error('❌ Error updating tour:', error);
+                showAdminNotification('Ошибка обновления тура', 'error');
             }
         } else {
             showAdminNotification('Все поля должны быть заполнены', 'error');
@@ -534,12 +608,17 @@ function deleteTour(countryId, tourId) {
     const tour = allTours.find(t => t.id === tourId && t.countryId === countryId);
     
     if (tour && confirm(`Вы уверены, что хотите удалить тур "${tour.name}"?`)) {
-        if (window.dataManager.deleteTour(countryId, tourId)) {
-            loadToursTable();
-            showAdminNotification('Тур удален!', 'success');
-            console.log('✅ Tour deleted');
-        } else {
-            showAdminNotification('Ошибка при удалении тура', 'error');
+        try {
+            if (window.dataManager.deleteTour(countryId, tourId)) {
+                loadToursTable();
+                showAdminNotification('Тур удален!', 'success');
+                console.log('✅ Tour deleted');
+            } else {
+                showAdminNotification('Ошибка при удалении тура', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error deleting tour:', error);
+            showAdminNotification('Ошибка удаления тура', 'error');
         }
     }
 }

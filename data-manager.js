@@ -141,7 +141,15 @@ class DataManager {
 
     addCountry(countryData) {
         const data = this.getData();
-        if (!data) return false;
+        if (!data) {
+            console.error('❌ No data available');
+            return false;
+        }
+
+        // Ensure countries array exists
+        if (!data.countries) {
+            data.countries = [];
+        }
 
         const newCountry = {
             id: Date.now(),
@@ -158,6 +166,12 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
+        // Ensure countries array exists
+        if (!data.countries) {
+            data.countries = [];
+            return false;
+        }
+
         const countryIndex = data.countries.findIndex(c => c.id === countryId);
         if (countryIndex === -1) return false;
 
@@ -168,6 +182,12 @@ class DataManager {
     deleteCountry(countryId) {
         const data = this.getData();
         if (!data) return false;
+
+        // Ensure countries array exists
+        if (!data.countries) {
+            data.countries = [];
+            return false;
+        }
 
         data.countries = data.countries.filter(c => c.id !== countryId);
         return this.setData(data);
@@ -197,6 +217,12 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
+        // Ensure countries array exists
+        if (!data.countries) {
+            data.countries = [];
+            return false;
+        }
+
         const country = data.countries.find(c => c.id === countryId);
         if (!country) return false;
 
@@ -217,6 +243,12 @@ class DataManager {
         const data = this.getData();
         if (!data) return false;
 
+        // Ensure countries array exists
+        if (!data.countries) {
+            data.countries = [];
+            return false;
+        }
+
         const country = data.countries.find(c => c.id === countryId);
         if (!country || !country.tours) return false;
 
@@ -233,6 +265,10 @@ class DataManager {
     updateContent(contentData) {
         const data = this.getData();
         if (!data) return false;
+
+        if (!data.content) {
+            data.content = {};
+        }
 
         data.content = { ...data.content, ...contentData };
         return this.setData(data);
@@ -301,6 +337,12 @@ class DataManager {
             lastUpdate: data?.lastUpdate
         });
         return data;
+    }
+
+    // Reset to default data if needed
+    resetToDefault() {
+        const defaultData = this.getDefaultData();
+        return this.setData(defaultData);
     }
 }
 
