@@ -118,6 +118,16 @@
             border-color: #2c5aa0;
             background: #e3f2fd;
         }
+
+        .editor-description {
+            color: #666;
+            font-size: 14px;
+            margin-bottom: 15px;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 6px;
+            border-left: 4px solid #2c5aa0;
+        }
     </style>
 </head>
 <body>
@@ -154,6 +164,10 @@
                 <div class="editor-mode-switch">
                     <div class="mode-btn active" data-mode="basic">Базовый</div>
                     <div class="mode-btn" data-mode="enhanced">Расширенный</div>
+                </div>
+                
+                <div class="editor-description" id="mode-description">
+                    💡 <strong>Базовый режим</strong>: Редактирование заголовка и описания секции
                 </div>
                 
                 <h3>Структура страницы</h3>
@@ -193,26 +207,26 @@
                             <label>Описание:</label>
                             <textarea class="form-control" id="section-description" rows="4" data-field="description"></textarea>
                         </div>
+                        
+                        <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 20px;">
+                            <button class="btn-admin" onclick="saveSection()">
+                                <i class="fas fa-save"></i> Сохранить изменения
+                            </button>
+                            <button class="btn-admin secondary" onclick="resetSection()">
+                                <i class="fas fa-undo"></i> Сбросить
+                            </button>
+                        </div>
                     </div>
                     
                     <!-- Enhanced editor will be injected here -->
                     <div id="enhanced-editor-content"></div>
-
-                    <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="btn-admin" onclick="saveSection()">
-                            <i class="fas fa-save"></i> Сохранить изменения
-                        </button>
-                        <button class="btn-admin secondary" onclick="resetSection()">
-                            <i class="fas fa-undo"></i> Сбросить
-                        </button>
-                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Enhanced Page Editor with mode switching
+        // Enhanced Page Editor with mode switching - FIXED VERSION
         class AdvancedPageEditor {
             constructor() {
                 this.currentSection = null;
@@ -224,7 +238,7 @@
                 console.log('🚀 Advanced Page Editor initialized');
                 this.setupSectionHandlers();
                 this.setupModeSwitching();
-                this.setupEnhancedEditor();
+                console.log('✅ Editor ready');
             }
 
             setupSectionHandlers() {
@@ -247,18 +261,6 @@
                 });
             }
 
-            setupEnhancedEditor() {
-                // Wait for enhanced editor to load
-                const checkEnhanced = () => {
-                    if (window.enhancedEditor) {
-                        console.log('✅ Enhanced editor loaded');
-                    } else {
-                        setTimeout(checkEnhanced, 100);
-                    }
-                };
-                checkEnhanced();
-            }
-
             switchMode(mode) {
                 this.currentMode = mode;
                 
@@ -267,6 +269,14 @@
                     btn.classList.remove('active');
                 });
                 document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+                
+                // Update description
+                const description = document.getElementById('mode-description');
+                if (mode === 'basic') {
+                    description.innerHTML = '💡 <strong>Базовый режим</strong>: Редактирование заголовка и описания секции';
+                } else {
+                    description.innerHTML = '💡 <strong>Расширенный режим</strong>: Полное управление секцией включая изображения, статистику и услуги';
+                }
                 
                 // Show/hide appropriate editor content
                 const basicEditor = document.querySelector('.basic-editor');
@@ -319,9 +329,8 @@
 
             loadEnhancedEditor() {
                 if (window.enhancedEditor && this.currentSection) {
-                    // Trigger enhanced editor injection
-                    window.enhancedEditor.originalEditor = window.editor;
-                    window.enhancedEditor.originalEditor.currentSection = this.currentSection;
+                    // Make sure enhanced editor knows the current section
+                    window.enhancedEditor.currentSection = this.currentSection;
                     window.enhancedEditor.injectEnhancedEditors();
                 }
             }
@@ -344,23 +353,25 @@
 
                 // Save enhanced data if in enhanced mode
                 if (this.currentMode === 'enhanced' && window.enhancedEditor) {
-                    window.enhancedEditor.saveEnhancedData();
-                }
-
-                if (window.dataManager.setData(data)) {
-                    this.showSaveIndicator('Изменения сохранены успешно!');
-                    this.safeRefresh();
+                    // Enhanced data is saved through its own save button
+                    this.showNotification('Базовые данные сохранены. Для полного сохранения используйте кнопку в расширенном редакторе.', 'success');
                 } else {
-                    alert('Ошибка сохранения');
+                    if (window.dataManager.setData(data)) {
+                        this.showNotification('Изменения сохранены успешно!', 'success');
+                        this.safeRefresh();
+                    } else {
+                        alert('Ошибка сохранения');
+                    }
                 }
             }
 
             resetSection() {
                 if (confirm('Сбросить все изменения в этой секции?')) {
                     this.loadSectionData(this.currentSection);
-                    if (this.currentMode === 'enhanced') {
-                        this.loadEnhancedEditor();
+                    if (this.currentMode === 'enhanced' && window.enhancedEditor) {
+                        window.enhancedEditor.injectEnhancedEditors();
                     }
+                    this.showNotification('Изменения сброшены', 'success');
                 }
             }
 
@@ -373,11 +384,19 @@
                 window.location.href = 'admin.html';
             }
 
-            showSaveIndicator(message) {
+            showNotification(message, type = 'success') {
                 const indicator = document.getElementById('save-indicator');
                 const messageEl = document.getElementById('save-message');
                 
                 messageEl.textContent = message;
+                indicator.className = 'save-indicator';
+                if (type === 'success') {
+                    indicator.style.background = '#d4edda';
+                    indicator.style.color = '#155724';
+                } else {
+                    indicator.style.background = '#f8d7da';
+                    indicator.style.color = '#721c24';
+                }
                 indicator.classList.add('show');
                 
                 setTimeout(() => {
@@ -385,15 +404,6 @@
                 }, 3000);
             }
         }
-
-        // Initialize editor when dataManager is ready
-        const initEditor = () => {
-            if (window.dataManager) {
-                window.editor = new AdvancedPageEditor();
-            } else {
-                setTimeout(initEditor, 100);
-            }
-        };
 
         // Global function for save button
         window.saveSection = () => {
@@ -408,9 +418,19 @@
             }
         };
 
+        // Initialize editor when dataManager is ready
+        const initEditor = () => {
+            if (window.dataManager) {
+                window.editor = new AdvancedPageEditor();
+                console.log('✅ Advanced Page Editor initialized successfully');
+            } else {
+                setTimeout(initEditor, 100);
+            }
+        };
+
         document.addEventListener('DOMContentLoaded', initEditor);
     </script>
     <script src="data-manager.js"></script>
-    <script src="enhanced-page-editor.js"></script>
+    <script src="enhanced-page-editor-fixed.js"></script>
 </body>
 </html>

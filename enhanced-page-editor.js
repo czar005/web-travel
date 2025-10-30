@@ -1,8 +1,9 @@
-// Enhanced Page Editor with full section management
+// Enhanced Page Editor with full section management - FIXED VERSION
 class EnhancedPageEditor {
     constructor() {
         this.currentSection = null;
         this.originalEditor = null;
+        this.currentData = null;
         this.init();
     }
 
@@ -15,10 +16,82 @@ class EnhancedPageEditor {
     waitForOriginalEditor() {
         if (window.editor) {
             this.originalEditor = window.editor;
+            this.loadCurrentData();
             this.patchEditorMethods();
         } else {
             setTimeout(() => this.waitForOriginalEditor(), 100);
         }
+    }
+
+    loadCurrentData() {
+        if (window.dataManager) {
+            this.currentData = window.dataManager.getData();
+            if (!this.currentData) {
+                this.currentData = this.getDefaultData();
+            }
+        } else {
+            this.currentData = this.getDefaultData();
+        }
+        
+        // Ensure content structure exists
+        if (!this.currentData.content) {
+            this.currentData.content = {};
+        }
+    }
+
+    getDefaultData() {
+        return {
+            content: {
+                hero: {
+                    title: "Откройте мир с WorldTravel",
+                    description: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.",
+                    buttonText: "Начать путешествие",
+                    backgroundImage: ""
+                },
+                about: {
+                    title: "О нас",
+                    description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
+                    image: "",
+                    stats: [
+                        { value: "5000", label: "Довольных клиентов" },
+                        { value: "50", label: "Стран мира" },
+                        { value: "10 лет", label: "Опыта работы" }
+                    ]
+                },
+                services: {
+                    title: "Услуги",
+                    services: [
+                        {
+                            title: "Авиабилеты",
+                            description: "Подбор и бронирование лучших авиаперелетов по выгодным ценам",
+                            icon: "fas fa-plane"
+                        },
+                        {
+                            title: "Отели", 
+                            description: "Бронирование отелей любого уровня комфорта по всему миру",
+                            icon: "fas fa-hotel"
+                        },
+                        {
+                            title: "Туры",
+                            description: "Индивидуальные и групповые туры с профессиональными гидами", 
+                            icon: "fas fa-map-marked-alt"
+                        },
+                        {
+                            title: "Страхование",
+                            description: "Полное страховое сопровождение вашего путешествия",
+                            icon: "fas fa-shield-alt"
+                        }
+                    ]
+                },
+                destinations: {
+                    title: "Направления", 
+                    subtitle: "Откройте для себя лучшие направления мира с нашими эксклюзивными турами"
+                },
+                contact: {
+                    title: "Контакты"
+                }
+            }
+        };
     }
 
     injectEnhancedStyles() {
@@ -168,6 +241,40 @@ class EnhancedPageEditor {
                 border-color: #2c5aa0;
                 box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
             }
+
+            .enhanced-save-section {
+                background: #d4edda;
+                border: 2px solid #c3e6cb;
+                border-radius: 10px;
+                padding: 20px;
+                margin: 20px 0;
+                text-align: center;
+            }
+
+            .enhanced-save-btn {
+                background: #28a745;
+                color: white;
+                border: none;
+                padding: 12px 30px;
+                border-radius: 6px;
+                cursor: pointer;
+                font-size: 16px;
+                font-weight: 600;
+                transition: all 0.3s ease;
+                display: inline-flex;
+                align-items: center;
+                gap: 10px;
+            }
+
+            .enhanced-save-btn:hover {
+                background: #218838;
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
+            }
+
+            .enhanced-save-btn:active {
+                transform: translateY(0);
+            }
         `;
         
         const styleElement = document.createElement('style');
@@ -189,12 +296,6 @@ class EnhancedPageEditor {
             }, 100);
         };
 
-        // Add enhanced save method
-        this.originalEditor.saveEnhancedSection = () => {
-            this.saveEnhancedData();
-            return this.originalEditor.saveSection();
-        };
-
         console.log('✅ Editor methods patched successfully');
     }
 
@@ -206,8 +307,14 @@ class EnhancedPageEditor {
         const existingEnhancedEditors = contentEditor.querySelectorAll('.enhanced-editor-section');
         existingEnhancedEditors.forEach(editor => editor.remove());
 
+        // Get current section from the main editor
+        this.currentSection = this.originalEditor.currentSection;
+        
+        // Load current data for the section
+        this.loadSectionData();
+
         // Inject appropriate enhanced editor based on section
-        switch (this.originalEditor.currentSection) {
+        switch (this.currentSection) {
             case 'hero':
                 this.injectHeroEditor();
                 break;
@@ -224,13 +331,42 @@ class EnhancedPageEditor {
                 this.injectContactEditor();
                 break;
         }
+
+        // Add save button section
+        this.injectSaveSection();
+    }
+
+    loadSectionData() {
+        if (!this.currentData.content[this.currentSection]) {
+            this.currentData.content[this.currentSection] = {};
+        }
+    }
+
+    injectSaveSection() {
+        const contentEditor = document.getElementById('content-editor');
+        if (!contentEditor) return;
+
+        const saveSectionHTML = `
+            <div class="enhanced-save-section">
+                <h3 style="color: #155724; margin-bottom: 15px;">💾 Сохранение изменений</h3>
+                <p style="color: #0c5460; margin-bottom: 20px;">Нажмите кнопку ниже чтобы сохранить все изменения в этой секции</p>
+                <button class="enhanced-save-btn" onclick="enhancedEditor.saveEnhancedSection()">
+                    <i class="fas fa-save"></i> Сохранить секцию
+                </button>
+                <p style="color: #856404; margin-top: 15px; font-size: 0.9em;">
+                    <i class="fas fa-info-circle"></i> Изменения появятся в предпросмотре после сохранения
+                </p>
+            </div>
+        `;
+
+        contentEditor.insertAdjacentHTML('beforeend', saveSectionHTML);
     }
 
     injectHeroEditor() {
         const contentEditor = document.getElementById('content-editor');
         if (!contentEditor) return;
 
-        const data = this.originalEditor.currentData?.content?.hero || {};
+        const data = this.currentData.content.hero || {};
         
         const heroEditorHTML = `
             <div class="enhanced-editor-section">
@@ -250,20 +386,19 @@ class EnhancedPageEditor {
                                 </div>`
                             }
                             <div class="image-actions">
-                                <button type="button" class="btn-admin" onclick="enhancedEditor.uploadImage('hero-background')">
+                                <button type="button" class="btn-admin" onclick="enhancedEditor.uploadImage('hero', 'backgroundImage')">
                                     <i class="fas fa-upload"></i> Загрузить изображение
                                 </button>
-                                <button type="button" class="btn-admin secondary" onclick="enhancedEditor.setImageUrl('hero-background')">
+                                <button type="button" class="btn-admin secondary" onclick="enhancedEditor.setImageUrl('hero', 'backgroundImage')">
                                     <i class="fas fa-link"></i> Указать URL
                                 </button>
                                 ${data.backgroundImage ? `
-                                <button type="button" class="btn-admin danger" onclick="enhancedEditor.removeImage('hero-background')">
+                                <button type="button" class="btn-admin danger" onclick="enhancedEditor.removeImage('hero', 'backgroundImage')">
                                     <i class="fas fa-trash"></i> Удалить
                                 </button>
                                 ` : ''}
                             </div>
                         </div>
-                        <input type="hidden" id="hero-background-input" value="${data.backgroundImage || ''}">
                     </div>
                 </div>
 
@@ -271,20 +406,20 @@ class EnhancedPageEditor {
                     <label>Заголовок баннера:</label>
                     <input type="text" class="enhanced-form-control" id="hero-title-input" 
                            value="${data.title || 'Откройте мир с WorldTravel'}" 
-                           oninput="enhancedEditor.updateHeroData('title', this.value)">
+                           oninput="enhancedEditor.updateSectionData('hero', 'title', this.value)">
                 </div>
 
                 <div class="enhanced-form-group">
                     <label>Описание баннера:</label>
                     <textarea class="enhanced-form-control" id="hero-description-input" rows="4"
-                              oninput="enhancedEditor.updateHeroData('description', this.value)">${data.description || 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.'}</textarea>
+                              oninput="enhancedEditor.updateSectionData('hero', 'description', this.value)">${data.description || 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.'}</textarea>
                 </div>
 
                 <div class="enhanced-form-group">
                     <label>Текст кнопки:</label>
                     <input type="text" class="enhanced-form-control" id="hero-button-text" 
                            value="${data.buttonText || 'Начать путешествие'}" 
-                           oninput="enhancedEditor.updateHeroData('buttonText', this.value)">
+                           oninput="enhancedEditor.updateSectionData('hero', 'buttonText', this.value)">
                 </div>
             </div>
         `;
@@ -296,7 +431,7 @@ class EnhancedPageEditor {
         const contentEditor = document.getElementById('content-editor');
         if (!contentEditor) return;
 
-        const data = this.originalEditor.currentData?.content?.about || {};
+        const data = this.currentData.content.about || {};
         const stats = data.stats || [
             { value: '5000', label: 'Довольных клиентов' },
             { value: '50', label: 'Стран мира' },
@@ -321,20 +456,19 @@ class EnhancedPageEditor {
                                 </div>`
                             }
                             <div class="image-actions">
-                                <button type="button" class="btn-admin" onclick="enhancedEditor.uploadImage('about-image')">
+                                <button type="button" class="btn-admin" onclick="enhancedEditor.uploadImage('about', 'image')">
                                     <i class="fas fa-upload"></i> Загрузить изображение
                                 </button>
-                                <button type="button" class="btn-admin secondary" onclick="enhancedEditor.setImageUrl('about-image')">
+                                <button type="button" class="btn-admin secondary" onclick="enhancedEditor.setImageUrl('about', 'image')">
                                     <i class="fas fa-link"></i> Указать URL
                                 </button>
                                 ${data.image ? `
-                                <button type="button" class="btn-admin danger" onclick="enhancedEditor.removeImage('about-image')">
+                                <button type="button" class="btn-admin danger" onclick="enhancedEditor.removeImage('about', 'image')">
                                     <i class="fas fa-trash"></i> Удалить
                                 </button>
                                 ` : ''}
                             </div>
                         </div>
-                        <input type="hidden" id="about-image-input" value="${data.image || ''}">
                     </div>
                 </div>
 
@@ -342,13 +476,13 @@ class EnhancedPageEditor {
                     <label>Заголовок секции:</label>
                     <input type="text" class="enhanced-form-control" id="about-title-input" 
                            value="${data.title || 'О нас'}" 
-                           oninput="enhancedEditor.updateAboutData('title', this.value)">
+                           oninput="enhancedEditor.updateSectionData('about', 'title', this.value)">
                 </div>
 
                 <div class="enhanced-form-group">
                     <label>Описание компании:</label>
                     <textarea class="enhanced-form-control" id="about-description-input" rows="4"
-                              oninput="enhancedEditor.updateAboutData('description', this.value)">${data.description || 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.'}</textarea>
+                              oninput="enhancedEditor.updateSectionData('about', 'description', this.value)">${data.description || 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.'}</textarea>
                 </div>
 
                 <div class="enhanced-editor-header" style="margin-top: 30px;">
@@ -393,7 +527,7 @@ class EnhancedPageEditor {
         const contentEditor = document.getElementById('content-editor');
         if (!contentEditor) return;
 
-        const data = this.originalEditor.currentData?.content?.services || {};
+        const data = this.currentData.content.services || {};
         const services = data.services || [
             { 
                 title: 'Авиабилеты', 
@@ -430,7 +564,7 @@ class EnhancedPageEditor {
                     <label>Заголовок секции:</label>
                     <input type="text" class="enhanced-form-control" id="services-title-input" 
                            value="${data.title || 'Услуги'}" 
-                           oninput="enhancedEditor.updateServicesData('title', this.value)">
+                           oninput="enhancedEditor.updateSectionData('services', 'title', this.value)">
                 </div>
 
                 <div id="services-editor-container">
@@ -483,7 +617,7 @@ class EnhancedPageEditor {
         const contentEditor = document.getElementById('content-editor');
         if (!contentEditor) return;
 
-        const data = this.originalEditor.currentData?.content?.destinations || {};
+        const data = this.currentData.content.destinations || {};
 
         const destinationsEditorHTML = `
             <div class="enhanced-editor-section">
@@ -495,17 +629,17 @@ class EnhancedPageEditor {
                     <label>Заголовок секции:</label>
                     <input type="text" class="enhanced-form-control" id="destinations-title-input" 
                            value="${data.title || 'Направления'}" 
-                           oninput="enhancedEditor.updateDestinationsData('title', this.value)">
+                           oninput="enhancedEditor.updateSectionData('destinations', 'title', this.value)">
                 </div>
 
                 <div class="enhanced-form-group">
                     <label>Подзаголовок:</label>
                     <textarea class="enhanced-form-control" id="destinations-subtitle-input" rows="3"
-                              oninput="enhancedEditor.updateDestinationsData('subtitle', this.value)">${data.subtitle || 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'}</textarea>
+                              oninput="enhancedEditor.updateSectionData('destinations', 'subtitle', this.value)">${data.subtitle || 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'}</textarea>
                 </div>
 
                 <div class="admin-hint">
-                    💡 Управление странами и турами осуществляется через основную админ-панель
+                    �� Управление странами и турами осуществляется через основную админ-панель
                 </div>
             </div>
         `;
@@ -517,7 +651,7 @@ class EnhancedPageEditor {
         const contentEditor = document.getElementById('content-editor');
         if (!contentEditor) return;
 
-        const data = this.originalEditor.currentData?.content?.contact || {};
+        const data = this.currentData.content.contact || {};
 
         const contactEditorHTML = `
             <div class="enhanced-editor-section">
@@ -529,7 +663,7 @@ class EnhancedPageEditor {
                     <label>Заголовок секции:</label>
                     <input type="text" class="enhanced-form-control" id="contact-title-input" 
                            value="${data.title || 'Контакты'}" 
-                           oninput="enhancedEditor.updateContactData('title', this.value)">
+                           oninput="enhancedEditor.updateSectionData('contact', 'title', this.value)">
                 </div>
 
                 <div class="admin-hint">
@@ -542,7 +676,7 @@ class EnhancedPageEditor {
     }
 
     // Image Management Methods
-    uploadImage(fieldId) {
+    uploadImage(section, field) {
         const input = document.createElement('input');
         input.type = 'file';
         input.accept = 'image/*';
@@ -551,7 +685,7 @@ class EnhancedPageEditor {
             if (file) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    this.setImage(fieldId, e.target.result);
+                    this.setImage(section, field, e.target.result);
                 };
                 reader.readAsDataURL(file);
             }
@@ -559,117 +693,66 @@ class EnhancedPageEditor {
         input.click();
     }
 
-    setImageUrl(fieldId) {
+    setImageUrl(section, field) {
         const url = prompt('Введите URL изображения:');
         if (url) {
-            this.setImage(fieldId, url);
+            this.setImage(section, field, url);
         }
     }
 
-    removeImage(fieldId) {
+    removeImage(section, field) {
         if (confirm('Удалить изображение?')) {
-            this.setImage(fieldId, '');
+            this.setImage(section, field, '');
         }
     }
 
-    setImage(fieldId, url) {
-        const input = document.getElementById(`${fieldId}-input`);
-        if (input) {
-            input.value = url;
-            this.updateSectionImage(fieldId, url);
+    setImage(section, field, url) {
+        if (!this.currentData.content[section]) {
+            this.currentData.content[section] = {};
         }
-    }
-
-    updateSectionImage(fieldId, url) {
-        const section = this.originalEditor.currentSection;
-        if (!this.originalEditor.currentData.content[section]) {
-            this.originalEditor.currentData.content[section] = {};
-        }
-
-        const imageFieldMap = {
-            'hero-background': 'backgroundImage',
-            'about-image': 'image'
-        };
-
-        const fieldName = imageFieldMap[fieldId];
-        if (fieldName) {
-            this.originalEditor.currentData.content[section][fieldName] = url;
-            this.originalEditor.hasUnsavedChanges = true;
-            this.showNotification('Изображение обновлено', 'success');
-        }
+        
+        this.currentData.content[section][field] = url;
+        this.showNotification('Изображение обновлено', 'success');
+        this.refreshPreview();
     }
 
     // Data Management Methods
-    updateHeroData(field, value) {
-        if (!this.originalEditor.currentData.content.hero) {
-            this.originalEditor.currentData.content.hero = {};
+    updateSectionData(section, field, value) {
+        if (!this.currentData.content[section]) {
+            this.currentData.content[section] = {};
         }
-        this.originalEditor.currentData.content.hero[field] = value;
-        this.originalEditor.hasUnsavedChanges = true;
-    }
-
-    updateAboutData(field, value) {
-        if (!this.originalEditor.currentData.content.about) {
-            this.originalEditor.currentData.content.about = {};
-        }
-        this.originalEditor.currentData.content.about[field] = value;
-        this.originalEditor.hasUnsavedChanges = true;
-    }
-
-    updateServicesData(field, value) {
-        if (!this.originalEditor.currentData.content.services) {
-            this.originalEditor.currentData.content.services = {};
-        }
-        this.originalEditor.currentData.content.services[field] = value;
-        this.originalEditor.hasUnsavedChanges = true;
-    }
-
-    updateDestinationsData(field, value) {
-        if (!this.originalEditor.currentData.content.destinations) {
-            this.originalEditor.currentData.content.destinations = {};
-        }
-        this.originalEditor.currentData.content.destinations[field] = value;
-        this.originalEditor.hasUnsavedChanges = true;
-    }
-
-    updateContactData(field, value) {
-        if (!this.originalEditor.currentData.content.contact) {
-            this.originalEditor.currentData.content.contact = {};
-        }
-        this.originalEditor.currentData.content.contact[field] = value;
-        this.originalEditor.hasUnsavedChanges = true;
+        this.currentData.content[section][field] = value;
+        this.refreshPreview();
     }
 
     // Stat Blocks Management
     addStatBlock() {
-        if (!this.originalEditor.currentData.content.about) {
-            this.originalEditor.currentData.content.about = {};
+        if (!this.currentData.content.about) {
+            this.currentData.content.about = {};
         }
-        if (!this.originalEditor.currentData.content.about.stats) {
-            this.originalEditor.currentData.content.about.stats = [];
+        if (!this.currentData.content.about.stats) {
+            this.currentData.content.about.stats = [];
         }
 
-        this.originalEditor.currentData.content.about.stats.push({
+        this.currentData.content.about.stats.push({
             value: 'Новое значение',
             label: 'Новая подпись'
         });
 
-        this.originalEditor.hasUnsavedChanges = true;
         this.injectAboutEditor();
         this.showNotification('Блок статистики добавлен', 'success');
     }
 
     updateStatBlock(index, field, value) {
-        if (this.originalEditor.currentData.content.about?.stats?.[index]) {
-            this.originalEditor.currentData.content.about.stats[index][field] = value;
-            this.originalEditor.hasUnsavedChanges = true;
+        if (this.currentData.content.about?.stats?.[index]) {
+            this.currentData.content.about.stats[index][field] = value;
+            this.refreshPreview();
         }
     }
 
     removeStatBlock(index) {
-        if (this.originalEditor.currentData.content.about?.stats?.[index]) {
-            this.originalEditor.currentData.content.about.stats.splice(index, 1);
-            this.originalEditor.hasUnsavedChanges = true;
+        if (this.currentData.content.about?.stats?.[index]) {
+            this.currentData.content.about.stats.splice(index, 1);
             this.injectAboutEditor();
             this.showNotification('Блок статистики удален', 'success');
         }
@@ -677,50 +760,102 @@ class EnhancedPageEditor {
 
     // Service Blocks Management
     addServiceBlock() {
-        if (!this.originalEditor.currentData.content.services) {
-            this.originalEditor.currentData.content.services = {};
+        if (!this.currentData.content.services) {
+            this.currentData.content.services = {};
         }
-        if (!this.originalEditor.currentData.content.services.services) {
-            this.originalEditor.currentData.content.services.services = [];
+        if (!this.currentData.content.services.services) {
+            this.currentData.content.services.services = [];
         }
 
-        this.originalEditor.currentData.content.services.services.push({
+        this.currentData.content.services.services.push({
             title: 'Новая услуга',
             description: 'Описание новой услуги',
             icon: 'fas fa-star'
         });
 
-        this.originalEditor.hasUnsavedChanges = true;
         this.injectServicesEditor();
         this.showNotification('Услуга добавлена', 'success');
     }
 
     updateServiceBlock(index, field, value) {
-        if (this.originalEditor.currentData.content.services?.services?.[index]) {
-            this.originalEditor.currentData.content.services.services[index][field] = value;
-            this.originalEditor.hasUnsavedChanges = true;
+        if (this.currentData.content.services?.services?.[index]) {
+            this.currentData.content.services.services[index][field] = value;
+            this.refreshPreview();
         }
     }
 
     removeServiceBlock(index) {
-        if (this.originalEditor.currentData.content.services?.services?.[index]) {
-            this.originalEditor.currentData.content.services.services.splice(index, 1);
-            this.originalEditor.hasUnsavedChanges = true;
+        if (this.currentData.content.services?.services?.[index]) {
+            this.currentData.content.services.services.splice(index, 1);
             this.injectServicesEditor();
             this.showNotification('Услуга удалена', 'success');
         }
     }
 
-    saveEnhancedData() {
-        // All data is already saved through individual update methods
-        console.log('💾 Enhanced data saved');
+    // Save and Preview Methods
+    saveEnhancedSection() {
+        if (!window.dataManager) {
+            this.showNotification('Ошибка: DataManager не доступен', 'error');
+            return;
+        }
+
+        // Get the main data
+        const mainData = window.dataManager.getData();
+        if (!mainData.content) {
+            mainData.content = {};
+        }
+
+        // Update the main data with our enhanced data
+        Object.keys(this.currentData.content).forEach(section => {
+            if (!mainData.content[section]) {
+                mainData.content[section] = {};
+            }
+            Object.assign(mainData.content[section], this.currentData.content[section]);
+        });
+
+        // Save to data manager
+        if (window.dataManager.setData(mainData)) {
+            this.showNotification('Секция успешно сохранена!', 'success');
+            this.refreshPreview();
+            
+            // Also update the basic editor fields
+            this.updateBasicEditorFields();
+        } else {
+            this.showNotification('Ошибка сохранения', 'error');
+        }
+    }
+
+    updateBasicEditorFields() {
+        if (this.currentSection && this.currentData.content[this.currentSection]) {
+            const sectionData = this.currentData.content[this.currentSection];
+            
+            const titleField = document.getElementById('section-title');
+            const descriptionField = document.getElementById('section-description');
+            
+            if (titleField && sectionData.title) {
+                titleField.value = sectionData.title;
+            }
+            if (descriptionField && sectionData.description) {
+                descriptionField.value = sectionData.description;
+            }
+        }
+    }
+
+    refreshPreview() {
+        // Trigger a preview refresh
+        if (this.originalEditor && this.originalEditor.safeRefresh) {
+            this.originalEditor.safeRefresh();
+        }
     }
 
     showNotification(message, type = 'success') {
-        if (this.originalEditor.showNotification) {
+        // Use the original editor's notification system if available
+        if (this.originalEditor && this.originalEditor.showNotification) {
             this.originalEditor.showNotification(message, type);
         } else {
+            // Fallback notification
             console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
+            alert(message);
         }
     }
 }
