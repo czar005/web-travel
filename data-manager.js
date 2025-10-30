@@ -555,3 +555,124 @@ function initializeDataManager() {
 
 initializeDataManager();
 console.log('✅ DataManager setup completed');
+
+// Enhanced data structure for page editor
+DataManager.prototype.getEnhancedDefaultData = function() {
+    return {
+        countries: [],
+        tours: [],
+        contacts: {
+            phone: "+7 (999) 123-45-67",
+            email: "info@worldtravel.com", 
+            address: "Москва, ул. Туристическая, 15",
+            hours: "Пн-Пт: 9:00-18:00"
+        },
+        settings: {
+            siteTitle: "WorldTravel - Туристическая компания",
+            companyName: "WorldTravel"
+        },
+        footer: {
+            description: "Ваш надежный партнер в мире путешествий.",
+            copyright: "&copy; 2024 WorldTravel. Все права защищены."
+        },
+        content: {
+            hero: {
+                title: "Откройте мир с WorldTravel",
+                description: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.",
+                buttonText: "Начать путешествие",
+                backgroundImage: ""
+            },
+            about: {
+                title: "О нас",
+                description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
+                image: "",
+                stats: [
+                    { value: "5000", label: "Довольных клиентов" },
+                    { value: "50", label: "Стран мира" },
+                    { value: "10 лет", label: "Опыта работы" }
+                ]
+            },
+            services: {
+                title: "Услуги",
+                services: [
+                    {
+                        title: "Авиабилеты",
+                        description: "Подбор и бронирование лучших авиаперелетов по выгодным ценам",
+                        icon: "fas fa-plane"
+                    },
+                    {
+                        title: "Отели", 
+                        description: "Бронирование отелей любого уровня комфорта по всему миру",
+                        icon: "fas fa-hotel"
+                    },
+                    {
+                        title: "Туры",
+                        description: "Индивидуальные и групповые туры с профессиональными гидами", 
+                        icon: "fas fa-map-marked-alt"
+                    },
+                    {
+                        title: "Страхование",
+                        description: "Полное страховое сопровождение вашего путешествия",
+                        icon: "fas fa-shield-alt"
+                    }
+                ]
+            },
+            destinations: {
+                title: "Направления", 
+                subtitle: "Откройте для себя лучшие направления мира с нашими эксклюзивными турами"
+            },
+            contact: {
+                title: "Контакты"
+            }
+        },
+        lastUpdate: new Date().toISOString()
+    };
+};
+
+// Ensure enhanced data structure
+DataManager.prototype.ensureEnhancedData = function() {
+    const data = this.getData();
+    const defaultData = this.getEnhancedDefaultData();
+    
+    let needsUpdate = false;
+    
+    // Ensure content structure exists
+    if (!data.content) {
+        data.content = defaultData.content;
+        needsUpdate = true;
+    } else {
+        // Ensure each content section exists with proper structure
+        Object.keys(defaultData.content).forEach(section => {
+            if (!data.content[section]) {
+                data.content[section] = defaultData.content[section];
+                needsUpdate = true;
+            } else {
+                // Ensure section has all required fields
+                Object.keys(defaultData.content[section]).forEach(field => {
+                    if (data.content[section][field] === undefined) {
+                        data.content[section][field] = defaultData.content[section][field];
+                        needsUpdate = true;
+                    }
+                });
+            }
+        });
+    }
+    
+    // Ensure footer exists
+    if (!data.footer) {
+        data.footer = defaultData.footer;
+        needsUpdate = true;
+    }
+    
+    if (needsUpdate) {
+        this.setData(data);
+        console.log('✅ Enhanced data structure ensured');
+    }
+    
+    return data;
+};
+
+// Override ensureDefaultData to use enhanced structure
+DataManager.prototype.ensureDefaultData = function() {
+    return this.ensureEnhancedData();
+};

@@ -20,7 +20,7 @@
         }
 
         .editor-panel {
-            width: 450px;
+            width: 500px;
             background: white;
             border-left: 2px solid #e1e5e9;
             display: flex;
@@ -89,6 +89,35 @@
         .save-indicator.show {
             display: flex;
         }
+
+        .editor-mode-switch {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .mode-btn {
+            flex: 1;
+            padding: 10px;
+            border: 2px solid #e9ecef;
+            background: white;
+            border-radius: 6px;
+            cursor: pointer;
+            text-align: center;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .mode-btn.active {
+            border-color: #2c5aa0;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .mode-btn:hover:not(.active) {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
     </style>
 </head>
 <body>
@@ -118,29 +147,34 @@
 
         <div class="editor-panel">
             <div class="panel-header">
-                <h2>Редактор контента</h2>
+                <h2>Расширенный редактор</h2>
             </div>
 
             <div class="panel-content">
+                <div class="editor-mode-switch">
+                    <div class="mode-btn active" data-mode="basic">Базовый</div>
+                    <div class="mode-btn" data-mode="enhanced">Расширенный</div>
+                </div>
+                
                 <h3>Структура страницы</h3>
                 <p style="color: #666; margin-bottom: 20px;">Выберите секцию для редактирования</p>
                 
                 <div id="section-list">
                     <div class="section-item" data-section="hero">
                         <div class="section-title">Главный баннер</div>
-                        <div class="section-desc">Заголовок и описание на главной</div>
+                        <div class="section-desc">Заголовок, описание и фоновое изображение</div>
                     </div>
                     <div class="section-item" data-section="about">
                         <div class="section-title">О компании</div>
-                        <div class="section-desc">Информация о компании</div>
+                        <div class="section-desc">Текст, изображение и блоки статистики</div>
                     </div>
                     <div class="section-item" data-section="services">
                         <div class="section-title">Услуги</div>
-                        <div class="section-desc">Список услуг компании</div>
+                        <div class="section-desc">Список услуг с иконками и описаниями</div>
                     </div>
                     <div class="section-item" data-section="destinations">
                         <div class="section-title">Направления</div>
-                        <div class="section-desc">Популярные направления</div>
+                        <div class="section-desc">Заголовок и описание секции</div>
                     </div>
                     <div class="section-item" data-section="contact">
                         <div class="section-title">Контакты</div>
@@ -149,33 +183,48 @@
                 </div>
 
                 <div id="content-editor" style="margin-top: 30px; display: none;">
-                    <div class="form-group">
-                        <label>Заголовок секции:</label>
-                        <input type="text" class="form-control" id="section-title">
+                    <!-- Basic editor fields -->
+                    <div class="basic-editor">
+                        <div class="form-group">
+                            <label>Заголовок секции:</label>
+                            <input type="text" class="form-control" id="section-title" data-field="title">
+                        </div>
+                        <div class="form-group">
+                            <label>Описание:</label>
+                            <textarea class="form-control" id="section-description" rows="4" data-field="description"></textarea>
+                        </div>
                     </div>
-                    <div class="form-group">
-                        <label>Описание:</label>
-                        <textarea class="form-control" id="section-description" rows="4"></textarea>
+                    
+                    <!-- Enhanced editor will be injected here -->
+                    <div id="enhanced-editor-content"></div>
+
+                    <div class="action-buttons" style="display: flex; gap: 10px; margin-top: 20px;">
+                        <button class="btn-admin" onclick="saveSection()">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                        <button class="btn-admin secondary" onclick="resetSection()">
+                            <i class="fas fa-undo"></i> Сбросить
+                        </button>
                     </div>
-                    <button class="btn-admin" onclick="editor.saveSection()">
-                        <i class="fas fa-save"></i> Сохранить изменения
-                    </button>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Simple Page Editor
-        class SimplePageEditor {
+        // Enhanced Page Editor with mode switching
+        class AdvancedPageEditor {
             constructor() {
                 this.currentSection = null;
+                this.currentMode = 'basic';
                 this.init();
             }
 
             init() {
-                console.log('🚀 Page Editor initialized');
+                console.log('🚀 Advanced Page Editor initialized');
                 this.setupSectionHandlers();
+                this.setupModeSwitching();
+                this.setupEnhancedEditor();
             }
 
             setupSectionHandlers() {
@@ -186,6 +235,51 @@
                         this.selectSection(sectionId);
                     });
                 });
+            }
+
+            setupModeSwitching() {
+                const modeButtons = document.querySelectorAll('.mode-btn');
+                modeButtons.forEach(button => {
+                    button.addEventListener('click', () => {
+                        const mode = button.getAttribute('data-mode');
+                        this.switchMode(mode);
+                    });
+                });
+            }
+
+            setupEnhancedEditor() {
+                // Wait for enhanced editor to load
+                const checkEnhanced = () => {
+                    if (window.enhancedEditor) {
+                        console.log('✅ Enhanced editor loaded');
+                    } else {
+                        setTimeout(checkEnhanced, 100);
+                    }
+                };
+                checkEnhanced();
+            }
+
+            switchMode(mode) {
+                this.currentMode = mode;
+                
+                // Update UI
+                document.querySelectorAll('.mode-btn').forEach(btn => {
+                    btn.classList.remove('active');
+                });
+                document.querySelector(`[data-mode="${mode}"]`).classList.add('active');
+                
+                // Show/hide appropriate editor content
+                const basicEditor = document.querySelector('.basic-editor');
+                const enhancedContent = document.getElementById('enhanced-editor-content');
+                
+                if (mode === 'basic') {
+                    basicEditor.style.display = 'block';
+                    enhancedContent.style.display = 'none';
+                } else {
+                    basicEditor.style.display = 'none';
+                    enhancedContent.style.display = 'block';
+                    this.loadEnhancedEditor();
+                }
             }
 
             selectSection(sectionId) {
@@ -200,6 +294,11 @@
                 
                 // Show editor
                 document.getElementById('content-editor').style.display = 'block';
+                
+                // Load enhanced editor if in enhanced mode
+                if (this.currentMode === 'enhanced') {
+                    this.loadEnhancedEditor();
+                }
             }
 
             loadSectionData(sectionId) {
@@ -218,9 +317,19 @@
                 }
             }
 
+            loadEnhancedEditor() {
+                if (window.enhancedEditor && this.currentSection) {
+                    // Trigger enhanced editor injection
+                    window.enhancedEditor.originalEditor = window.editor;
+                    window.enhancedEditor.originalEditor.currentSection = this.currentSection;
+                    window.enhancedEditor.injectEnhancedEditors();
+                }
+            }
+
             saveSection() {
                 if (!this.currentSection || !window.dataManager) return;
 
+                // Save basic data
                 const title = document.getElementById('section-title').value;
                 const description = document.getElementById('section-description').value;
 
@@ -233,11 +342,25 @@
                     description: description
                 };
 
+                // Save enhanced data if in enhanced mode
+                if (this.currentMode === 'enhanced' && window.enhancedEditor) {
+                    window.enhancedEditor.saveEnhancedData();
+                }
+
                 if (window.dataManager.setData(data)) {
                     this.showSaveIndicator('Изменения сохранены успешно!');
                     this.safeRefresh();
                 } else {
                     alert('Ошибка сохранения');
+                }
+            }
+
+            resetSection() {
+                if (confirm('Сбросить все изменения в этой секции?')) {
+                    this.loadSectionData(this.currentSection);
+                    if (this.currentMode === 'enhanced') {
+                        this.loadEnhancedEditor();
+                    }
                 }
             }
 
@@ -266,14 +389,28 @@
         // Initialize editor when dataManager is ready
         const initEditor = () => {
             if (window.dataManager) {
-                window.editor = new SimplePageEditor();
+                window.editor = new AdvancedPageEditor();
             } else {
                 setTimeout(initEditor, 100);
+            }
+        };
+
+        // Global function for save button
+        window.saveSection = () => {
+            if (window.editor) {
+                window.editor.saveSection();
+            }
+        };
+
+        window.resetSection = () => {
+            if (window.editor) {
+                window.editor.resetSection();
             }
         };
 
         document.addEventListener('DOMContentLoaded', initEditor);
     </script>
     <script src="data-manager.js"></script>
+    <script src="enhanced-page-editor.js"></script>
 </body>
 </html>
