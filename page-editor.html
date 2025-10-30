@@ -351,17 +351,11 @@
                     description: description
                 };
 
-                // Save enhanced data if in enhanced mode
-                if (this.currentMode === 'enhanced' && window.enhancedEditor) {
-                    // Enhanced data is saved through its own save button
-                    this.showNotification('Базовые данные сохранены. Для полного сохранения используйте кнопку в расширенном редакторе.', 'success');
+                if (window.dataManager.setData(data)) {
+                    this.showNotification('Изменения сохранены успешно!', 'success');
+                    this.safeRefresh();
                 } else {
-                    if (window.dataManager.setData(data)) {
-                        this.showNotification('Изменения сохранены успешно!', 'success');
-                        this.safeRefresh();
-                    } else {
-                        alert('Ошибка сохранения');
-                    }
+                    alert('Ошибка сохранения');
                 }
             }
 
@@ -431,6 +425,6 @@
         document.addEventListener('DOMContentLoaded', initEditor);
     </script>
     <script src="data-manager.js"></script>
-    <script src="enhanced-page-editor-fixed.js"></script>
+    <script src="enhanced-page-editor.js"></script>
 </body>
 </html>
