@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Универсальный редактор - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="universal-editor.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .universal-editor-layout {
+            display: flex;
+            min-height: 100vh;
+            background: #f5f7fb;
+        }
+
+        .editor-sidebar {
+            width: 300px;
+            background: white;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-header {
+            background: white;
+            padding: 20px 30px;
+            border-bottom: 1px solid #e1e5e9;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .editor-content {
+            flex: 1;
+            padding: 30px;
+            overflow-y: auto;
+        }
+
+        .sidebar-header {
+            padding: 25px 20px;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .sidebar-header h2 {
+            margin: 0 0 5px 0;
+            font-size: 1.4em;
+        }
+
+        .sidebar-header p {
+            margin: 0;
+            opacity: 0.9;
+            font-size: 0.9em;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            padding: 20px 0;
+        }
+
+        .nav-section {
+            margin-bottom: 25px;
+        }
+
+        .nav-section h4 {
+            padding: 0 20px 10px 20px;
+            margin: 0;
+            color: #6c757d;
+            font-size: 0.9em;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            color: #495057;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            border-left: 3px solid transparent;
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: #f8f9fa;
+            color: #2c5aa0;
+        }
+
+        .nav-item.active {
+            background: #e3f2fd;
+            color: #2c5aa0;
+            border-left-color: #2c5aa0;
+            font-weight: 600;
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1em;
+        }
+
+        .preview-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .preview-frame-container {
+            height: 400px;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            overflow: hidden;
+            background: white;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .save-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 12px 20px;
+            border-radius: 6px;
+            margin: 15px 0;
+            display: none;
+            align-items: center;
+            gap: 10px;
+            border-left: 4px solid #28a745;
+        }
+
+        .save-indicator.show {
+            display: flex;
+        }
+
+        .editor-actions-global {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 1024px) {
+            .universal-editor-layout {
+                flex-direction: column;
+            }
+            
+            .editor-sidebar {
+                width: 100%;
+                height: auto;
+            }
+            
+            .sidebar-nav {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+                padding: 15px;
+            }
+            
+            .nav-section {
+                flex: 1;
+                margin-bottom: 0;
+            }
+            
+            .nav-item {
+                padding: 10px 15px;
+                border-left: none;
+                border-bottom: 3px solid transparent;
+            }
+            
+            .nav-item.active {
+                border-left-color: transparent;
+                border-bottom-color: #2c5aa0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="universal-editor-layout">
+        <!-- Sidebar Navigation -->
+        <aside class="editor-sidebar">
+            <div class="sidebar-header">
+                <h2><i class="fas fa-edit"></i> Редактор сайта</h2>
+                <p>Управление всем контентом</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <div class="nav-section">
+                    <h4>Основные секции</h4>
+                    <div class="nav-item active" data-section="content">
+                        <i class="fas fa-home"></i>
+                        <span>Главная страница</span>
+                    </div>
+                    <div class="nav-item" data-section="hero">
+                        <i class="fas fa-sliders-h"></i>
+                        <span>Главный баннер</span>
+                    </div>
+                    <div class="nav-item" data-section="about">
+                        <i class="fas fa-building"></i>
+                        <span>О компании</span>
+                    </div>
+                    <div class="nav-item" data-section="services">
+                        <i class="fas fa-concierge-bell"></i>
+                        <span>Услуги</span>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <h4>Дополнительно</h4>
+                    <div class="nav-item" data-section="destinations">
+                        <i class="fas fa-map-marked-alt"></i>
+                        <span>Направления</span>
+                    </div>
+                    <div class="nav-item" data-section="contact">
+                        <i class="fas fa-phone"></i>
+                        <span>Контакты</span>
+                    </div>
+                </div>
+
+                <div class="nav-section">
+                    <h4>Настройки</h4>
+                    <div class="nav-item" data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Настройки сайта</span>
+                    </div>
+                </div>
+            </nav>
+
+            <div class="sidebar-footer" style="padding: 20px; border-top: 1px solid #e9ecef;">
+                <button class="btn btn-success" style="width: 100%;" onclick="universalEditor.saveSection()">
+                    <i class="fas fa-save"></i> Сохранить все изменения
+                </button>
+                <button class="btn btn-secondary" style="width: 100%; margin-top: 10px;" onclick="window.location.href='admin.html'">
+                    <i class="fas fa-arrow-left"></i> В админку
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="editor-main">
+            <header class="editor-header">
+                <div>
+                    <h1 id="current-section-title">Управление контентом</h1>
+                    <p id="current-section-desc">Редактирование всех секций сайта</p>
+                </div>
+                <div class="editor-actions-global">
+                    <button class="btn btn-warning" onclick="refreshPreview()">
+                        <i class="fas fa-sync"></i> Обновить предпросмотр
+                    </button>
+                    <button class="btn btn-info" onclick="openPreview()">
+                        <i class="fas fa-external-link-alt"></i> Открыть в новой вкладке
+                    </button>
+                </div>
+            </header>
+
+            <div class="editor-content">
+                <div class="save-indicator" id="save-indicator">
+                    <i class="fas fa-check-circle"></i>
+                    <span id="save-message">Изменения сохранены успешно!</span>
+                </div>
+
+                <!-- Preview Panel -->
+                <div class="preview-panel">
+                    <h3>Предпросмотр страницы</h3>
+                    <p>Изменения появятся здесь после сохранения и обновления</p>
+                    <div class="preview-frame-container">
+                        <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true&nocache=1"></iframe>
+                    </div>
+                </div>
+
+                <!-- Editor Content -->
+                <div id="universal-editor-content">
+                    <!-- Editor will be injected here by JavaScript -->
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="data-manager.js"></script>
+    <script src="universal-editor.js"></script>
+    <script>
+        // Initialize navigation
+        document.addEventListener('DOMContentLoaded', function() {
+            // Setup navigation click handlers
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+                    selectSection(sectionId);
+                });
+            });
+
+            // Select default section
+            selectSection('content');
+        });
+
+        function selectSection(sectionId) {
+            // Update UI
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+            // Update section title and description
+            updateSectionHeader(sectionId);
+
+            // Load section in editor
+            if (window.universalEditor) {
+                window.universalEditor.selectSection(sectionId);
+            }
+        }
+
+        function updateSectionHeader(sectionId) {
+            const titles = {
+                'content': 'Управление контентом',
+                'hero': 'Главный баннер',
+                'about': 'О компании',
+                'services': 'Услуги',
+                'destinations': 'Направления',
+                'contact': 'Контакты',
+                'settings': 'Настройки сайта'
+            };
+
+            const descriptions = {
+                'content': 'Редактирование всех секций сайта',
+                'hero': 'Управление основной секцией сайта',
+                'about': 'Информация о компании и статистика',
+                'services': 'Список услуг компании',
+                'destinations': 'Раздел популярных направлений',
+                'contact': 'Контактная информация и форма обратной связи',
+                'settings': 'Основные настройки сайта'
+            };
+
+            document.getElementById('current-section-title').textContent = titles[sectionId] || 'Редактор';
+            document.getElementById('current-section-desc').textContent = descriptions[sectionId] || 'Управление контентом';
+        }
+
+        function refreshPreview() {
+            const frame = document.getElementById('preview-frame');
+            frame.src = frame.src.split('?')[0] + '?editor=true&nocache=' + Date.now();
+            showNotification('Предпросмотр обновлен', 'success');
+        }
+
+        function openPreview() {
+            window.open('index.html?editor=true', '_blank');
+        }
+
+        function showNotification(message, type = 'success') {
+            const indicator = document.getElementById('save-indicator');
+            const messageEl = document.getElementById('save-message');
+            
+            messageEl.textContent = message;
+            indicator.className = 'save-indicator';
+            
+            if (type === 'success') {
+                indicator.style.background = '#d4edda';
+                indicator.style.color = '#155724';
+                indicator.style.borderLeftColor = '#28a745';
+            } else {
+                indicator.style.background = '#f8d7da';
+                indicator.style.color = '#721c24';
+                indicator.style.borderLeftColor = '#dc3545';
+            }
+            
+            indicator.classList.add('show');
+            
+            setTimeout(() => {
+                indicator.classList.remove('show');
+            }, 3000);
+        }
+
+        // Make functions global
+        window.refreshPreview = refreshPreview;
+        window.openPreview = openPreview;
+        window.showNotification = showNotification;
+        window.selectSection = selectSection;
+    </script>
+</body>
+</html>
