@@ -1,0 +1,853 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактор страниц - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .editor-container {
+            display: flex;
+            height: 100vh;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-panel {
+            width: 500px;
+            background: white;
+            border-left: 2px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: #2c5aa0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-frame-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .section-item {
+            padding: 15px;
+            background: #f8f9fa;
+            border: 2px solid #e9ecef;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+
+        .section-item:hover {
+            border-color: #2c5aa0;
+            background: #e3f2fd;
+        }
+
+        .section-item.active {
+            border-color: #2c5aa0;
+            background: #2c5aa0;
+            color: white;
+        }
+
+        .save-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .save-indicator.show {
+            display: flex;
+        }
+
+        /* Enhanced Editor Styles */
+        .enhanced-editor-section {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 20px;
+            margin: 20px 0;
+            border: 2px solid #e9ecef;
+        }
+        
+        .enhanced-editor-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #dee2e6;
+        }
+        
+        .enhanced-editor-title {
+            color: #2c5aa0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        .stats-grid-editor {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .stat-editor-item {
+            background: white;
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #dee2e6;
+        }
+        
+        .image-manager-section {
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border: 2px dashed #dee2e6;
+        }
+        
+        .image-preview-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 15px;
+            margin: 15px 0;
+        }
+        
+        .image-preview {
+            max-width: 300px;
+            max-height: 200px;
+            border-radius: 8px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .image-actions {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        
+        .block-item {
+            background: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2c5aa0;
+        }
+        
+        .add-block-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .remove-block-btn {
+            background: #dc3545;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .enhanced-form-group {
+            margin-bottom: 15px;
+        }
+        
+        .enhanced-form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #495057;
+        }
+        
+        .enhanced-form-control {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn-admin warning" onclick="editor.safeRefresh()">
+                        <i class="fas fa-sync"></i> Обновить
+                    </button>
+                    <button class="btn-admin success" onclick="editor.saveAndExit()" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="save-indicator" id="save-indicator">
+                <i class="fas fa-check-circle"></i>
+                <span id="save-message">Изменения сохранены</span>
+            </div>
+
+            <div class="preview-frame-container">
+                <iframe class="preview-frame" id="preview-frame" src="index.html?editor=true&nocache=1"></iframe>
+            </div>
+        </div>
+
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор контента</h2>
+            </div>
+
+            <div class="panel-content">
+                <h3>Структура страницы</h3>
+                <p style="color: #666; margin-bottom: 20px;">Выберите секцию для редактирования</p>
+                
+                <div id="section-list">
+                    <div class="section-item" data-section="hero">
+                        <div class="section-title">Главный баннер</div>
+                        <div class="section-desc">Заголовок и описание на главной</div>
+                    </div>
+                    <div class="section-item" data-section="about">
+                        <div class="section-title">О компании</div>
+                        <div class="section-desc">Информация о компании и статистика</div>
+                    </div>
+                    <div class="section-item" data-section="services">
+                        <div class="section-title">Услуги</div>
+                        <div class="section-desc">Список услуг компании</div>
+                    </div>
+                    <div class="section-item" data-section="destinations">
+                        <div class="section-title">Направления</div>
+                        <div class="section-desc">Популярные направления</div>
+                    </div>
+                    <div class="section-item" data-section="contact">
+                        <div class="section-title">Контакты</div>
+                        <div class="section-desc">Контактная информация</div>
+                    </div>
+                </div>
+
+                <div id="content-editor" style="margin-top: 30px; display: none;">
+                    <!-- Basic editor fields -->
+                    <div class="basic-editor">
+                        <div class="form-group">
+                            <label>Заголовок секции:</label>
+                            <input type="text" class="form-control" id="section-title">
+                        </div>
+                        <div class="form-group">
+                            <label>Описание:</label>
+                            <textarea class="form-control" id="section-description" rows="4"></textarea>
+                        </div>
+                        <button class="btn-admin" onclick="editor.saveSection()">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                    
+                    <!-- Enhanced editor will be injected here -->
+                    <div id="enhanced-editor-content"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Simple Page Editor with Enhanced Features
+        class SimplePageEditor {
+            constructor() {
+                this.currentSection = null;
+                this.currentData = null;
+                this.init();
+            }
+
+            init() {
+                console.log('🚀 Page Editor initialized');
+                this.setupSectionHandlers();
+                this.loadData();
+            }
+
+            setupSectionHandlers() {
+                const sectionItems = document.querySelectorAll('.section-item');
+                sectionItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        const sectionId = item.getAttribute('data-section');
+                        this.selectSection(sectionId);
+                    });
+                });
+            }
+
+            loadData() {
+                if (window.dataManager) {
+                    this.currentData = window.dataManager.getData();
+                    if (!this.currentData) {
+                        this.currentData = this.getDefaultData();
+                    }
+                    
+                    if (!this.currentData.content) {
+                        this.currentData.content = {};
+                    }
+                } else {
+                    this.currentData = this.getDefaultData();
+                }
+                console.log('📁 Data loaded:', this.currentData);
+            }
+
+            getDefaultData() {
+                return {
+                    content: {
+                        hero: {
+                            title: "Откройте мир с WorldTravel",
+                            description: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.",
+                            buttonText: "Начать путешествие",
+                            backgroundImage: ""
+                        },
+                        about: {
+                            title: "О нас",
+                            description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
+                            image: "",
+                            stats: [
+                                { value: "5000", label: "Довольных клиентов" },
+                                { value: "50", label: "Стран мира" },
+                                { value: "10 лет", label: "Опыта работы" }
+                            ]
+                        },
+                        services: {
+                            title: "Услуги",
+                            description: "Наши основные направления услуг для вашего комфортного путешествия",
+                            services: [
+                                {
+                                    title: "Авиабилеты",
+                                    description: "Подбор и бронирование лучших авиаперелетов по выгодным ценам",
+                                    icon: "fas fa-plane"
+                                },
+                                {
+                                    title: "Отели", 
+                                    description: "Бронирование отелей любого уровня комфорта по всему миру",
+                                    icon: "fas fa-hotel"
+                                },
+                                {
+                                    title: "Туры",
+                                    description: "Индивидуальные и групповые туры с профессиональными гидами", 
+                                    icon: "fas fa-map-marked-alt"
+                                },
+                                {
+                                    title: "Страхование",
+                                    description: "Полное страховое сопровождение вашего путешествия",
+                                    icon: "fas fa-shield-alt"
+                                }
+                            ]
+                        },
+                        destinations: {
+                            title: "Направления", 
+                            subtitle: "Откройте для себя лучшие направления мира с нашими эксклюзивными турами"
+                        },
+                        contact: {
+                            title: "Контакты",
+                            description: "Свяжитесь с нами для планирования вашего идеального путешествия"
+                        }
+                    }
+                };
+            }
+
+            selectSection(sectionId) {
+                // Update UI
+                document.querySelectorAll('.section-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+                this.currentSection = sectionId;
+                this.loadSectionData(sectionId);
+                
+                // Show editor
+                document.getElementById('content-editor').style.display = 'block';
+                
+                // Inject enhanced editor
+                this.injectEnhancedEditor();
+            }
+
+            loadSectionData(sectionId) {
+                if (!this.currentData.content[sectionId]) {
+                    const defaultData = this.getDefaultData();
+                    this.currentData.content[sectionId] = defaultData.content[sectionId] || {};
+                }
+
+                const sectionData = this.currentData.content[sectionId];
+                if (sectionData) {
+                    document.getElementById('section-title').value = sectionData.title || '';
+                    document.getElementById('section-description').value = sectionData.description || '';
+                }
+            }
+
+            injectEnhancedEditor() {
+                const contentEditor = document.getElementById('enhanced-editor-content');
+                if (!contentEditor) return;
+
+                // Clear previous content
+                contentEditor.innerHTML = '';
+
+                // Inject appropriate enhanced editor based on section
+                switch (this.currentSection) {
+                    case 'hero':
+                        this.injectHeroEditor(contentEditor);
+                        break;
+                    case 'about':
+                        this.injectAboutEditor(contentEditor);
+                        break;
+                    case 'services':
+                        this.injectServicesEditor(contentEditor);
+                        break;
+                    case 'destinations':
+                        this.injectDestinationsEditor(contentEditor);
+                        break;
+                    case 'contact':
+                        this.injectContactEditor(contentEditor);
+                        break;
+                }
+            }
+
+            // Hero Section Editor
+            injectHeroEditor(container) {
+                const data = this.currentData.content.hero || {};
+                
+                const html = `
+                    <div class="enhanced-editor-section">
+                        <div class="enhanced-editor-header">
+                            <div class="enhanced-editor-title">🎯 Дополнительные настройки</div>
+                        </div>
+                        
+                        <div class="image-manager-section">
+                            <div class="enhanced-form-group">
+                                <label>Фоновое изображение:</label>
+                                <div class="image-preview-container">
+                                    ${data.backgroundImage ? 
+                                        `<img src="${data.backgroundImage}" alt="Preview" class="image-preview" onerror="this.style.display='none'">` :
+                                        `<div style="text-align: center; color: #6c757d; padding: 20px;">
+                                            <i class="fas fa-image" style="font-size: 3em; margin-bottom: 10px;"></i>
+                                            <div>Изображение не установлено</div>
+                                        </div>`
+                                    }
+                                    <div class="image-actions">
+                                        <button type="button" class="btn-admin" onclick="editor.uploadImage('backgroundImage')">
+                                            <i class="fas fa-upload"></i> Загрузить
+                                        </button>
+                                        <button type="button" class="btn-admin secondary" onclick="editor.setImageUrl('backgroundImage')">
+                                            <i class="fas fa-link"></i> URL
+                                        </button>
+                                        ${data.backgroundImage ? `
+                                        <button type="button" class="btn-admin danger" onclick="editor.removeImage('backgroundImage')">
+                                            <i class="fas fa-trash"></i> Удалить
+                                        </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="enhanced-form-group">
+                            <label>Текст кнопки:</label>
+                            <input type="text" class="enhanced-form-control" id="hero-button-text" 
+                                   value="${data.buttonText || 'Начать путешествие'}" 
+                                   oninput="editor.updateHeroField('buttonText', this.value)">
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            // About Section Editor with Stats
+            injectAboutEditor(container) {
+                const data = this.currentData.content.about || {};
+                const stats = data.stats || [];
+
+                const html = `
+                    <div class="enhanced-editor-section">
+                        <div class="enhanced-editor-header">
+                            <div class="enhanced-editor-title">📊 Управление статистикой</div>
+                            <button type="button" class="add-block-btn" onclick="editor.addStatBlock()">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+
+                        <div class="image-manager-section">
+                            <div class="enhanced-form-group">
+                                <label>Изображение компании:</label>
+                                <div class="image-preview-container">
+                                    ${data.image ? 
+                                        `<img src="${data.image}" alt="Preview" class="image-preview" onerror="this.style.display='none'">` :
+                                        `<div style="text-align: center; color: #6c757d; padding: 20px;">
+                                            <i class="fas fa-building" style="font-size: 3em; margin-bottom: 10px;"></i>
+                                            <div>Изображение не установлено</div>
+                                        </div>`
+                                    }
+                                    <div class="image-actions">
+                                        <button type="button" class="btn-admin" onclick="editor.uploadImage('image')">
+                                            <i class="fas fa-upload"></i> Загрузить
+                                        </button>
+                                        <button type="button" class="btn-admin secondary" onclick="editor.setImageUrl('image')">
+                                            <i class="fas fa-link"></i> URL
+                                        </button>
+                                        ${data.image ? `
+                                        <button type="button" class="btn-admin danger" onclick="editor.removeImage('image')">
+                                            <i class="fas fa-trash"></i> Удалить
+                                        </button>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stats-grid-editor" id="stats-editor-container">
+                            ${stats.map((stat, index) => `
+                                <div class="stat-editor-item">
+                                    <div class="enhanced-form-group">
+                                        <label>Значение:</label>
+                                        <input type="text" class="enhanced-form-control stat-value" 
+                                               value="${stat.value}" 
+                                               oninput="editor.updateStatBlock(${index}, 'value', this.value)"
+                                               placeholder="5000">
+                                    </div>
+                                    <div class="enhanced-form-group">
+                                        <label>Подпись:</label>
+                                        <input type="text" class="enhanced-form-control stat-label" 
+                                               value="${stat.label}" 
+                                               oninput="editor.updateStatBlock(${index}, 'label', this.value)"
+                                               placeholder="Довольных клиентов">
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <button type="button" class="remove-block-btn" onclick="editor.removeStatBlock(${index})">
+                                            <i class="fas fa-trash"></i> Удалить
+                                        </button>
+                                    </div>
+                                </div>
+                            `).join('')}
+                            ${stats.length === 0 ? `
+                                <div style="text-align: center; padding: 40px 20px; color: #666; grid-column: 1 / -1;">
+                                    <i class="fas fa-chart-bar" style="font-size: 3em; margin-bottom: 15px; display: block; color: #ccc;"></i>
+                                    <p>Статистика не добавлена</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            // Services Section Editor
+            injectServicesEditor(container) {
+                const data = this.currentData.content.services || {};
+                const services = data.services || [];
+
+                const html = `
+                    <div class="enhanced-editor-section">
+                        <div class="enhanced-editor-header">
+                            <div class="enhanced-editor-title">⚡ Управление услугами</div>
+                            <button type="button" class="add-block-btn" onclick="editor.addServiceBlock()">
+                                <i class="fas fa-plus"></i> Добавить
+                            </button>
+                        </div>
+
+                        <div id="services-editor-container">
+                            ${services.map((service, index) => `
+                                <div class="block-item">
+                                    <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: start; margin-bottom: 10px;">
+                                        <div class="enhanced-form-group">
+                                            <label>Название услуги:</label>
+                                            <input type="text" class="enhanced-form-control service-title" 
+                                                   value="${service.title}" 
+                                                   oninput="editor.updateServiceBlock(${index}, 'title', this.value)"
+                                                   placeholder="Авиабилеты">
+                                        </div>
+                                        <div class="enhanced-form-group">
+                                            <label>Иконка:</label>
+                                            <input type="text" class="enhanced-form-control service-icon" 
+                                                   value="${service.icon}" 
+                                                   oninput="editor.updateServiceBlock(${index}, 'icon', this.value)"
+                                                   placeholder="fas fa-plane">
+                                        </div>
+                                        <div>
+                                            <button type="button" class="remove-block-btn" onclick="editor.removeServiceBlock(${index})">
+                                                <i class="fas fa-trash"></i> Удалить
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div class="enhanced-form-group">
+                                        <label>Описание услуги:</label>
+                                        <textarea class="enhanced-form-control service-description" rows="2"
+                                                  oninput="editor.updateServiceBlock(${index}, 'description', this.value)"
+                                                  placeholder="Описание услуги...">${service.description}</textarea>
+                                    </div>
+                                    ${service.icon ? `
+                                    <div style="background: #e9ecef; padding: 8px 12px; border-radius: 4px; margin-top: 8px; font-size: 0.9em;">
+                                        <i class="${service.icon}" style="margin-right: 6px;"></i>
+                                        <span>Предпросмотр иконки</span>
+                                    </div>
+                                    ` : ''}
+                                </div>
+                            `).join('')}
+                            ${services.length === 0 ? `
+                                <div style="text-align: center; padding: 40px 20px; color: #666;">
+                                    <i class="fas fa-concierge-bell" style="font-size: 3em; margin-bottom: 15px; display: block; color: #ccc;"></i>
+                                    <p>Услуги не добавлены</p>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                `;
+
+                container.innerHTML = html;
+            }
+
+            // Other section editors
+            injectDestinationsEditor(container) {
+                container.innerHTML = `
+                    <div class="enhanced-editor-section">
+                        <div class="enhanced-editor-header">
+                            <div class="enhanced-editor-title">🌍 Дополнительные настройки</div>
+                        </div>
+                        <p style="color: #666; margin: 0;">Для этой секции доступны только основные настройки</p>
+                    </div>
+                `;
+            }
+
+            injectContactEditor(container) {
+                container.innerHTML = `
+                    <div class="enhanced-editor-section">
+                        <div class="enhanced-editor-header">
+                            <div class="enhanced-editor-title">📞 Дополнительные настройки</div>
+                        </div>
+                        <p style="color: #666; margin: 0;">Для этой секции доступны только основные настройки</p>
+                    </div>
+                `;
+            }
+
+            // Data Management Methods
+            updateHeroField(field, value) {
+                if (!this.currentData.content.hero) {
+                    this.currentData.content.hero = {};
+                }
+                this.currentData.content.hero[field] = value;
+            }
+
+            // Stats Management
+            addStatBlock() {
+                if (!this.currentData.content.about) {
+                    this.currentData.content.about = {};
+                }
+                if (!this.currentData.content.about.stats) {
+                    this.currentData.content.about.stats = [];
+                }
+
+                this.currentData.content.about.stats.push({
+                    value: '1000',
+                    label: 'Новый показатель'
+                });
+
+                this.showNotification('Блок статистики добавлен', 'success');
+                this.injectAboutEditor(document.getElementById('enhanced-editor-content'));
+            }
+
+            updateStatBlock(index, field, value) {
+                if (this.currentData.content.about?.stats?.[index]) {
+                    this.currentData.content.about.stats[index][field] = value;
+                }
+            }
+
+            removeStatBlock(index) {
+                if (this.currentData.content.about?.stats?.[index]) {
+                    this.currentData.content.about.stats.splice(index, 1);
+                    this.showNotification('Блок статистики удален', 'success');
+                    this.injectAboutEditor(document.getElementById('enhanced-editor-content'));
+                }
+            }
+
+            // Services Management
+            addServiceBlock() {
+                if (!this.currentData.content.services) {
+                    this.currentData.content.services = {};
+                }
+                if (!this.currentData.content.services.services) {
+                    this.currentData.content.services.services = [];
+                }
+
+                this.currentData.content.services.services.push({
+                    title: 'Новая услуга',
+                    description: 'Описание новой услуги',
+                    icon: 'fas fa-star'
+                });
+
+                this.showNotification('Услуга добавлена', 'success');
+                this.injectServicesEditor(document.getElementById('enhanced-editor-content'));
+            }
+
+            updateServiceBlock(index, field, value) {
+                if (this.currentData.content.services?.services?.[index]) {
+                    this.currentData.content.services.services[index][field] = value;
+                }
+            }
+
+            removeServiceBlock(index) {
+                if (this.currentData.content.services?.services?.[index]) {
+                    this.currentData.content.services.services.splice(index, 1);
+                    this.showNotification('Услуга удалена', 'success');
+                    this.injectServicesEditor(document.getElementById('enhanced-editor-content'));
+                }
+            }
+
+            // Image Management
+            uploadImage(field) {
+                const input = document.createElement('input');
+                input.type = 'file';
+                input.accept = 'image/*';
+                input.onchange = (e) => {
+                    const file = e.target.files[0];
+                    if (file) {
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            this.setImage(field, e.target.result);
+                        };
+                        reader.readAsDataURL(file);
+                    }
+                };
+                input.click();
+            }
+
+            setImageUrl(field) {
+                const url = prompt('Введите URL изображения:');
+                if (url) {
+                    this.setImage(field, url);
+                }
+            }
+
+            removeImage(field) {
+                if (confirm('Удалить изображение?')) {
+                    this.setImage(field, '');
+                }
+            }
+
+            setImage(field, url) {
+                if (!this.currentData.content[this.currentSection]) {
+                    this.currentData.content[this.currentSection] = {};
+                }
+                this.currentData.content[this.currentSection][field] = url;
+                this.showNotification('Изображение обновлено', 'success');
+                this.injectEnhancedEditor();
+            }
+
+            // Save Methods
+            saveSection() {
+                if (!this.currentSection || !window.dataManager) return;
+
+                // Update basic fields
+                const title = document.getElementById('section-title').value;
+                const description = document.getElementById('section-description').value;
+
+                if (!this.currentData.content[this.currentSection]) {
+                    this.currentData.content[this.currentSection] = {};
+                }
+
+                this.currentData.content[this.currentSection].title = title;
+                this.currentData.content[this.currentSection].description = description;
+
+                // Get main data and merge
+                const mainData = window.dataManager.getData() || {};
+                if (!mainData.content) mainData.content = {};
+                
+                // Merge our changes
+                Object.keys(this.currentData.content).forEach(section => {
+                    if (!mainData.content[section]) mainData.content[section] = {};
+                    Object.assign(mainData.content[section], this.currentData.content[section]);
+                });
+
+                mainData.lastUpdate = new Date().toISOString();
+
+                if (window.dataManager.setData(mainData)) {
+                    this.showSaveIndicator('Изменения сохранены успешно!');
+                    this.safeRefresh();
+                } else {
+                    alert('Ошибка сохранения');
+                }
+            }
+
+            safeRefresh() {
+                const frame = document.getElementById('preview-frame');
+                frame.src = frame.src.split('?')[0] + '?editor=true&nocache=' + Date.now();
+            }
+
+            saveAndExit() {
+                window.location.href = 'admin.html';
+            }
+
+            showSaveIndicator(message) {
+                const indicator = document.getElementById('save-indicator');
+                const messageEl = document.getElementById('save-message');
+                
+                messageEl.textContent = message;
+                indicator.classList.add('show');
+                
+                setTimeout(() => {
+                    indicator.classList.remove('show');
+                }, 3000);
+            }
+
+            showNotification(message, type = 'success') {
+                console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
+                // Simple alert for now
+                alert(message);
+            }
+        }
+
+        // Initialize editor when dataManager is ready
+        const initEditor = () => {
+            if (window.dataManager) {
+                window.editor = new SimplePageEditor();
+            } else {
+                setTimeout(initEditor, 100);
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', initEditor);
+    </script>
+    <script src="data-manager.js"></script>
+</body>
+</html>
