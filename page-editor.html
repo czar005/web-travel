@@ -179,6 +179,10 @@
             gap: 8px;
         }
         
+        .add-block-btn:hover {
+            background: #218838;
+        }
+        
         .remove-block-btn {
             background: #dc3545;
             color: white;
@@ -187,6 +191,10 @@
             border-radius: 4px;
             cursor: pointer;
             font-size: 12px;
+        }
+        
+        .remove-block-btn:hover {
+            background: #c82333;
         }
         
         .enhanced-form-group {
@@ -206,6 +214,12 @@
             border: 1px solid #ced4da;
             border-radius: 6px;
             font-size: 14px;
+        }
+        
+        .enhanced-form-control:focus {
+            outline: none;
+            border-color: #2c5aa0;
+            box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
         }
     </style>
 </head>
@@ -290,7 +304,7 @@
     </div>
 
     <script>
-        // Simple Page Editor with Enhanced Features
+        // Simple Page Editor with Enhanced Features - FIXED VERSION
         class SimplePageEditor {
             constructor() {
                 this.currentSection = null;
@@ -317,17 +331,21 @@
             loadData() {
                 if (window.dataManager) {
                     this.currentData = window.dataManager.getData();
+                    console.log('📁 Initial data loaded:', this.currentData);
+                    
                     if (!this.currentData) {
                         this.currentData = this.getDefaultData();
+                        console.log('📁 Using default data');
                     }
                     
                     if (!this.currentData.content) {
                         this.currentData.content = {};
+                        console.log('📁 Created content structure');
                     }
                 } else {
                     this.currentData = this.getDefaultData();
+                    console.log('📁 DataManager not available, using default data');
                 }
-                console.log('📁 Data loaded:', this.currentData);
             }
 
             getDefaultData() {
@@ -383,11 +401,14 @@
                             title: "Контакты",
                             description: "Свяжитесь с нами для планирования вашего идеального путешествия"
                         }
-                    }
+                    },
+                    lastUpdate: new Date().toISOString()
                 };
             }
 
             selectSection(sectionId) {
+                console.log('🎯 Selecting section:', sectionId);
+                
                 // Update UI
                 document.querySelectorAll('.section-item').forEach(item => {
                     item.classList.remove('active');
@@ -405,24 +426,35 @@
             }
 
             loadSectionData(sectionId) {
+                console.log('📝 Loading section data for:', sectionId);
+                
                 if (!this.currentData.content[sectionId]) {
                     const defaultData = this.getDefaultData();
                     this.currentData.content[sectionId] = defaultData.content[sectionId] || {};
+                    console.log('📁 Created section data:', this.currentData.content[sectionId]);
                 }
 
                 const sectionData = this.currentData.content[sectionId];
                 if (sectionData) {
                     document.getElementById('section-title').value = sectionData.title || '';
                     document.getElementById('section-description').value = sectionData.description || '';
+                    console.log('✅ Loaded basic data:', { 
+                        title: sectionData.title, 
+                        description: sectionData.description 
+                    });
                 }
             }
 
             injectEnhancedEditor() {
                 const contentEditor = document.getElementById('enhanced-editor-content');
-                if (!contentEditor) return;
+                if (!contentEditor) {
+                    console.error('❌ Enhanced editor container not found');
+                    return;
+                }
 
                 // Clear previous content
                 contentEditor.innerHTML = '';
+                console.log('🔄 Injecting enhanced editor for section:', this.currentSection);
 
                 // Inject appropriate enhanced editor based on section
                 switch (this.currentSection) {
@@ -441,12 +473,15 @@
                     case 'contact':
                         this.injectContactEditor(contentEditor);
                         break;
+                    default:
+                        console.warn('⚠️ Unknown section:', this.currentSection);
                 }
             }
 
             // Hero Section Editor
             injectHeroEditor(container) {
                 const data = this.currentData.content.hero || {};
+                console.log('🎯 Injecting hero editor with data:', data);
                 
                 const html = `
                     <div class="enhanced-editor-section">
@@ -494,17 +529,18 @@
                 container.innerHTML = html;
             }
 
-            // About Section Editor with Stats
+            // About Section Editor with Stats - FIXED
             injectAboutEditor(container) {
                 const data = this.currentData.content.about || {};
                 const stats = data.stats || [];
+                console.log('🏢 Injecting about editor with stats:', stats);
 
                 const html = `
                     <div class="enhanced-editor-section">
                         <div class="enhanced-editor-header">
                             <div class="enhanced-editor-title">📊 Управление статистикой</div>
                             <button type="button" class="add-block-btn" onclick="editor.addStatBlock()">
-                                <i class="fas fa-plus"></i> Добавить
+                                <i class="fas fa-plus"></i> Добавить блок
                             </button>
                         </div>
 
@@ -564,6 +600,7 @@
                                 <div style="text-align: center; padding: 40px 20px; color: #666; grid-column: 1 / -1;">
                                     <i class="fas fa-chart-bar" style="font-size: 3em; margin-bottom: 15px; display: block; color: #ccc;"></i>
                                     <p>Статистика не добавлена</p>
+                                    <small>Добавьте первый блок статистики</small>
                                 </div>
                             ` : ''}
                         </div>
@@ -571,19 +608,21 @@
                 `;
 
                 container.innerHTML = html;
+                console.log('✅ About editor injected with', stats.length, 'stats blocks');
             }
 
-            // Services Section Editor
+            // Services Section Editor - FIXED
             injectServicesEditor(container) {
                 const data = this.currentData.content.services || {};
                 const services = data.services || [];
+                console.log('⚡ Injecting services editor with services:', services);
 
                 const html = `
                     <div class="enhanced-editor-section">
                         <div class="enhanced-editor-header">
                             <div class="enhanced-editor-title">⚡ Управление услугами</div>
                             <button type="button" class="add-block-btn" onclick="editor.addServiceBlock()">
-                                <i class="fas fa-plus"></i> Добавить
+                                <i class="fas fa-plus"></i> Добавить услугу
                             </button>
                         </div>
 
@@ -629,6 +668,7 @@
                                 <div style="text-align: center; padding: 40px 20px; color: #666;">
                                     <i class="fas fa-concierge-bell" style="font-size: 3em; margin-bottom: 15px; display: block; color: #ccc;"></i>
                                     <p>Услуги не добавлены</p>
+                                    <small>Добавьте первую услугу</small>
                                 </div>
                             ` : ''}
                         </div>
@@ -636,6 +676,7 @@
                 `;
 
                 container.innerHTML = html;
+                console.log('✅ Services editor injected with', services.length, 'services');
             }
 
             // Other section editors
@@ -663,74 +704,115 @@
 
             // Data Management Methods
             updateHeroField(field, value) {
+                console.log('🎯 Updating hero field:', field, value);
                 if (!this.currentData.content.hero) {
                     this.currentData.content.hero = {};
                 }
                 this.currentData.content.hero[field] = value;
             }
 
-            // Stats Management
+            // Stats Management - FIXED
             addStatBlock() {
+                console.log('➕ Adding stat block');
+                
                 if (!this.currentData.content.about) {
                     this.currentData.content.about = {};
+                    console.log('📁 Created about section');
                 }
                 if (!this.currentData.content.about.stats) {
                     this.currentData.content.about.stats = [];
+                    console.log('�� Created stats array');
                 }
 
-                this.currentData.content.about.stats.push({
+                const newStat = {
                     value: '1000',
                     label: 'Новый показатель'
-                });
+                };
+                
+                this.currentData.content.about.stats.push(newStat);
+                console.log('✅ Added stat block:', newStat);
+                console.log('📊 Current stats:', this.currentData.content.about.stats);
 
                 this.showNotification('Блок статистики добавлен', 'success');
                 this.injectAboutEditor(document.getElementById('enhanced-editor-content'));
             }
 
             updateStatBlock(index, field, value) {
+                console.log('📊 Updating stat block:', index, field, value);
+                
                 if (this.currentData.content.about?.stats?.[index]) {
                     this.currentData.content.about.stats[index][field] = value;
+                    console.log('✅ Stat block updated:', this.currentData.content.about.stats[index]);
+                } else {
+                    console.error('❌ Stat block not found at index:', index);
                 }
             }
 
             removeStatBlock(index) {
+                console.log('🗑️ Removing stat block:', index);
+                
                 if (this.currentData.content.about?.stats?.[index]) {
-                    this.currentData.content.about.stats.splice(index, 1);
+                    const removed = this.currentData.content.about.stats.splice(index, 1);
+                    console.log('✅ Stat block removed:', removed);
+                    console.log('📊 Remaining stats:', this.currentData.content.about.stats);
+                    
                     this.showNotification('Блок статистики удален', 'success');
                     this.injectAboutEditor(document.getElementById('enhanced-editor-content'));
+                } else {
+                    console.error('❌ Stat block not found at index:', index);
                 }
             }
 
-            // Services Management
+            // Services Management - FIXED
             addServiceBlock() {
+                console.log('➕ Adding service block');
+                
                 if (!this.currentData.content.services) {
                     this.currentData.content.services = {};
+                    console.log('📁 Created services section');
                 }
                 if (!this.currentData.content.services.services) {
                     this.currentData.content.services.services = [];
+                    console.log('📁 Created services array');
                 }
 
-                this.currentData.content.services.services.push({
+                const newService = {
                     title: 'Новая услуга',
                     description: 'Описание новой услуги',
                     icon: 'fas fa-star'
-                });
+                };
+                
+                this.currentData.content.services.services.push(newService);
+                console.log('✅ Added service block:', newService);
+                console.log('⚡ Current services:', this.currentData.content.services.services);
 
                 this.showNotification('Услуга добавлена', 'success');
                 this.injectServicesEditor(document.getElementById('enhanced-editor-content'));
             }
 
             updateServiceBlock(index, field, value) {
+                console.log('⚡ Updating service block:', index, field, value);
+                
                 if (this.currentData.content.services?.services?.[index]) {
                     this.currentData.content.services.services[index][field] = value;
+                    console.log('✅ Service block updated:', this.currentData.content.services.services[index]);
+                } else {
+                    console.error('❌ Service block not found at index:', index);
                 }
             }
 
             removeServiceBlock(index) {
+                console.log('🗑️ Removing service block:', index);
+                
                 if (this.currentData.content.services?.services?.[index]) {
-                    this.currentData.content.services.services.splice(index, 1);
+                    const removed = this.currentData.content.services.services.splice(index, 1);
+                    console.log('✅ Service block removed:', removed);
+                    console.log('⚡ Remaining services:', this.currentData.content.services.services);
+                    
                     this.showNotification('Услуга удалена', 'success');
                     this.injectServicesEditor(document.getElementById('enhanced-editor-content'));
+                } else {
+                    console.error('❌ Service block not found at index:', index);
                 }
             }
 
@@ -766,17 +848,25 @@
             }
 
             setImage(field, url) {
+                console.log('🖼️ Setting image for', field, url);
+                
                 if (!this.currentData.content[this.currentSection]) {
                     this.currentData.content[this.currentSection] = {};
                 }
                 this.currentData.content[this.currentSection][field] = url;
+                
                 this.showNotification('Изображение обновлено', 'success');
                 this.injectEnhancedEditor();
             }
 
             // Save Methods
             saveSection() {
-                if (!this.currentSection || !window.dataManager) return;
+                console.log('💾 Saving section:', this.currentSection);
+                
+                if (!this.currentSection || !window.dataManager) {
+                    console.error('❌ Cannot save: no section selected or DataManager not available');
+                    return;
+                }
 
                 // Update basic fields
                 const title = document.getElementById('section-title').value;
@@ -789,22 +879,32 @@
                 this.currentData.content[this.currentSection].title = title;
                 this.currentData.content[this.currentSection].description = description;
 
+                console.log('📝 Basic fields updated:', { title, description });
+
                 // Get main data and merge
                 const mainData = window.dataManager.getData() || {};
-                if (!mainData.content) mainData.content = {};
+                if (!mainData.content) {
+                    mainData.content = {};
+                    console.log('📁 Created content in main data');
+                }
                 
                 // Merge our changes
                 Object.keys(this.currentData.content).forEach(section => {
-                    if (!mainData.content[section]) mainData.content[section] = {};
+                    if (!mainData.content[section]) {
+                        mainData.content[section] = {};
+                    }
                     Object.assign(mainData.content[section], this.currentData.content[section]);
+                    console.log('🔄 Merged section:', section, mainData.content[section]);
                 });
 
                 mainData.lastUpdate = new Date().toISOString();
 
                 if (window.dataManager.setData(mainData)) {
+                    console.log('✅ Data saved successfully');
                     this.showSaveIndicator('Изменения сохранены успешно!');
                     this.safeRefresh();
                 } else {
+                    console.error('❌ Failed to save data');
                     alert('Ошибка сохранения');
                 }
             }
@@ -812,6 +912,7 @@
             safeRefresh() {
                 const frame = document.getElementById('preview-frame');
                 frame.src = frame.src.split('?')[0] + '?editor=true&nocache=' + Date.now();
+                console.log('🔄 Preview refreshed');
             }
 
             saveAndExit() {
@@ -831,17 +932,20 @@
             }
 
             showNotification(message, type = 'success') {
-                console.log(`${type === 'success' ? '✅' : '❌'} ${message}`);
-                // Simple alert for now
-                alert(message);
+                console.log(`💬 ${type}: ${message}`);
+                // Simple alert for now - can be replaced with toast notifications
+                alert(`${type === 'success' ? '✅' : '❌'} ${message}`);
             }
         }
 
         // Initialize editor when dataManager is ready
         const initEditor = () => {
             if (window.dataManager) {
+                console.log('🎬 Initializing page editor...');
                 window.editor = new SimplePageEditor();
+                console.log('✅ Page editor initialized successfully');
             } else {
+                console.log('⏳ Waiting for DataManager...');
                 setTimeout(initEditor, 100);
             }
         };
