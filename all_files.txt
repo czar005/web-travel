@@ -660,7 +660,7 @@ body {
     </div>
 
     <script>
-        // Simple Page Editor with Enhanced Features - FIXED VERSION
+        // Enhanced Page Editor with fixed stats and services - FIXED VERSION
         class SimplePageEditor {
             constructor() {
                 this.currentSection = null;
@@ -718,8 +718,8 @@ body {
                             description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
                             image: "",
                             stats: [
-                                { value: "5000", label: "Довольных клиентов" },
-                                { value: "50", label: "Стран мира" },
+                                { value: "5000+", label: "Довольных клиентов" },
+                                { value: "50+", label: "Стран мира" },
                                 { value: "10 лет", label: "Опыта работы" }
                             ]
                         },
@@ -736,16 +736,6 @@ body {
                                     title: "Отели", 
                                     description: "Бронирование отелей любого уровня комфорта по всему миру",
                                     icon: "fas fa-hotel"
-                                },
-                                {
-                                    title: "Туры",
-                                    description: "Индивидуальные и групповые туры с профессиональными гидами", 
-                                    icon: "fas fa-map-marked-alt"
-                                },
-                                {
-                                    title: "Страхование",
-                                    description: "Полное страховое сопровождение вашего путешествия",
-                                    icon: "fas fa-shield-alt"
                                 }
                             ]
                         },
@@ -765,7 +755,6 @@ body {
             selectSection(sectionId) {
                 console.log('🎯 Selecting section:', sectionId);
                 
-                // Update UI
                 document.querySelectorAll('.section-item').forEach(item => {
                     item.classList.remove('active');
                 });
@@ -774,10 +763,7 @@ body {
                 this.currentSection = sectionId;
                 this.loadSectionData(sectionId);
                 
-                // Show editor
                 document.getElementById('content-editor').style.display = 'block';
-                
-                // Inject enhanced editor
                 this.injectEnhancedEditor();
             }
 
@@ -808,11 +794,9 @@ body {
                     return;
                 }
 
-                // Clear previous content
                 contentEditor.innerHTML = '';
                 console.log('🔄 Injecting enhanced editor for section:', this.currentSection);
 
-                // Inject appropriate enhanced editor based on section
                 switch (this.currentSection) {
                     case 'hero':
                         this.injectHeroEditor(contentEditor);
@@ -936,7 +920,7 @@ body {
                                         <input type="text" class="enhanced-form-control stat-value" 
                                                value="${stat.value}" 
                                                oninput="editor.updateStatBlock(${index}, 'value', this.value)"
-                                               placeholder="5000">
+                                               placeholder="5000+">
                                     </div>
                                     <div class="enhanced-form-group">
                                         <label>Подпись:</label>
@@ -1077,11 +1061,11 @@ body {
                 }
                 if (!this.currentData.content.about.stats) {
                     this.currentData.content.about.stats = [];
-                    console.log('�� Created stats array');
+                    console.log('📁 Created stats array');
                 }
 
                 const newStat = {
-                    value: '1000',
+                    value: '1000+',
                     label: 'Новый показатель'
                 };
                 
@@ -1215,7 +1199,7 @@ body {
                 this.injectEnhancedEditor();
             }
 
-            // Save Methods
+            // Save Methods - FIXED: Removed calls to non-existent methods
             saveSection() {
                 console.log('💾 Saving section:', this.currentSection);
                 
@@ -1238,23 +1222,25 @@ body {
                 console.log('📝 Basic fields updated:', { title, description });
 
                 // Get main data and merge
-                const mainData = window.dataManager.getData() || {};
+                const mainData = window.dataManager.getData() || this.getDefaultData();
                 if (!mainData.content) {
                     mainData.content = {};
                     console.log('📁 Created content in main data');
                 }
                 
-                // Merge our changes
-                Object.keys(this.currentData.content).forEach(section => {
-                    if (!mainData.content[section]) {
-                        mainData.content[section] = {};
-                    }
-                    Object.assign(mainData.content[section], this.currentData.content[section]);
-                    console.log('🔄 Merged section:', section, mainData.content[section]);
-                });
+                // Ensure the section exists in main data
+                if (!mainData.content[this.currentSection]) {
+                    mainData.content[this.currentSection] = {};
+                }
+                
+                // Merge ALL changes including stats and services
+                Object.assign(mainData.content[this.currentSection], this.currentData.content[this.currentSection]);
+                
+                console.log('🔄 Merged section data:', this.currentSection, mainData.content[this.currentSection]);
 
                 mainData.lastUpdate = new Date().toISOString();
 
+                // Simply save the entire data structure
                 if (window.dataManager.setData(mainData)) {
                     console.log('✅ Data saved successfully');
                     this.showSaveIndicator('Изменения сохранены успешно!');
@@ -1289,7 +1275,6 @@ body {
 
             showNotification(message, type = 'success') {
                 console.log(`💬 ${type}: ${message}`);
-                // Simple alert for now - can be replaced with toast notifications
                 alert(`${type === 'success' ? '✅' : '❌'} ${message}`);
             }
         }
@@ -1315,7 +1300,7 @@ body {
 
 
 === FILE: ./admin.js ===
-// Improved Admin JavaScript
+// Complete Admin JavaScript with all fixes
 console.log('🔄 Admin JS loading...');
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -1326,7 +1311,6 @@ document.addEventListener('DOMContentLoaded', function() {
 function initializeAdmin() {
     console.log('🚀 Initializing admin...');
     
-    // Wait for dataManager to be ready
     const initInterval = setInterval(() => {
         if (window.dataManager) {
             clearInterval(initInterval);
@@ -1337,17 +1321,11 @@ function initializeAdmin() {
         }
     }, 100);
 
-    // Fallback timeout
     setTimeout(() => {
         clearInterval(initInterval);
         if (!window.dataManager) {
-            console.error('❌ DataManager not available, using fallback');
+            console.error('❌ DataManager not available');
             showAdminNotification('Ошибка загрузки данных. Обновите страницу.', 'error');
-            // Try to initialize data manager manually
-            if (typeof DataManager !== 'undefined') {
-                window.dataManager = new DataManager();
-                loadAdminData();
-            }
         }
     }, 5000);
 }
@@ -1355,7 +1333,6 @@ function initializeAdmin() {
 function setupAdminEventListeners() {
     console.log('🔧 Setting up admin event listeners...');
     
-    // Form handlers
     const addCountryForm = document.getElementById('add-country-form');
     const addTourForm = document.getElementById('add-tour-form');
     const contactForm = document.getElementById('contact-form');
@@ -1363,22 +1340,18 @@ function setupAdminEventListeners() {
     
     if (addCountryForm) {
         addCountryForm.addEventListener('submit', handleAddCountry);
-        console.log('✅ Country form handler added');
     }
     
     if (addTourForm) {
         addTourForm.addEventListener('submit', handleAddTour);
-        console.log('✅ Tour form handler added');
     }
     
     if (contactForm) {
         contactForm.addEventListener('submit', handleUpdateContacts);
-        console.log('✅ Contact form handler added');
     }
     
     if (settingsForm) {
         settingsForm.addEventListener('submit', handleUpdateSettings);
-        console.log('✅ Settings form handler added');
     }
     
     // Tab handlers
@@ -1388,11 +1361,9 @@ function setupAdminEventListeners() {
             const tabName = this.getAttribute('data-tab');
             console.log('📑 Switching to tab:', tabName);
             
-            // Update active tab UI
             tabButtons.forEach(btn => btn.classList.remove('active'));
             this.classList.add('active');
             
-            // Show/hide tab content
             document.querySelectorAll('.tab-pane').forEach(pane => {
                 pane.classList.remove('active');
             });
@@ -1416,54 +1387,28 @@ function setupAdminEventListeners() {
         });
     });
 
-    // Force refresh button
-    const refreshBtn = document.createElement('button');
-    refreshBtn.className = 'btn-admin secondary';
-    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Обновить данные';
-    refreshBtn.style.marginLeft = '10px';
-    refreshBtn.onclick = forceRefreshData;
-    
-    const headerActions = document.querySelector('.admin-nav');
-    if (headerActions) {
-        headerActions.appendChild(refreshBtn);
-    }
-
-    // Reset data button for emergencies
-    const resetBtn = document.createElement('button');
-    resetBtn.className = 'btn-admin danger';
-    resetBtn.innerHTML = '<i class="fas fa-redo"></i> Сбросить данные';
-    resetBtn.style.marginLeft = '10px';
-    resetBtn.onclick = resetData;
-    resetBtn.title = 'Восстановить стандартные данные';
-    
-    if (headerActions) {
-        headerActions.appendChild(resetBtn);
+    // Add image upload handler
+    const imageUpload = document.getElementById('country-image-upload');
+    if (imageUpload) {
+        imageUpload.addEventListener('change', handleImageUpload);
     }
 }
 
-function resetData() {
-    if (confirm('Вы уверены, что хотите сбросить все данные к стандартным? Это удалит все добавленные страны и туры.')) {
-        if (window.dataManager && window.dataManager.resetToDefault) {
-            window.dataManager.resetToDefault();
-            loadAdminData();
-            showAdminNotification('Данные сброшены к стандартным', 'success');
-        }
-    }
-}
-
-function forceRefreshData() {
-    console.log('🔄 Force refreshing data...');
-    if (window.dataManager) {
-        window.dataManager.forceRefresh();
-        loadAdminData();
-        showAdminNotification('Данные обновлены', 'success');
-    } else {
-        showAdminNotification('Ошибка обновления данных', 'error');
+function handleImageUpload(e) {
+    const file = e.target.files[0];
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            document.getElementById('country-image-preview').innerHTML = 
+                `<img src="${e.target.result}" alt="Preview" style="max-width: 200px; max-height: 150px; border-radius: 8px;">`;
+            document.getElementById('country-image-data').value = e.target.result;
+        };
+        reader.readAsDataURL(file);
     }
 }
 
 function loadAdminData() {
-    console.log('📥 Loading admin data...');
+    console.log('�� Loading admin data...');
     
     if (!window.dataManager) {
         console.error('❌ DataManager not available');
@@ -1485,7 +1430,6 @@ function loadAdminData() {
         console.log('✅ Admin data loaded successfully');
     } else {
         showAdminNotification('Данные не найдены, создаем стандартные', 'warning');
-        // Try to ensure default data exists
         window.dataManager.ensureDefaultData();
         setTimeout(loadAdminData, 500);
     }
@@ -1505,7 +1449,17 @@ function loadCountriesTable() {
         if (countries.length > 0) {
             tbody.innerHTML = countries.map(country => `
                 <tr>
-                    <td><strong>${country.name}</strong></td>
+                    <td>
+                        <div style="display: flex; align-items: center; gap: 10px;">
+                            ${country.image ? 
+                                `<img src="${country.image}" alt="${country.name}" style="width: 50px; height: 40px; object-fit: cover; border-radius: 4px;">` :
+                                `<div style="width: 50px; height: 40px; background: #f0f0f0; border-radius: 4px; display: flex; align-items: center; justify-content: center;">
+                                    <i class="fas fa-image" style="color: #ccc;"></i>
+                                </div>`
+                            }
+                            <strong>${country.name}</strong>
+                        </div>
+                    </td>
                     <td>${country.description || 'Описание отсутствует'}</td>
                     <td><span class="tour-count-badge">${country.tours ? country.tours.length : 0}</span></td>
                     <td>
@@ -1523,10 +1477,7 @@ function loadCountriesTable() {
             console.log('✅ Countries table loaded');
         } else {
             tbody.innerHTML = '<tr><td colspan="4" style="text-align: center; color: #999; padding: 40px;">Страны не добавлены</td></tr>';
-            console.log('📭 No countries to display');
         }
-    } else {
-        console.error('❌ Countries table body not found');
     }
 }
 
@@ -1582,10 +1533,7 @@ function loadToursTable() {
                     </td>
                 </tr>
             `;
-            console.log('📭 No tours to display');
         }
-    } else {
-        console.error('❌ Tours table body not found');
     }
 }
 
@@ -1596,8 +1544,6 @@ function loadContactsForm() {
     
     const contacts = window.dataManager.getContacts();
     const form = document.getElementById('contact-form');
-    
-    console.log('📋 Contacts data:', contacts);
     
     if (form) {
         form.querySelector('#contact-phone').value = contacts.phone || '';
@@ -1616,8 +1562,6 @@ function loadSettingsForm() {
     const settings = window.dataManager.getSettings();
     const form = document.getElementById('settings-form');
     
-    console.log('📋 Settings data:', settings);
-    
     if (form) {
         form.querySelector('#site-title').value = settings.siteTitle || '';
         form.querySelector('#company-name').value = settings.companyName || '';
@@ -1633,8 +1577,6 @@ function loadCountrySelect() {
     const countries = window.dataManager.getCountries();
     const select = document.getElementById('tour-country');
     
-    console.log('📋 Countries for select:', countries.length);
-    
     if (select) {
         if (countries.length > 0) {
             select.innerHTML = '<option value="">-- Выберите страну --</option>' + 
@@ -1644,12 +1586,11 @@ function loadCountrySelect() {
             console.log('✅ Country select loaded');
         } else {
             select.innerHTML = '<option value="">Сначала добавьте страны</option>';
-            console.log('📭 No countries for select');
         }
     }
 }
 
-// Form handlers with improved validation
+// Form handlers
 function handleAddCountry(e) {
     e.preventDefault();
     console.log('➕ Adding new country...');
@@ -1659,7 +1600,8 @@ function handleAddCountry(e) {
     
     const countryData = {
         name: formData.get('name').trim(),
-        description: formData.get('description').trim()
+        description: formData.get('description').trim(),
+        image: document.getElementById('country-image-data').value || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop'
     };
     
     if (!countryData.name) {
@@ -1676,13 +1618,14 @@ function handleAddCountry(e) {
         const result = window.dataManager.addCountry(countryData);
         if (result) {
             form.reset();
+            document.getElementById('country-image-preview').innerHTML = 
+                '<div style="color: #666; text-align: center; padding: 20px;"><i class="fas fa-image"></i><br>Изображение не выбрано</div>';
             loadCountriesTable();
             loadCountrySelect();
             showAdminNotification(`Страна "${countryData.name}" успешно добавлена!`, 'success');
             console.log('✅ Country added:', countryData.name);
         } else {
             showAdminNotification('Ошибка при добавлении страны', 'error');
-            console.error('❌ Failed to add country');
         }
     } catch (error) {
         console.error('❌ Error adding country:', error);
@@ -1705,24 +1648,8 @@ function handleAddTour(e) {
     
     const countryId = parseInt(formData.get('country'));
     
-    // Validation
-    if (!tourData.name) {
-        showAdminNotification('Введите название тура', 'error');
-        return;
-    }
-    
-    if (!tourData.price) {
-        showAdminNotification('Введите цену тура', 'error');
-        return;
-    }
-    
-    if (!tourData.duration) {
-        showAdminNotification('Введите длительность тура', 'error');
-        return;
-    }
-    
-    if (!countryId) {
-        showAdminNotification('Выберите страну', 'error');
+    if (!tourData.name || !tourData.price || !tourData.duration || !countryId) {
+        showAdminNotification('Заполните все обязательные поля', 'error');
         return;
     }
     
@@ -1740,7 +1667,6 @@ function handleAddTour(e) {
             console.log('✅ Tour added:', tourData.name);
         } else {
             showAdminNotification('Ошибка при добавлении тура', 'error');
-            console.error('❌ Failed to add tour');
         }
     } catch (error) {
         console.error('❌ Error adding tour:', error);
@@ -1822,15 +1748,21 @@ function editCountry(countryId) {
         
         if (newName.trim()) {
             try {
-                window.dataManager.updateCountry(countryId, {
+                // Use the correct method name - updateCountry
+                const result = window.dataManager.updateCountry(countryId, {
                     name: newName.trim(),
                     description: newDesc.trim()
                 });
-                loadCountriesTable();
-                loadCountrySelect();
-                loadToursTable();
-                showAdminNotification('Страна обновлена!', 'success');
-                console.log('✅ Country updated');
+                
+                if (result) {
+                    loadCountriesTable();
+                    loadCountrySelect();
+                    loadToursTable();
+                    showAdminNotification('Страна обновлена!', 'success');
+                    console.log('✅ Country updated');
+                } else {
+                    showAdminNotification('Ошибка обновления страны', 'error');
+                }
             } catch (error) {
                 console.error('❌ Error updating country:', error);
                 showAdminNotification('Ошибка обновления страны', 'error');
@@ -1858,7 +1790,9 @@ function deleteCountry(countryId) {
     
     if (confirm(message)) {
         try {
-            if (window.dataManager.deleteCountry(countryId)) {
+            // Use the correct method name - deleteCountry
+            const result = window.dataManager.deleteCountry(countryId);
+            if (result) {
                 loadCountriesTable();
                 loadToursTable();
                 loadCountrySelect();
@@ -1895,7 +1829,6 @@ function editTour(countryId, tourId) {
         
         if (newName.trim() && newPrice && newDuration.trim()) {
             try {
-                // Delete old tour and create new one
                 if (window.dataManager.deleteTour(countryId, tourId)) {
                     window.dataManager.addTour(countryId, {
                         name: newName.trim(),
@@ -1944,7 +1877,6 @@ function deleteTour(countryId, tourId) {
 function showAdminNotification(message, type = 'info') {
     console.log(`📢 ${type.toUpperCase()}: ${message}`);
     
-    // Remove existing notifications
     document.querySelectorAll('.admin-notification').forEach(n => n.remove());
     
     const notification = document.createElement('div');
@@ -1980,7 +1912,6 @@ function showAdminNotification(message, type = 'info') {
     
     document.body.appendChild(notification);
     
-    // Auto-remove after 5 seconds
     setTimeout(() => {
         if (notification.parentElement) {
             notification.remove();
@@ -1988,7 +1919,7 @@ function showAdminNotification(message, type = 'info') {
     }, 5000);
 }
 
-// Add CSS for notifications if not exists
+// Add CSS for notifications
 if (!document.querySelector('#admin-notification-styles')) {
     const style = document.createElement('style');
     style.id = 'admin-notification-styles';
@@ -2001,16 +1932,330 @@ if (!document.querySelector('#admin-notification-styles')) {
     document.head.appendChild(style);
 }
 
-// Debug function
-window.debugAdmin = function() {
-    console.log('🔍 Admin Debug Info:');
-    console.log('- DataManager available:', !!window.dataManager);
-    if (window.dataManager) {
-        window.dataManager.debugData();
+console.log('✅ Admin JS loaded successfully');
+            form.reset();
+            document.getElementById('country-image-preview').innerHTML = 
+                '<div style="color: #666; text-align: center; padding: 20px;"><i class="fas fa-image"></i><br>Изображение не выбрано</div>';
+            loadCountriesTable();
+            loadCountrySelect();
+            showAdminNotification(`Страна "${countryData.name}" успешно добавлена!`, 'success');
+            console.log('✅ Country added:', countryData.name);
+        } else {
+            showAdminNotification('Ошибка при добавлении страны', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error adding country:', error);
+        showAdminNotification('Ошибка при добавлении страны: ' + error.message, 'error');
     }
-    console.log('- Countries table:', document.querySelector('#countries-table tbody')?.children.length || 0, 'rows');
-    console.log('- Tours table:', document.querySelector('#tours-table tbody')?.children.length || 0, 'rows');
-};
+}
+
+function handleAddTour(e) {
+    e.preventDefault();
+    console.log('➕ Adding new tour...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const tourData = {
+        name: formData.get('name').trim(),
+        price: formData.get('price').trim(),
+        duration: formData.get('duration').trim()
+    };
+    
+    const countryId = parseInt(formData.get('country'));
+    
+    if (!tourData.name || !tourData.price || !tourData.duration || !countryId) {
+        showAdminNotification('Заполните все обязательные поля', 'error');
+        return;
+    }
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    try {
+        const result = window.dataManager.addTour(countryId, tourData);
+        if (result) {
+            form.reset();
+            loadToursTable();
+            showAdminNotification(`Тур "${tourData.name}" успешно добавлен!`, 'success');
+            console.log('✅ Tour added:', tourData.name);
+        } else {
+            showAdminNotification('Ошибка при добавлении тура', 'error');
+        }
+    } catch (error) {
+        console.error('❌ Error adding tour:', error);
+        showAdminNotification('Ошибка при добавлении тура: ' + error.message, 'error');
+    }
+}
+
+function handleUpdateContacts(e) {
+    e.preventDefault();
+    console.log('📞 Updating contacts...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const contactData = {
+        phone: formData.get('phone').trim(),
+        email: formData.get('email').trim(),
+        address: formData.get('address').trim(),
+        hours: formData.get('hours').trim()
+    };
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    try {
+        window.dataManager.updateContacts(contactData);
+        showAdminNotification('Контактная информация обновлена!', 'success');
+        console.log('✅ Contacts updated');
+    } catch (error) {
+        console.error('❌ Error updating contacts:', error);
+        showAdminNotification('Ошибка обновления контактов: ' + error.message, 'error');
+    }
+}
+
+function handleUpdateSettings(e) {
+    e.preventDefault();
+    console.log('⚙️ Updating settings...');
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const settingsData = {
+        siteTitle: formData.get('siteTitle').trim(),
+        companyName: formData.get('companyName').trim()
+    };
+    
+    if (!window.dataManager) {
+        showAdminNotification('Ошибка: DataManager не доступен', 'error');
+        return;
+    }
+    
+    try {
+        window.dataManager.updateSettings(settingsData);
+        showAdminNotification('Настройки сайта обновлены!', 'success');
+        console.log('✅ Settings updated');
+    } catch (error) {
+        console.error('❌ Error updating settings:', error);
+        showAdminNotification('Ошибка обновления настроек: ' + error.message, 'error');
+    }
+}
+
+// Country management functions - FIXED
+function editCountry(countryId) {
+    console.log('✏️ Editing country:', countryId);
+    
+    if (!window.dataManager) {
+        showAdminNotification('DataManager не доступен', 'error');
+        return;
+    }
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    
+    if (country) {
+        const newName = prompt('Введите новое название страны:', country.name);
+        if (newName === null) return;
+        
+        const newDesc = prompt('Введите новое описание:', country.description || '');
+        if (newDesc === null) return;
+        
+        if (newName.trim()) {
+            try {
+                // Use the correct method - updateCountry exists now
+                const result = window.dataManager.updateCountry(countryId, {
+                    name: newName.trim(),
+                    description: newDesc.trim()
+                });
+                
+                if (result) {
+                    loadCountriesTable();
+                    loadCountrySelect();
+                    loadToursTable();
+                    showAdminNotification('Страна обновлена!', 'success');
+                    console.log('✅ Country updated');
+                } else {
+                    showAdminNotification('Ошибка обновления страны', 'error');
+                }
+            } catch (error) {
+                console.error('❌ Error updating country:', error);
+                showAdminNotification('Ошибка обновления страны: ' + error.message, 'error');
+            }
+        } else {
+            showAdminNotification('Название страны не может быть пустым', 'error');
+        }
+    }
+}
+
+function deleteCountry(countryId) {
+    console.log('🗑️ Deleting country:', countryId);
+    
+    if (!window.dataManager) {
+        showAdminNotification('DataManager не доступен', 'error');
+        return;
+    }
+    
+    const countries = window.dataManager.getCountries();
+    const country = countries.find(c => c.id === countryId);
+    
+    if (!country) {
+        showAdminNotification('Страна не найдена', 'error');
+        return;
+    }
+    
+    const tourCount = country.tours ? country.tours.length : 0;
+    const message = tourCount > 0 
+        ? `Вы уверены, что хотите удалить страну "${country.name}"? Все ${tourCount} туров в этой стране также будут удалены.`
+        : `Вы уверены, что хотите удалить страну "${country.name}"?`;
+    
+    if (confirm(message)) {
+        try {
+            // Use the correct method - deleteCountry exists now
+            const result = window.dataManager.deleteCountry(countryId);
+            if (result) {
+                loadCountriesTable();
+                loadToursTable();
+                loadCountrySelect();
+                showAdminNotification('Страна удалена!', 'success');
+                console.log('✅ Country deleted');
+            } else {
+                showAdminNotification('Ошибка при удалении страны', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error deleting country:', error);
+            showAdminNotification('Ошибка удаления страны: ' + error.message, 'error');
+        }
+    }
+}
+
+// Tour management functions
+function editTour(countryId, tourId) {
+    console.log('✏️ Editing tour:', tourId, 'in country:', countryId);
+    
+    if (!window.dataManager) return;
+    
+    const allTours = window.dataManager.getAllTours();
+    const tour = allTours.find(t => t.id === tourId && t.countryId === countryId);
+    
+    if (tour) {
+        const newName = prompt('Введите новое название тура:', tour.name);
+        if (newName === null) return;
+        
+        const newPrice = prompt('Введите новую цену:', tour.price);
+        if (newPrice === null) return;
+        
+        const newDuration = prompt('Введите новую длительность:', tour.duration);
+        if (newDuration === null) return;
+        
+        if (newName.trim() && newPrice && newDuration.trim()) {
+            try {
+                if (window.dataManager.deleteTour(countryId, tourId)) {
+                    window.dataManager.addTour(countryId, {
+                        name: newName.trim(),
+                        price: newPrice.trim(),
+                        duration: newDuration.trim()
+                    });
+                    loadToursTable();
+                    showAdminNotification('Тур обновлен!', 'success');
+                    console.log('✅ Tour updated');
+                }
+            } catch (error) {
+                console.error('❌ Error updating tour:', error);
+                showAdminNotification('Ошибка обновления тура', 'error');
+            }
+        } else {
+            showAdminNotification('Все поля должны быть заполнены', 'error');
+        }
+    }
+}
+
+function deleteTour(countryId, tourId) {
+    console.log('��️ Deleting tour:', tourId, 'from country:', countryId);
+    
+    if (!window.dataManager) return;
+    
+    const allTours = window.dataManager.getAllTours();
+    const tour = allTours.find(t => t.id === tourId && t.countryId === countryId);
+    
+    if (tour && confirm(`Вы уверены, что хотите удалить тур "${tour.name}"?`)) {
+        try {
+            if (window.dataManager.deleteTour(countryId, tourId)) {
+                loadToursTable();
+                showAdminNotification('Тур удален!', 'success');
+                console.log('✅ Tour deleted');
+            } else {
+                showAdminNotification('Ошибка при удалении тура', 'error');
+            }
+        } catch (error) {
+            console.error('❌ Error deleting tour:', error);
+            showAdminNotification('Ошибка удаления тура', 'error');
+        }
+    }
+}
+
+// Notification system
+function showAdminNotification(message, type = 'info') {
+    console.log(`📢 ${type.toUpperCase()}: ${message}`);
+    
+    document.querySelectorAll('.admin-notification').forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    const bgColor = type === 'error' ? '#dc3545' : type === 'warning' ? '#ffc107' : type === 'success' ? '#28a745' : '#007bff';
+    const textColor = type === 'warning' ? '#000' : '#fff';
+    
+    notification.className = 'admin-notification';
+    notification.innerHTML = \`
+        <div style="
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: \${bgColor};
+            color: \${textColor};
+            padding: 15px 20px;
+            border-radius: 10px;
+            z-index: 10000;
+            animation: slideInRight 0.3s ease;
+            max-width: 400px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-weight: 500;
+        ">
+            <i class="fas fa-\${type === 'error' ? 'exclamation-triangle' : type === 'warning' ? 'exclamation-circle' : type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+            \${message}
+            <button onclick="this.parentElement.parentElement.remove()" style="background: none; border: none; color: inherit; cursor: pointer; margin-left: 10px;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    \`;
+    
+    document.body.appendChild(notification);
+    
+    setTimeout(() => {
+        if (notification.parentElement) {
+            notification.remove();
+        }
+    }, 5000);
+}
+
+// Add CSS for notifications
+if (!document.querySelector('#admin-notification-styles')) {
+    const style = document.createElement('style');
+    style.id = 'admin-notification-styles';
+    style.textContent = \`
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+    \`;
+    document.head.appendChild(style);
+}
 
 console.log('✅ Admin JS loaded successfully');
 
