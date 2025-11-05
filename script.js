@@ -6,12 +6,13 @@ document.addEventListener('DOMContentLoaded', function() {
     initAnimations();
     loadDestinations();
     initContactForm();
-    loadDynamicContent();
-    startContentSync();
     removeFavoriteButtons();
     
     // Force initial content load
-    setTimeout(updateDynamicContent, 1000);
+    setTimeout(() => {
+        loadDynamicContent();
+        startContentSync();
+    }, 500);
 });
 
 function initNavigation() {
@@ -117,7 +118,7 @@ function loadDestinations() {
         try {
             if (window.dataManager) {
                 const countries = window.dataManager.getCountries();
-                console.log('📋 Countries loaded:', countries.length);
+                console.log('�� Countries loaded:', countries.length);
                 
                 if (countries.length > 0) {
                     renderDestinations(grid, countries);
@@ -139,7 +140,7 @@ function renderDestinations(grid, countries) {
     grid.innerHTML = countries.map(country => `
         <div class="destination-card slide-in-bottom">
             <div class="destination-image">
-                <img src="${country.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop'}" 
+                <img src="${country.image}" 
                      alt="${country.name}" 
                      onerror="this.src='https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop'">
                 <div class="destination-overlay">
@@ -166,6 +167,8 @@ function renderDestinations(grid, countries) {
         </div>
     `).join('');
     
+    // Remove any favorite buttons that might appear
+    removeFavoriteButtons();
     console.log('✅ Destinations rendered:', countries.length);
 }
 
@@ -229,7 +232,16 @@ function loadDynamicContent() {
 }
 
 function startContentSync() {
-    setInterval(updateDynamicContent, 2000);
+    // Fast sync for first 30 seconds
+    const fastSync = setInterval(updateDynamicContent, 500);
+    setTimeout(() => {
+        clearInterval(fastSync);
+        // Then normal sync
+        setInterval(updateDynamicContent, 2000);
+    }, 30000);
+    
+    // Also sync on data updates
+    window.addEventListener('dataUpdated', updateDynamicContent);
 }
 
 function updateDynamicContent() {
@@ -246,49 +258,48 @@ function updateStats() {
     if (!data?.content?.about?.stats) return;
     
     const stats = data.content.about.stats;
-    const statElements = document.querySelectorAll('.stat');
+    let statElements = document.querySelectorAll('.stat');
     
     console.log('📊 Updating stats:', stats.length);
     
     // Ensure we have enough stat elements
     const statsContainer = document.querySelector('.stats');
-    if (statsContainer && statElements.length < stats.length) {
-        // Add missing stat elements
-        for (let i = statElements.length; i < stats.length; i++) {
-            const newStat = document.createElement('div');
-            newStat.className = 'stat animate-counter';
-            newStat.innerHTML = `
-                <h3>0</h3>
-                <p>Загрузка...</p>
+    if (statsContainer) {
+        // Clear and recreate stats to ensure they match
+        statsContainer.innerHTML = '';
+        
+        stats.forEach(stat => {
+            const statElement = document.createElement('div');
+            statElement.className = 'stat animate-counter';
+            statElement.setAttribute('data-target', stat.value);
+            statElement.innerHTML = `
+                <h3>${stat.value}</h3>
+                <p>${stat.label}</p>
             `;
-            statsContainer.appendChild(newStat);
-        }
+            statsContainer.appendChild(statElement);
+        });
+        
         // Re-query elements
         statElements = document.querySelectorAll('.stat');
     }
     
+    // Update existing elements
     stats.forEach((stat, index) => {
         if (statElements[index]) {
             const valueElement = statElements[index].querySelector('h3');
             const labelElement = statElements[index].querySelector('p');
             
-            if (valueElement && valueElement.textContent !== stat.value) {
+            if (valueElement) {
                 valueElement.textContent = stat.value;
                 valueElement.setAttribute('data-target', stat.value);
             }
-            if (labelElement && labelElement.textContent !== stat.label) {
+            if (labelElement) {
                 labelElement.textContent = stat.label;
             }
             
             statElements[index].style.display = 'block';
-            statElements[index].classList.add('animate-counter');
         }
     });
-    
-    // Hide extra elements
-    for (let i = stats.length; i < statElements.length; i++) {
-        statElements[i].style.display = 'none';
-    }
 }
 
 function updateServices() {
@@ -298,52 +309,51 @@ function updateServices() {
     if (!data?.content?.services?.services) return;
     
     const services = data.content.services.services;
-    const serviceCards = document.querySelectorAll('.service-card');
+    let serviceCards = document.querySelectorAll('.service-card');
     
     console.log('🎯 Updating services:', services.length);
     
     // Ensure we have enough service cards
     const servicesGrid = document.querySelector('.services-grid');
-    if (servicesGrid && serviceCards.length < services.length) {
-        // Add missing service cards
-        for (let i = serviceCards.length; i < services.length; i++) {
-            const newCard = document.createElement('div');
-            newCard.className = 'service-card slide-in-left';
-            newCard.innerHTML = `
-                <div class="service-icon"><i class="fas fa-star"></i></div>
-                <h3>Новая услуга</h3>
-                <p>Описание услуги</p>
+    if (servicesGrid) {
+        // Clear and recreate services to ensure they match
+        servicesGrid.innerHTML = '';
+        
+        services.forEach((service, index) => {
+            const animationClass = index % 4 === 0 ? 'slide-in-left' : 
+                                index % 4 === 1 ? 'slide-in-bottom' : 
+                                index % 4 === 2 ? 'slide-in-right' : 'slide-in-top';
+            
+            const serviceCard = document.createElement('div');
+            serviceCard.className = `service-card ${animationClass}`;
+            serviceCard.innerHTML = `
+                <div class="service-icon"><i class="${service.icon || 'fas fa-star'}"></i></div>
+                <h3>${service.title}</h3>
+                <p>${service.description}</p>
             `;
-            servicesGrid.appendChild(newCard);
-        }
+            servicesGrid.appendChild(serviceCard);
+        });
+        
         // Re-query elements
         serviceCards = document.querySelectorAll('.service-card');
     }
     
+    // Update existing cards
     services.forEach((service, index) => {
         if (serviceCards[index]) {
             const titleElement = serviceCards[index].querySelector('h3');
             const descElement = serviceCards[index].querySelector('p');
             const iconElement = serviceCards[index].querySelector('.service-icon i');
             
-            if (titleElement && titleElement.textContent !== service.title) {
-                titleElement.textContent = service.title;
-            }
-            if (descElement && descElement.textContent !== service.description) {
-                descElement.textContent = service.description;
-            }
-            if (iconElement && service.icon && iconElement.className !== service.icon) {
+            if (titleElement) titleElement.textContent = service.title;
+            if (descElement) descElement.textContent = service.description;
+            if (iconElement && service.icon) {
                 iconElement.className = service.icon;
             }
             
             serviceCards[index].style.display = 'block';
         }
     });
-    
-    // Hide extra cards
-    for (let i = services.length; i < serviceCards.length; i++) {
-        serviceCards[i].style.display = 'none';
-    }
 }
 
 function updateContentSections() {
@@ -373,14 +383,23 @@ function updateContentSections() {
 }
 
 function updateImages() {
+    if (!window.dataManager) return;
+    
+    const data = window.dataManager.getData();
+    
     // Update hero image if exists in data
-    if (window.dataManager) {
-        const data = window.dataManager.getData();
-        if (data?.content?.hero?.backgroundImage) {
-            const heroImg = document.querySelector('.hero-img');
-            if (heroImg && data.content.hero.backgroundImage) {
-                heroImg.src = data.content.hero.backgroundImage;
-            }
+    if (data?.content?.hero?.backgroundImage) {
+        const heroImg = document.querySelector('.hero-img');
+        if (heroImg && data.content.hero.backgroundImage) {
+            heroImg.src = data.content.hero.backgroundImage;
+        }
+    }
+    
+    // Update about image if exists
+    if (data?.content?.about?.image) {
+        const aboutImg = document.querySelector('.about-img');
+        if (aboutImg && data.content.about.image) {
+            aboutImg.src = data.content.about.image;
         }
     }
 }
@@ -394,16 +413,34 @@ function updateElementText(selector, text) {
 }
 
 function removeFavoriteButtons() {
-    document.querySelectorAll('.favorite-btn, .btn-favorite, [class*="favorite"]').forEach(btn => {
-        btn.remove();
+    // Remove any existing favorite buttons
+    document.querySelectorAll('.favorite-btn, .btn-favorite, [class*="favorite"], .fa-heart, .far.fa-heart, .fas.fa-heart').forEach(btn => {
+        if (btn.closest('.destination-card') || btn.closest('.tour-item')) {
+            btn.remove();
+        }
     });
     
+    // Remove from destination cards
+    document.querySelectorAll('.destination-card').forEach(card => {
+        const hearts = card.querySelectorAll('.fa-heart, .far.fa-heart, .fas.fa-heart');
+        hearts.forEach(heart => heart.remove());
+    });
+    
+    // Remove from tour items
+    document.querySelectorAll('.tour-item').forEach(item => {
+        const hearts = item.querySelectorAll('.fa-heart, .far.fa-heart, .fas.fa-heart');
+        hearts.forEach(heart => heart.remove());
+    });
+    
+    // Observer for dynamically added content
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
                 if (node.nodeType === 1) {
-                    node.querySelectorAll?.('.favorite-btn, .btn-favorite, [class*="favorite"]').forEach(btn => {
-                        btn.remove();
+                    node.querySelectorAll?.('.favorite-btn, .btn-favorite, [class*="favorite"], .fa-heart, .far.fa-heart, .fas.fa-heart').forEach(btn => {
+                        if (btn.closest('.destination-card') || btn.closest('.tour-item')) {
+                            btn.remove();
+                        }
                     });
                 }
             });

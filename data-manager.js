@@ -1,4 +1,4 @@
-// Complete Data Manager with all methods
+// Complete Data Manager with all fixes
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
@@ -8,12 +8,6 @@ class DataManager {
     init() {
         console.log('🚀 DataManager initialized');
         this.ensureDefaultData();
-        
-        window.addEventListener('error', (e) => {
-            if (e.message.includes('DataManager')) {
-                console.error('🚨 Global error caught for DataManager:', e.error);
-            }
-        });
     }
 
     ensureDefaultData() {
@@ -35,8 +29,7 @@ class DataManager {
                     description: "Страна искусства, древней истории и самой вкусной кухни в мире.",
                     image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop",
                     tours: [
-                        { id: 1, name: "Римские каникулы", price: "€600", duration: "5 дней" },
-                        { id: 2, name: "Венецианская романтика", price: "€550", duration: "4 дня" }
+                        { id: 1, name: "Римские каникулы", price: "€600", duration: "5 дней" }
                     ]
                 },
                 {
@@ -45,8 +38,7 @@ class DataManager {
                     description: "Романтическая Франция с её богатой историей и изысканной кухней.",
                     image: "https://images.unsplash.com/photo-1431274172761-fca41d930114?w=400&h=300&fit=crop",
                     tours: [
-                        { id: 3, name: "Парижские огни", price: "€700", duration: "6 дней" },
-                        { id: 4, name: "Лазурный берег", price: "€800", duration: "7 дней" }
+                        { id: 2, name: "Парижские огни", price: "€700", duration: "6 дней" }
                     ]
                 }
             ],
@@ -120,9 +112,7 @@ class DataManager {
         try {
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
-            
             window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
-            
             console.log('💾 Data saved successfully');
             return true;
         } catch (error) {
@@ -146,7 +136,6 @@ class DataManager {
             image: countryData.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop',
             tours: []
         };
-        
         data.countries.push(newCountry);
         return this.setData(data);
     }
@@ -154,7 +143,6 @@ class DataManager {
     updateCountry(countryId, countryData) {
         const data = this.getData();
         if (!data) return false;
-
         const countryIndex = data.countries.findIndex(c => c.id === countryId);
         if (countryIndex !== -1) {
             data.countries[countryIndex] = { ...data.countries[countryIndex], ...countryData };
@@ -166,7 +154,6 @@ class DataManager {
     deleteCountry(countryId) {
         const data = this.getData();
         if (!data) return false;
-
         data.countries = data.countries.filter(c => c.id !== countryId);
         return this.setData(data);
     }
@@ -175,7 +162,6 @@ class DataManager {
     getAllTours() {
         const countries = this.getCountries();
         const allTours = [];
-        
         countries.forEach(country => {
             if (country.tours) {
                 country.tours.forEach(tour => {
@@ -187,25 +173,21 @@ class DataManager {
                 });
             }
         });
-        
         return allTours;
     }
 
     addTour(countryId, tourData) {
         const data = this.getData();
         if (!data) return false;
-
         const country = data.countries.find(c => c.id === countryId);
         if (country) {
             if (!country.tours) country.tours = [];
-            
             const newTour = {
                 id: Date.now(),
                 name: tourData.name,
                 price: tourData.price,
                 duration: tourData.duration
             };
-            
             country.tours.push(newTour);
             return this.setData(data);
         }
@@ -215,7 +197,6 @@ class DataManager {
     deleteTour(countryId, tourId) {
         const data = this.getData();
         if (!data) return false;
-
         const country = data.countries.find(c => c.id === countryId);
         if (country && country.tours) {
             country.tours = country.tours.filter(t => t.id !== tourId);
@@ -228,7 +209,6 @@ class DataManager {
     updateContent(section, content) {
         const data = this.getData();
         if (!data) return false;
-
         if (!data.content) data.content = {};
         data.content[section] = { ...data.content[section], ...content };
         return this.setData(data);
@@ -243,7 +223,6 @@ class DataManager {
     updateContacts(contacts) {
         const data = this.getData();
         if (!data) return false;
-
         data.contacts = { ...data.contacts, ...contacts };
         return this.setData(data);
     }
@@ -257,7 +236,6 @@ class DataManager {
     updateSettings(settings) {
         const data = this.getData();
         if (!data) return false;
-
         data.settings = { ...data.settings, ...settings };
         return this.setData(data);
     }
@@ -266,7 +244,6 @@ class DataManager {
     updateStats(stats) {
         const data = this.getData();
         if (!data) return false;
-
         if (!data.content) data.content = {};
         if (!data.content.about) data.content.about = {};
         data.content.about.stats = stats;
@@ -277,7 +254,6 @@ class DataManager {
     updateServices(services) {
         const data = this.getData();
         if (!data) return false;
-
         if (!data.content) data.content = {};
         if (!data.content.services) data.content.services = {};
         data.content.services.services = services;

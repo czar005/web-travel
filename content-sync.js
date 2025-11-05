@@ -186,10 +186,10 @@
                 const statElement = document.createElement('div');
                 statElement.className = 'stat animate-counter';
                 statElement.setAttribute('data-target', stat.value);
-                statElement.innerHTML = `
-                    <h3>${stat.value}</h3>
-                    <p>${stat.label}</p>
-                `;
+                statElement.innerHTML = \`
+                    <h3>\${stat.value}</h3>
+                    <p>\${stat.label}</p>
+                \`;
                 statsContainer.appendChild(statElement);
             });
         }
@@ -223,12 +223,12 @@
                                     index % 4 === 2 ? 'slide-in-right' : 'slide-in-top';
                 
                 const serviceCard = document.createElement('div');
-                serviceCard.className = `service-card ${animationClass}`;
-                serviceCard.innerHTML = `
-                    <div class="service-icon"><i class="${service.icon || 'fas fa-star'}"></i></div>
-                    <h3>${service.title}</h3>
-                    <p>${service.description}</p>
-                `;
+                serviceCard.className = \`service-card \${animationClass}\`;
+                serviceCard.innerHTML = \`
+                    <div class="service-icon"><i class="\${service.icon || 'fas fa-star'}"></i></div>
+                    <h3>\${service.title}</h3>
+                    <p>\${service.description}</p>
+                \`;
                 servicesGrid.appendChild(serviceCard);
             });
         }
@@ -253,8 +253,8 @@
         
         navMap.forEach(item => {
             if (item.title) {
-                updateElementsText(`.nav-links a[href="${item.href}"]`, item.title);
-                updateElementsText(`.footer-section:nth-child(2) a[href="${item.href}"]`, item.title);
+                updateElementsText(\`.nav-links a[href="\${item.href}"]\`, item.title);
+                updateElementsText(\`.footer-section:nth-child(2) a[href="\${item.href}"]\`, item.title);
             }
         });
     }
