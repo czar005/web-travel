@@ -208,13 +208,8 @@
         });
     }
     
-    // ИСПРАВЛЕННАЯ СТРОКА - был неверный escape-символ
-    // Было: const message = `Вы уверены, что хотите удалить страну \"${country.name}\"?`;
-    // Стало: используем одинарные кавычки для избежания экранирования
-    function confirmCountryDeletion(countryName) {
-        const message = 'Вы уверены, что хотите удалить страну "' + countryName + '"?';
-        return confirm(message);
-    }
+    // ИСПРАВЛЕННАЯ СТРОКА 189 - был неверный escape-символ
+    const message = "Вы уверены, что хотите удалить страну \"" + country.name + "\"?";
     
     // Глобальные функции для принудительной синхронизации
     window.forceContentSync = syncContent;
