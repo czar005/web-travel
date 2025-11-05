@@ -1,21 +1,17 @@
-// Enhanced main script with fixed UI and removed favorite buttons
+// Complete Main Script with all fixes
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Main script initialized');
     
-    // Initialize components
     initNavigation();
     initAnimations();
     loadDestinations();
     initContactForm();
-    
-    // Load dynamic content
     loadDynamicContent();
-    
-    // Start content sync
     startContentSync();
-    
-    // Remove favorite buttons
     removeFavoriteButtons();
+    
+    // Force initial content load
+    setTimeout(updateDynamicContent, 1000);
 });
 
 function initNavigation() {
@@ -29,7 +25,6 @@ function initNavigation() {
         });
     }
     
-    // Smooth scrolling for navigation links
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
         anchor.addEventListener('click', function (e) {
             e.preventDefault();
@@ -40,7 +35,6 @@ function initNavigation() {
                     block: 'start'
                 });
                 
-                // Close mobile menu if open
                 if (navLinks.classList.contains('active')) {
                     navLinks.classList.remove('active');
                     hamburger.classList.remove('active');
@@ -51,7 +45,6 @@ function initNavigation() {
 }
 
 function initAnimations() {
-    // Intersection Observer for animations
     const observerOptions = {
         threshold: 0.1,
         rootMargin: '0px 0px -50px 0px'
@@ -62,7 +55,6 @@ function initAnimations() {
             if (entry.isIntersecting) {
                 entry.target.classList.add('animate-in');
                 
-                // Animate counters
                 if (entry.target.classList.contains('animate-counter')) {
                     animateCounter(entry.target);
                 }
@@ -70,14 +62,23 @@ function initAnimations() {
         });
     }, observerOptions);
     
-    // Observe elements
     document.querySelectorAll('.service-card, .stat, .destination-card').forEach(el => {
         observer.observe(el);
     });
 }
 
 function animateCounter(counterElement) {
-    const target = parseInt(counterElement.getAttribute('data-target').replace('+', '').replace(' лет', ''));
+    let targetText = counterElement.getAttribute('data-target');
+    let target = 0;
+    
+    if (targetText.includes('+')) {
+        target = parseInt(targetText.replace('+', ''));
+    } else if (targetText.includes('лет')) {
+        target = parseInt(targetText.replace(' лет', ''));
+    } else {
+        target = parseInt(targetText);
+    }
+    
     const duration = 2000;
     const step = target / (duration / 16);
     let current = 0;
@@ -88,9 +89,15 @@ function animateCounter(counterElement) {
             current = target;
             clearInterval(timer);
         }
-        counterElement.querySelector('h3').textContent = Math.floor(current).toLocaleString() + 
-            (counterElement.getAttribute('data-target').includes('+') ? '+' : '') +
-            (counterElement.getAttribute('data-target').includes('лет') ? ' лет' : '');
+        
+        let displayText = Math.floor(current).toLocaleString();
+        if (targetText.includes('+')) displayText += '+';
+        if (targetText.includes('лет')) displayText += ' лет';
+        
+        const valueElement = counterElement.querySelector('h3');
+        if (valueElement) {
+            valueElement.textContent = displayText;
+        }
     }, 16);
 }
 
@@ -103,11 +110,9 @@ function loadDestinations() {
     
     console.log('🌍 Loading destinations...');
     
-    // Show loading
     if (loading) loading.style.display = 'block';
     if (error) error.style.display = 'none';
     
-    // Load from data manager
     setTimeout(() => {
         try {
             if (window.dataManager) {
@@ -134,9 +139,9 @@ function renderDestinations(grid, countries) {
     grid.innerHTML = countries.map(country => `
         <div class="destination-card slide-in-bottom">
             <div class="destination-image">
-                <img src="${country.image || 'images/travel-placeholder.svg'}" 
+                <img src="${country.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop'}" 
                      alt="${country.name}" 
-                     onerror="this.src='images/travel-placeholder.svg'">
+                     onerror="this.src='https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop'">
                 <div class="destination-overlay">
                     <h3>${country.name}</h3>
                 </div>
@@ -186,7 +191,6 @@ function initContactForm() {
         form.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            // Simple form validation
             const inputs = form.querySelectorAll('input[required], textarea[required]');
             let isValid = true;
             
@@ -200,7 +204,6 @@ function initContactForm() {
             });
             
             if (isValid) {
-                // Show success message
                 alert('Спасибо! Ваше сообщение отправлено. Мы свяжемся с вами в ближайшее время.');
                 form.reset();
             } else {
@@ -221,24 +224,19 @@ function scrollToDestinations() {
 }
 
 function loadDynamicContent() {
-    // This will be populated by content-sync.js
     console.log('📄 Loading dynamic content...');
+    updateDynamicContent();
 }
 
 function startContentSync() {
-    // Start checking for content updates
     setInterval(updateDynamicContent, 2000);
 }
 
 function updateDynamicContent() {
-    // Update stats
     updateStats();
-    
-    // Update services
     updateServices();
-    
-    // Update other dynamic content
     updateContentSections();
+    updateImages();
 }
 
 function updateStats() {
@@ -252,21 +250,38 @@ function updateStats() {
     
     console.log('📊 Updating stats:', stats.length);
     
+    // Ensure we have enough stat elements
+    const statsContainer = document.querySelector('.stats');
+    if (statsContainer && statElements.length < stats.length) {
+        // Add missing stat elements
+        for (let i = statElements.length; i < stats.length; i++) {
+            const newStat = document.createElement('div');
+            newStat.className = 'stat animate-counter';
+            newStat.innerHTML = `
+                <h3>0</h3>
+                <p>Загрузка...</p>
+            `;
+            statsContainer.appendChild(newStat);
+        }
+        // Re-query elements
+        statElements = document.querySelectorAll('.stat');
+    }
+    
     stats.forEach((stat, index) => {
         if (statElements[index]) {
             const valueElement = statElements[index].querySelector('h3');
             const labelElement = statElements[index].querySelector('p');
             
-            if (valueElement) {
+            if (valueElement && valueElement.textContent !== stat.value) {
                 valueElement.textContent = stat.value;
                 valueElement.setAttribute('data-target', stat.value);
             }
-            if (labelElement) {
+            if (labelElement && labelElement.textContent !== stat.label) {
                 labelElement.textContent = stat.label;
             }
             
-            // Show element
             statElements[index].style.display = 'block';
+            statElements[index].classList.add('animate-counter');
         }
     });
     
@@ -287,19 +302,40 @@ function updateServices() {
     
     console.log('🎯 Updating services:', services.length);
     
+    // Ensure we have enough service cards
+    const servicesGrid = document.querySelector('.services-grid');
+    if (servicesGrid && serviceCards.length < services.length) {
+        // Add missing service cards
+        for (let i = serviceCards.length; i < services.length; i++) {
+            const newCard = document.createElement('div');
+            newCard.className = 'service-card slide-in-left';
+            newCard.innerHTML = `
+                <div class="service-icon"><i class="fas fa-star"></i></div>
+                <h3>Новая услуга</h3>
+                <p>Описание услуги</p>
+            `;
+            servicesGrid.appendChild(newCard);
+        }
+        // Re-query elements
+        serviceCards = document.querySelectorAll('.service-card');
+    }
+    
     services.forEach((service, index) => {
         if (serviceCards[index]) {
             const titleElement = serviceCards[index].querySelector('h3');
             const descElement = serviceCards[index].querySelector('p');
             const iconElement = serviceCards[index].querySelector('.service-icon i');
             
-            if (titleElement) titleElement.textContent = service.title;
-            if (descElement) descElement.textContent = service.description;
-            if (iconElement && service.icon) {
+            if (titleElement && titleElement.textContent !== service.title) {
+                titleElement.textContent = service.title;
+            }
+            if (descElement && descElement.textContent !== service.description) {
+                descElement.textContent = service.description;
+            }
+            if (iconElement && service.icon && iconElement.className !== service.icon) {
                 iconElement.className = service.icon;
             }
             
-            // Show card
             serviceCards[index].style.display = 'block';
         }
     });
@@ -311,21 +347,61 @@ function updateServices() {
 }
 
 function updateContentSections() {
-    // Additional content updates can be added here
+    if (!window.dataManager) return;
+    
+    const data = window.dataManager.getData();
+    if (!data?.content) return;
+    
+    // Update section titles
+    if (data.content.hero) {
+        updateElementText('#home h1', data.content.hero.title);
+        updateElementText('#home p', data.content.hero.description);
+    }
+    if (data.content.about) {
+        updateElementText('#about .section-title', data.content.about.title);
+        updateElementText('.about-text p', data.content.about.description);
+    }
+    if (data.content.services) {
+        updateElementText('#services .section-title', data.content.services.title);
+    }
+    if (data.content.destinations) {
+        updateElementText('#destinations .section-title', data.content.destinations.title);
+    }
+    if (data.content.contact) {
+        updateElementText('#contact .section-title', data.content.contact.title);
+    }
 }
 
-// Remove favorite buttons from tour cards
+function updateImages() {
+    // Update hero image if exists in data
+    if (window.dataManager) {
+        const data = window.dataManager.getData();
+        if (data?.content?.hero?.backgroundImage) {
+            const heroImg = document.querySelector('.hero-img');
+            if (heroImg && data.content.hero.backgroundImage) {
+                heroImg.src = data.content.hero.backgroundImage;
+            }
+        }
+    }
+}
+
+function updateElementText(selector, text) {
+    if (!text) return;
+    const element = document.querySelector(selector);
+    if (element && element.textContent !== text) {
+        element.textContent = text;
+    }
+}
+
 function removeFavoriteButtons() {
-    // Remove any existing favorite buttons
     document.querySelectorAll('.favorite-btn, .btn-favorite, [class*="favorite"]').forEach(btn => {
         btn.remove();
     });
     
-    // Also remove from any dynamically created elements
     const observer = new MutationObserver(function(mutations) {
         mutations.forEach(function(mutation) {
             mutation.addedNodes.forEach(function(node) {
-                if (node.nodeType === 1) { // Element node
+                if (node.nodeType === 1) {
                     node.querySelectorAll?.('.favorite-btn, .btn-favorite, [class*="favorite"]').forEach(btn => {
                         btn.remove();
                     });
@@ -340,7 +416,6 @@ function removeFavoriteButtons() {
     });
 }
 
-// Search functionality
 function initSearch() {
     const searchInput = document.querySelector('.search-input');
     if (searchInput) {
@@ -360,7 +435,6 @@ function initSearch() {
     }
 }
 
-// Initialize search
 if (document.readyState === 'loading') {
     document.addEventListener('DOMContentLoaded', initSearch);
 } else {

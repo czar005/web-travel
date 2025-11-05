@@ -1,4 +1,4 @@
-// Enhanced Data Manager with all required methods
+// Complete Data Manager with all methods
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
@@ -9,7 +9,6 @@ class DataManager {
         console.log('🚀 DataManager initialized');
         this.ensureDefaultData();
         
-        // Global error handler for DataManager
         window.addEventListener('error', (e) => {
             if (e.message.includes('DataManager')) {
                 console.error('🚨 Global error caught for DataManager:', e.error);
@@ -34,7 +33,7 @@ class DataManager {
                     id: 1,
                     name: "Италия",
                     description: "Страна искусства, древней истории и самой вкусной кухни в мире.",
-                    image: "images/travel-placeholder.svg",
+                    image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop",
                     tours: [
                         { id: 1, name: "Римские каникулы", price: "€600", duration: "5 дней" },
                         { id: 2, name: "Венецианская романтика", price: "€550", duration: "4 дня" }
@@ -44,7 +43,7 @@ class DataManager {
                     id: 2, 
                     name: "Франция",
                     description: "Романтическая Франция с её богатой историей и изысканной кухней.",
-                    image: "images/travel-placeholder.svg",
+                    image: "https://images.unsplash.com/photo-1431274172761-fca41d930114?w=400&h=300&fit=crop",
                     tours: [
                         { id: 3, name: "Парижские огни", price: "€700", duration: "6 дней" },
                         { id: 4, name: "Лазурный берег", price: "€800", duration: "7 дней" }
@@ -81,16 +80,6 @@ class DataManager {
                             title: "Отели", 
                             description: "Бронирование отелей любого уровня комфорта по всему миру",
                             icon: "fas fa-hotel"
-                        },
-                        {
-                            title: "Туры",
-                            description: "Индивидуальные и групповые туры с профессиональными гидами", 
-                            icon: "fas fa-map-marked-alt"
-                        },
-                        {
-                            title: "Страхование",
-                            description: "Полное страховое сопровождение вашего путешествия",
-                            icon: "fas fa-shield-alt"
                         }
                     ]
                 },
@@ -132,7 +121,6 @@ class DataManager {
             data.lastUpdate = new Date().toISOString();
             localStorage.setItem(this.storageKey, JSON.stringify(data));
             
-            // Dispatch event for other components
             window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
             
             console.log('💾 Data saved successfully');
@@ -155,7 +143,7 @@ class DataManager {
             id: Date.now(),
             name: countryData.name,
             description: countryData.description,
-            image: countryData.image || 'images/travel-placeholder.svg',
+            image: countryData.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop',
             tours: []
         };
         
@@ -274,7 +262,7 @@ class DataManager {
         return this.setData(data);
     }
 
-    // Stats management - FIXED: Added missing method
+    // Stats management
     updateStats(stats) {
         const data = this.getData();
         if (!data) return false;
@@ -285,7 +273,7 @@ class DataManager {
         return this.setData(data);
     }
 
-    // Services management - FIXED: Added missing method
+    // Services management
     updateServices(services) {
         const data = this.getData();
         if (!data) return false;
