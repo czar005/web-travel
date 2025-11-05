@@ -1,168 +1,256 @@
-// Complete Data Manager with all fixes
-class DataManager {
-    constructor() {
-        this.storageKey = 'worldtravel_data';
+// Enhanced Data Manager with better sync
+(function() {
+    'use strict';
+    
+    console.log('🔄 Data Manager loading...');
+    
+    const STORAGE_KEY = 'worldtravel_data';
+    
+    function DataManager() {
+        this.data = this.loadData();
         this.init();
     }
-
-    init() {
-        console.log('🚀 DataManager initialized');
+    
+    DataManager.prototype.init = function() {
+        console.log('🚀 Data Manager initialized with:', {
+            countries: this.data.countries.length,
+            tours: this.getAllTours().length,
+            hasContent: !!this.data.content
+        });
+        
+        // Ensure default structure
         this.ensureDefaultData();
-    }
-
-    ensureDefaultData() {
-        let data = this.getData();
-        if (!data) {
-            data = this.getDefaultData();
-            this.setData(data);
-            console.log('📁 Default data created');
+    };
+    
+    DataManager.prototype.loadData = function() {
+        try {
+            // Try localStorage first
+            const stored = localStorage.getItem(STORAGE_KEY);
+            if (stored) {
+                const data = JSON.parse(stored);
+                console.log('📁 Data loaded from localStorage');
+                return this.migrateData(data);
+            }
+            
+            // Try sessionStorage as fallback
+            const sessionStored = sessionStorage.getItem(STORAGE_KEY);
+            if (sessionStored) {
+                const data = JSON.parse(sessionStored);
+                console.log('💾 Data loaded from sessionStorage');
+                return this.migrateData(data);
+            }
+            
+            console.log('📝 No stored data found, creating default');
+            return this.getDefaultData();
+            
+        } catch (error) {
+            console.error('❌ Error loading data:', error);
+            return this.getDefaultData();
         }
+    };
+    
+    DataManager.prototype.migrateData = function(data) {
+        // Ensure all required structures exist
+        if (!data.countries) data.countries = [];
+        if (!data.tours) data.tours = [];
+        if (!data.contacts) data.contacts = {};
+        if (!data.settings) data.settings = {};
+        if (!data.content) data.content = this.getDefaultData().content;
+        
+        // Ensure content structure
+        const defaultContent = this.getDefaultData().content;
+        if (!data.content.hero) data.content.hero = defaultContent.hero;
+        if (!data.content.about) data.content.about = defaultContent.about;
+        if (!data.content.services) data.content.services = defaultContent.services;
+        if (!data.content.destinations) data.content.destinations = defaultContent.destinations;
+        if (!data.content.contact) data.content.contact = defaultContent.contact;
+        
         return data;
-    }
-
-    getDefaultData() {
+    };
+    
+    DataManager.prototype.getDefaultData = function() {
         return {
-            countries: [
-                {
-                    id: 1,
-                    name: "Италия",
-                    description: "Страна искусства, древней истории и самой вкусной кухни в мире.",
-                    image: "https://images.unsplash.com/photo-1515542622106-78bda8ba0e5b?w=400&h=300&fit=crop",
-                    tours: [
-                        { id: 1, name: "Римские каникулы", price: "€600", duration: "5 дней" }
-                    ]
-                },
-                {
-                    id: 2, 
-                    name: "Франция",
-                    description: "Романтическая Франция с её богатой историей и изысканной кухней.",
-                    image: "https://images.unsplash.com/photo-1431274172761-fca41d930114?w=400&h=300&fit=crop",
-                    tours: [
-                        { id: 2, name: "Парижские огни", price: "€700", duration: "6 дней" }
-                    ]
-                }
-            ],
+            countries: [],
+            tours: [],
+            contacts: {
+                phone: '+7 (999) 123-45-67',
+                email: 'info@worldtravel.com',
+                address: 'Москва, ул. Туристическая, 15',
+                hours: 'Пн-Пт: 9:00-18:00'
+            },
+            settings: {
+                siteTitle: 'WorldTravel - Туристическая компания',
+                companyName: 'WorldTravel'
+            },
             content: {
                 hero: {
-                    title: "Откройте мир с WorldTravel",
-                    description: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.",
-                    buttonText: "Начать путешествие",
-                    backgroundImage: ""
+                    title: 'Откройте мир с WorldTravel',
+                    description: 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.',
+                    buttonText: 'Начать путешествие'
                 },
                 about: {
-                    title: "О нас",
-                    description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы.",
-                    image: "",
+                    title: 'О нас',
+                    description: 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.',
                     stats: [
-                        { value: "5000+", label: "Довольных клиентов" },
-                        { value: "50+", label: "Стран мира" },
-                        { value: "10 лет", label: "Опыта работы" }
+                        { value: '5000+', label: 'Довольных клиентов' },
+                        { value: '50+', label: 'Стран мира' },
+                        { value: '10 лет', label: 'Опыта работы' }
                     ]
                 },
                 services: {
-                    title: "Услуги",
-                    description: "Наши основные направления услуг для вашего комфортного путешествия",
+                    title: 'Услуги',
+                    description: 'Наши основные направления услуг для вашего комфортного путешествия',
                     services: [
                         {
-                            title: "Авиабилеты",
-                            description: "Подбор и бронирование лучших авиаперелетов по выгодным ценам",
-                            icon: "fas fa-plane"
+                            title: 'Авиабилеты',
+                            description: 'Подбор и бронирование лучших авиаперелетов по выгодным ценам',
+                            icon: 'fas fa-plane'
                         },
                         {
-                            title: "Отели", 
-                            description: "Бронирование отелей любого уровня комфорта по всему миру",
-                            icon: "fas fa-hotel"
+                            title: 'Отели', 
+                            description: 'Бронирование отелей любого уровня комфорта по всему миру',
+                            icon: 'fas fa-hotel'
                         }
                     ]
                 },
                 destinations: {
-                    title: "Направления", 
-                    subtitle: "Откройте для себя лучшие направления мира с нашими эксклюзивными турами"
+                    title: 'Направления', 
+                    subtitle: 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'
                 },
                 contact: {
-                    title: "Контакты",
-                    description: "Свяжитесь с нами для планирования вашего идеального путешествия"
+                    title: 'Контакты',
+                    description: 'Свяжитесь с нами для планирования вашего идеального путешествия'
                 }
-            },
-            contacts: {
-                phone: "+7 (999) 123-45-67",
-                email: "info@worldtravel.com",
-                address: "Москва, ул. Туристическая, 15",
-                hours: "Пн-Пт: 9:00-18:00"
-            },
-            settings: {
-                siteTitle: "WorldTravel - Туристическая компания",
-                companyName: "WorldTravel"
             },
             lastUpdate: new Date().toISOString()
         };
-    }
-
-    getData() {
-        try {
-            const data = localStorage.getItem(this.storageKey);
-            return data ? JSON.parse(data) : null;
-        } catch (error) {
-            console.error('❌ Error reading data:', error);
-            return null;
+    };
+    
+    DataManager.prototype.ensureDefaultData = function() {
+        const defaultData = this.getDefaultData();
+        let needsSave = false;
+        
+        // Ensure contacts
+        if (!this.data.contacts || Object.keys(this.data.contacts).length === 0) {
+            this.data.contacts = defaultData.contacts;
+            needsSave = true;
         }
-    }
-
-    setData(data) {
+        
+        // Ensure settings
+        if (!this.data.settings || Object.keys(this.data.settings).length === 0) {
+            this.data.settings = defaultData.settings;
+            needsSave = true;
+        }
+        
+        // Ensure content structure
+        if (!this.data.content) {
+            this.data.content = defaultData.content;
+            needsSave = true;
+        } else {
+            // Ensure each content section exists
+            Object.keys(defaultData.content).forEach(section => {
+                if (!this.data.content[section]) {
+                    this.data.content[section] = defaultData.content[section];
+                    needsSave = true;
+                }
+            });
+        }
+        
+        if (needsSave) {
+            this.saveData();
+            console.log('✅ Default data ensured');
+        }
+    };
+    
+    DataManager.prototype.saveData = function() {
         try {
-            data.lastUpdate = new Date().toISOString();
-            localStorage.setItem(this.storageKey, JSON.stringify(data));
-            window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
+            this.data.lastUpdate = new Date().toISOString();
+            
+            // Save to both storage systems for redundancy
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+            sessionStorage.setItem(STORAGE_KEY, JSON.stringify(this.data));
+            
             console.log('💾 Data saved successfully');
+            
+            // Trigger sync event
+            this.triggerDataUpdate();
+            
             return true;
         } catch (error) {
             console.error('❌ Error saving data:', error);
             return false;
         }
-    }
-
-    // Country management
-    getCountries() {
-        const data = this.getData();
-        return data?.countries || [];
-    }
-
-    addCountry(countryData) {
-        const data = this.getData() || this.getDefaultData();
+    };
+    
+    DataManager.prototype.triggerDataUpdate = function() {
+        // Dispatch custom event for sync systems
+        const event = new CustomEvent('dataUpdated', {
+            detail: { data: this.data }
+        });
+        window.dispatchEvent(event);
+        
+        // Also trigger storage event for cross-tab sync
+        window.dispatchEvent(new StorageEvent('storage', {
+            key: STORAGE_KEY,
+            newValue: JSON.stringify(this.data)
+        }));
+    };
+    
+    DataManager.prototype.getData = function() {
+        return this.data;
+    };
+    
+    DataManager.prototype.setData = function(newData) {
+        this.data = { ...this.data, ...newData };
+        return this.saveData();
+    };
+    
+    // Countries management
+    DataManager.prototype.getCountries = function() {
+        return this.data.countries || [];
+    };
+    
+    DataManager.prototype.addCountry = function(countryData) {
         const newCountry = {
             id: Date.now(),
             name: countryData.name,
             description: countryData.description,
-            image: countryData.image || 'https://images.unsplash.com/photo-1488646953014-85cb44e25828?w=400&h=300&fit=crop',
+            image: countryData.image,
             tours: []
         };
-        data.countries.push(newCountry);
-        return this.setData(data);
-    }
-
-    updateCountry(countryId, countryData) {
-        const data = this.getData();
-        if (!data) return false;
-        const countryIndex = data.countries.findIndex(c => c.id === countryId);
-        if (countryIndex !== -1) {
-            data.countries[countryIndex] = { ...data.countries[countryIndex], ...countryData };
-            return this.setData(data);
+        
+        this.data.countries.push(newCountry);
+        const success = this.saveData();
+        
+        if (success) {
+            console.log('✅ Country added:', newCountry.name);
+        }
+        
+        return success;
+    };
+    
+    DataManager.prototype.updateCountry = function(countryId, updates) {
+        const country = this.data.countries.find(c => c.id === countryId);
+        if (country) {
+            Object.assign(country, updates);
+            return this.saveData();
         }
         return false;
-    }
-
-    deleteCountry(countryId) {
-        const data = this.getData();
-        if (!data) return false;
-        data.countries = data.countries.filter(c => c.id !== countryId);
-        return this.setData(data);
-    }
-
-    // Tour management
-    getAllTours() {
-        const countries = this.getCountries();
+    };
+    
+    DataManager.prototype.deleteCountry = function(countryId) {
+        const index = this.data.countries.findIndex(c => c.id === countryId);
+        if (index !== -1) {
+            this.data.countries.splice(index, 1);
+            return this.saveData();
+        }
+        return false;
+    };
+    
+    // Tours management
+    DataManager.prototype.getAllTours = function() {
         const allTours = [];
-        countries.forEach(country => {
+        this.data.countries.forEach(country => {
             if (country.tours) {
                 country.tours.forEach(tour => {
                     allTours.push({
@@ -174,120 +262,81 @@ class DataManager {
             }
         });
         return allTours;
-    }
-
-    addTour(countryId, tourData) {
-        const data = this.getData();
-        if (!data) return false;
-        const country = data.countries.find(c => c.id === countryId);
+    };
+    
+    DataManager.prototype.addTour = function(countryId, tourData) {
+        const country = this.data.countries.find(c => c.id === countryId);
         if (country) {
             if (!country.tours) country.tours = [];
+            
             const newTour = {
                 id: Date.now(),
                 name: tourData.name,
                 price: tourData.price,
                 duration: tourData.duration
             };
+            
             country.tours.push(newTour);
-            return this.setData(data);
+            const success = this.saveData();
+            
+            if (success) {
+                console.log('✅ Tour added:', newTour.name);
+            }
+            
+            return success;
         }
         return false;
-    }
-
-    deleteTour(countryId, tourId) {
-        const data = this.getData();
-        if (!data) return false;
-        const country = data.countries.find(c => c.id === countryId);
+    };
+    
+    DataManager.prototype.deleteTour = function(countryId, tourId) {
+        const country = this.data.countries.find(c => c.id === countryId);
         if (country && country.tours) {
-            country.tours = country.tours.filter(t => t.id !== tourId);
-            return this.setData(data);
+            const index = country.tours.findIndex(t => t.id === tourId);
+            if (index !== -1) {
+                country.tours.splice(index, 1);
+                return this.saveData();
+            }
         }
         return false;
-    }
-
-    // Content management
-    updateContent(section, content) {
-        const data = this.getData();
-        if (!data) return false;
-        if (!data.content) data.content = {};
-        data.content[section] = { ...data.content[section], ...content };
-        return this.setData(data);
-    }
-
+    };
+    
     // Contacts management
-    getContacts() {
-        const data = this.getData();
-        return data?.contacts || {};
-    }
-
-    updateContacts(contacts) {
-        const data = this.getData();
-        if (!data) return false;
-        data.contacts = { ...data.contacts, ...contacts };
-        return this.setData(data);
-    }
-
+    DataManager.prototype.getContacts = function() {
+        return this.data.contacts || {};
+    };
+    
+    DataManager.prototype.updateContacts = function(updates) {
+        this.data.contacts = { ...this.data.contacts, ...updates };
+        return this.saveData();
+    };
+    
     // Settings management
-    getSettings() {
-        const data = this.getData();
-        return data?.settings || {};
+    DataManager.prototype.getSettings = function() {
+        return this.data.settings || {};
+    };
+    
+    DataManager.prototype.updateSettings = function(updates) {
+        this.data.settings = { ...this.data.settings, ...updates };
+        return this.saveData();
+    };
+    
+    // Content management
+    DataManager.prototype.getContent = function() {
+        return this.data.content || {};
+    };
+    
+    DataManager.prototype.updateContent = function(section, updates) {
+        if (!this.data.content) this.data.content = {};
+        if (!this.data.content[section]) this.data.content[section] = {};
+        
+        this.data.content[section] = { ...this.data.content[section], ...updates };
+        return this.saveData();
+    };
+    
+    // Initialize global instance
+    if (!window.dataManager) {
+        window.dataManager = new DataManager();
+        console.log('✅ Data Manager ready');
     }
-
-    updateSettings(settings) {
-        const data = this.getData();
-        if (!data) return false;
-        data.settings = { ...data.settings, ...settings };
-        return this.setData(data);
-    }
-
-    // Stats management
-    updateStats(stats) {
-        const data = this.getData();
-        if (!data) return false;
-        if (!data.content) data.content = {};
-        if (!data.content.about) data.content.about = {};
-        data.content.about.stats = stats;
-        return this.setData(data);
-    }
-
-    // Services management
-    updateServices(services) {
-        const data = this.getData();
-        if (!data) return false;
-        if (!data.content) data.content = {};
-        if (!data.content.services) data.content.services = {};
-        data.content.services.services = services;
-        return this.setData(data);
-    }
-
-    // Force refresh
-    forceRefresh() {
-        const data = this.getData();
-        window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
-        return data;
-    }
-
-    // Reset to default
-    resetToDefault() {
-        const defaultData = this.getDefaultData();
-        return this.setData(defaultData);
-    }
-
-    // Debug
-    debugData() {
-        const data = this.getData();
-        console.log('🔍 DataManager Debug:', {
-            countries: data?.countries?.length || 0,
-            tours: this.getAllTours().length,
-            content: data?.content ? Object.keys(data.content) : [],
-            lastUpdate: data?.lastUpdate
-        });
-        return data;
-    }
-}
-
-// Initialize DataManager
-if (typeof window !== 'undefined') {
-    window.dataManager = new DataManager();
-    console.log('✅ DataManager ready with all methods');
-}
+    
+})();

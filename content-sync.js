@@ -52,7 +52,7 @@
             const newHash = calculateDataHash(data);
             if (newHash === lastDataHash) return;
             
-            console.log('🔄 Applying content updates...');
+            console.log('🔄 Applying content updates...', data);
             
             applyContentUpdates(data);
             applyContactUpdates(data);
@@ -74,7 +74,10 @@
         if (window.dataManager && window.dataManager.getData) {
             try {
                 data = window.dataManager.getData();
-                if (data) return data;
+                if (data) {
+                    console.log('📊 Data from dataManager');
+                    return data;
+                }
             } catch (e) {
                 console.log('⚠️ dataManager not available');
             }
@@ -85,6 +88,7 @@
         if (localData) {
             try {
                 data = JSON.parse(localData);
+                console.log('�� Data from localStorage');
                 return data;
             } catch (e) {
                 console.log('⚠️ localStorage data corrupted');
@@ -96,12 +100,14 @@
         if (sessionData) {
             try {
                 data = JSON.parse(sessionData);
+                console.log('💾 Data from sessionStorage');
                 return data;
             } catch (e) {
                 console.log('⚠️ sessionStorage data corrupted');
             }
         }
         
+        console.log('📭 No data found from any source');
         return null;
     }
     
@@ -118,39 +124,41 @@
         if (!data.content) return;
         
         const content = data.content;
+        console.log('📄 Applying content:', Object.keys(content));
         
         // Hero section
         if (content.hero) {
+            console.log('🎯 Applying hero:', content.hero);
             updateElement('#home h1, .hero h1', content.hero.title);
-            updateElement('#home p, .hero p', content.hero.subtitle);
+            updateElement('#home p, .hero p', content.hero.description);
         }
         
         // About section
         if (content.about) {
+            console.log('🏢 Applying about:', content.about);
             updateElement('#about .section-title', content.about.title);
             updateElement('.about-text p', content.about.description);
         }
         
         // Services section
         if (content.services) {
+            console.log('⚡ Applying services:', content.services);
             updateElement('#services .section-title', content.services.title);
+            updateElement('#services .section-subtitle', content.services.description);
         }
         
         // Destinations section
         if (content.destinations) {
+            console.log('🌍 Applying destinations:', content.destinations);
             updateElement('#destinations .section-title', content.destinations.title);
             updateElement('.destinations .section-subtitle', content.destinations.subtitle);
         }
         
         // Contact section
         if (content.contact) {
+            console.log('📞 Applying contact:', content.contact);
             updateElement('#contact .section-title', content.contact.title);
-        }
-        
-        // Footer section
-        if (content.footer) {
-            updateElement('.footer-section:first-child p', content.footer.description);
-            updateElementHTML('.footer-bottom p', content.footer.copyright);
+            updateElement('#contact .section-subtitle', content.contact.description);
         }
     }
     
@@ -158,6 +166,7 @@
         if (!data.contacts) return;
         
         const contacts = data.contacts;
+        console.log('📞 Applying contacts:', contacts);
         
         // Правильный порядок контактов в секции
         if (contacts.phone) {
@@ -182,6 +191,7 @@
         if (!data.settings) return;
         
         const settings = data.settings;
+        console.log('⚙️ Applying settings:', settings);
         
         if (settings.siteTitle) {
             document.title = settings.siteTitle;
@@ -191,25 +201,32 @@
     function updateElement(selector, value) {
         if (!value) return;
         const elements = document.querySelectorAll(selector);
+        let updated = false;
         elements.forEach(el => {
             if (el.textContent !== value) {
                 el.textContent = value;
+                updated = true;
             }
         });
+        if (updated) {
+            console.log('✅ Updated:', selector, 'to:', value);
+        }
     }
     
     function updateElementHTML(selector, value) {
         if (!value) return;
         const elements = document.querySelectorAll(selector);
+        let updated = false;
         elements.forEach(el => {
             if (el.innerHTML !== value) {
                 el.innerHTML = value;
+                updated = true;
             }
         });
+        if (updated) {
+            console.log('✅ Updated HTML:', selector, 'to:', value);
+        }
     }
-    
-    // ИСПРАВЛЕННАЯ СТРОКА 189 - был неверный escape-символ
-    // const message = `Вы уверены, что хотите удалить страну \"${country.name}\"?`;
     
     // Глобальные функции для принудительной синхронизации
     window.forceContentSync = syncContent;
