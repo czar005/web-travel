@@ -22,164 +22,186 @@
         </div>
 
         <div class="admin-tabs">
-            <button class="tab-button active" data-tab="countries">🌍 Страны</button>
+            <button class="tab-button active" data-tab="countries">�� Страны</button>
             <button class="tab-button" data-tab="tours">🗺️ Туры</button>
             <button class="tab-button" data-tab="contacts">📞 Контакты</button>
             <button class="tab-button" data-tab="settings">⚙️ Настройки</button>
         </div>
 
         <!-- Countries Tab -->
-        <div class="tab-content">
-            <div class="tab-pane active" id="countries-tab">
-                <div class="admin-section">
-                    <h3>Добавить новую страну</h3>
-                    <form id="add-country-form" class="admin-form">
-                        <div class="form-group">
-                            <label for="country-name">Название страны:</label>
-                            <input type="text" id="country-name" name="name" required placeholder="Например: Турция">
-                        </div>
-                        <div class="form-group">
-                            <label for="country-description">Описание:</label>
-                            <textarea id="country-description" name="description" rows="3" placeholder="Краткое описание страны..."></textarea>
-                        </div>
-                        <button type="submit" class="btn-admin">
-                            <i class="fas fa-plus"></i> Добавить страну
-                        </button>
-                    </form>
-                </div>
-
-                <div class="admin-section">
-                    <h3>Список стран</h3>
-                    <div class="table-container">
-                        <table class="admin-table" id="countries-table">
-                            <thead>
-                                <tr>
-                                    <th>Страна</th>
-                                    <th>Описание</th>
-                                    <th>Туры</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Countries will be loaded via JavaScript -->
-                            </tbody>
-                        </table>
+        <div id="countries-tab" class="tab-pane active">
+            <div class="admin-section">
+                <h3>Добавить новую страну</h3>
+                <p class="admin-hint">Заполните информацию о стране. Изображение будет отображаться на главной странице.</p>
+                
+                <form id="add-country-form" class="admin-form">
+                    <div class="form-group">
+                        <label for="country-name">Название страны *</label>
+                        <input type="text" id="country-name" name="name" required placeholder="Например, Италия">
                     </div>
-                </div>
-            </div>
-
-            <!-- Tours Tab -->
-            <div class="tab-pane" id="tours-tab">
-                <div class="admin-section">
-                    <h3>Добавить новый тур</h3>
-                    <form id="add-tour-form" class="admin-form">
-                        <div class="form-group">
-                            <label for="tour-country">Страна:</label>
-                            <select id="tour-country" name="country" required>
-                                <option value="">-- Выберите страну --</option>
-                            </select>
-                        </div>
-                        <div class="form-group">
-                            <label for="tour-name">Название тура:</label>
-                            <input type="text" id="tour-name" name="name" required placeholder="Например: Анталия - Все включено">
-                        </div>
-                        <div class="form-group">
-                            <label for="tour-price">Цена:</label>
-                            <input type="text" id="tour-price" name="price" required placeholder="Например: 45,000 ₽">
-                        </div>
-                        <div class="form-group">
-                            <label for="tour-duration">Длительность:</label>
-                            <input type="text" id="tour-duration" name="duration" required placeholder="Например: 7 ночей">
-                        </div>
-                        <button type="submit" class="btn-admin">
-                            <i class="fas fa-plus"></i> Добавить тур
-                        </button>
-                    </form>
-                </div>
-
-                <div class="admin-section">
-                    <h3>Все туры</h3>
-                    <div class="table-container">
-                        <table class="admin-table" id="tours-table">
-                            <thead>
-                                <tr>
-                                    <th>Тур</th>
-                                    <th>Страна</th>
-                                    <th>Цена</th>
-                                    <th>Длительность</th>
-                                    <th>Действия</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                <!-- Tours will be loaded via JavaScript -->
-                            </tbody>
-                        </table>
+                    
+                    <div class="form-group">
+                        <label for="country-description">Описание страны *</label>
+                        <textarea id="country-description" name="description" required placeholder="Краткое описание страны для отображения на сайте"></textarea>
                     </div>
-                </div>
+                    
+                    <div class="form-group">
+                        <label>Изображение страны</label>
+                        <div class="image-upload-area" style="border: 2px dashed #ddd; padding: 20px; text-align: center; border-radius: 8px; margin-bottom: 10px;">
+                            <div id="country-image-preview" style="color: #666; margin-bottom: 15px;">
+                                <i class="fas fa-image" style="font-size: 2em; display: block; margin-bottom: 5px;"></i>
+                                <span>Изображение не выбрано</span>
+                            </div>
+                            <input type="file" id="country-image-upload" accept="image/*" style="display: none;">
+                            <button type="button" class="btn-admin secondary" onclick="document.getElementById('country-image-upload').click()">
+                                <i class="fas fa-upload"></i> Выбрать изображение
+                            </button>
+                        </div>
+                        <input type="hidden" id="country-image-data" name="image">
+                    </div>
+                    
+                    <button type="submit" class="btn-admin">
+                        <i class="fas fa-plus"></i> Добавить страну
+                    </button>
+                </form>
             </div>
 
-            <!-- Contacts Tab -->
-            <div class="tab-pane" id="contacts-tab">
-                <div class="admin-section">
-                    <h3>Контактная информация</h3>
-                    <p class="admin-hint">Изменения появятся в секции контактов и футере на главной странице.</p>
-                    <form id="contact-form" class="admin-form">
-                        <div class="form-group">
-                            <label for="contact-phone">Телефон:</label>
-                            <input type="text" id="contact-phone" name="phone" placeholder="+7 (999) 123-45-67">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-email">Email:</label>
-                            <input type="email" id="contact-email" name="email" placeholder="info@worldtravel.com">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-address">Адрес:</label>
-                            <input type="text" id="contact-address" name="address" placeholder="Москва, ул. Туристическая, 15">
-                        </div>
-                        <div class="form-group">
-                            <label for="contact-hours">Часы работы:</label>
-                            <input type="text" id="contact-hours" name="hours" placeholder="Пн-Пт: 9:00-18:00">
-                        </div>
-                        <button type="submit" class="btn-admin">
-                            <i class="fas fa-save"></i> Сохранить контакты
-                        </button>
-                    </form>
+            <div class="admin-section">
+                <h3>Список стран</h3>
+                <div class="table-container">
+                    <table id="countries-table" class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Страна</th>
+                                <th>Описание</th>
+                                <th>Туры</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Countries will be loaded here -->
+                        </tbody>
+                    </table>
                 </div>
             </div>
+        </div>
 
-            <!-- Settings Tab -->
-            <div class="tab-pane" id="settings-tab">
-                <div class="admin-section">
-                    <h3>Настройки сайта</h3>
-                    <form id="settings-form" class="admin-form">
-                        <div class="form-group">
-                            <label for="site-title">Заголовок сайта:</label>
-                            <input type="text" id="site-title" name="siteTitle" placeholder="WorldTravel - Туристическая компания">
-                        </div>
-                        <div class="form-group">
-                            <label for="company-name">Название компании:</label>
-                            <input type="text" id="company-name" name="companyName" placeholder="WorldTravel">
-                        </div>
-                        <button type="submit" class="btn-admin">
-                            <i class="fas fa-save"></i> Сохранить настройки
-                        </button>
-                    </form>
+        <!-- Tours Tab -->
+        <div id="tours-tab" class="tab-pane">
+            <div class="admin-section">
+                <h3>Добавить новый тур</h3>
+                <p class="admin-hint">Создайте новый тур для выбранной страны.</p>
+                
+                <form id="add-tour-form" class="admin-form">
+                    <div class="form-group">
+                        <label for="tour-name">Название тура *</label>
+                        <input type="text" id="tour-name" name="name" required placeholder="Например, Римские каникулы">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tour-country">Страна *</label>
+                        <select id="tour-country" name="country" required>
+                            <option value="">-- Выберите страну --</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tour-price">Цена *</label>
+                        <input type="text" id="tour-price" name="price" required placeholder="Например, €600">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="tour-duration">Длительность *</label>
+                        <input type="text" id="tour-duration" name="duration" required placeholder="Например, 5 дней">
+                    </div>
+                    
+                    <button type="submit" class="btn-admin">
+                        <i class="fas fa-plus"></i> Добавить тур
+                    </button>
+                </form>
+            </div>
+
+            <div class="admin-section">
+                <h3>Список туров</h3>
+                <div class="table-container">
+                    <table id="tours-table" class="admin-table">
+                        <thead>
+                            <tr>
+                                <th>Тур</th>
+                                <th>Страна</th>
+                                <th>Цена</th>
+                                <th>Длительность</th>
+                                <th>Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Tours will be loaded here -->
+                        </tbody>
+                    </table>
                 </div>
+            </div>
+        </div>
+
+        <!-- Contacts Tab -->
+        <div id="contacts-tab" class="tab-pane">
+            <div class="admin-section">
+                <h3>Контактная информация</h3>
+                <p class="admin-hint">Обновите контактные данные компании.</p>
+                
+                <form id="contact-form" class="admin-form">
+                    <div class="form-group">
+                        <label for="contact-phone">Телефон *</label>
+                        <input type="text" id="contact-phone" name="phone" required placeholder="+7 (999) 123-45-67">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact-email">Email *</label>
+                        <input type="email" id="contact-email" name="email" required placeholder="info@worldtravel.com">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact-address">Адрес *</label>
+                        <input type="text" id="contact-address" name="address" required placeholder="Москва, ул. Туристическая, 15">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="contact-hours">Часы работы *</label>
+                        <input type="text" id="contact-hours" name="hours" required placeholder="Пн-Пт: 9:00-18:00">
+                    </div>
+                    
+                    <button type="submit" class="btn-admin">
+                        <i class="fas fa-save"></i> Обновить контакты
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Settings Tab -->
+        <div id="settings-tab" class="tab-pane">
+            <div class="admin-section">
+                <h3>Настройки сайта</h3>
+                <p class="admin-hint">Основные настройки вашего сайта.</p>
+                
+                <form id="settings-form" class="admin-form">
+                    <div class="form-group">
+                        <label for="site-title">Заголовок сайта *</label>
+                        <input type="text" id="site-title" name="siteTitle" required placeholder="WorldTravel - Туристическая компания">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="company-name">Название компании *</label>
+                        <input type="text" id="company-name" name="companyName" required placeholder="WorldTravel">
+                    </div>
+                    
+                    <button type="submit" class="btn-admin">
+                        <i class="fas fa-save"></i> Сохранить настройки
+                    </button>
+                </form>
             </div>
         </div>
     </div>
 
-    <!-- Scripts -->
     <script src="data-manager.js"></script>
     <script src="admin.js"></script>
 </body>
 </html>
-
-    <!-- Add link to enhanced page editor -->
-    <div class="admin-section">
-        <h3>Редактор страниц</h3>
-        <p class="admin-hint">Расширенный редактор для управления контентом всех секций сайта</p>
-        <a href="enhanced-page-editor.html" class="btn-admin" style="margin-top: 10px;">
-            <i class="fas fa-edit"></i> Открыть расширенный редактор
-        </a>
-    </div>

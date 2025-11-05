@@ -304,7 +304,7 @@
     </div>
 
     <script>
-        // Simple Page Editor with Enhanced Features - FIXED VERSION
+        // Enhanced Page Editor with fixed stats and services
         class SimplePageEditor {
             constructor() {
                 this.currentSection = null;
@@ -362,8 +362,8 @@
                             description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
                             image: "",
                             stats: [
-                                { value: "5000", label: "Довольных клиентов" },
-                                { value: "50", label: "Стран мира" },
+                                { value: "5000+", label: "Довольных клиентов" },
+                                { value: "50+", label: "Стран мира" },
                                 { value: "10 лет", label: "Опыта работы" }
                             ]
                         },
@@ -380,16 +380,6 @@
                                     title: "Отели", 
                                     description: "Бронирование отелей любого уровня комфорта по всему миру",
                                     icon: "fas fa-hotel"
-                                },
-                                {
-                                    title: "Туры",
-                                    description: "Индивидуальные и групповые туры с профессиональными гидами", 
-                                    icon: "fas fa-map-marked-alt"
-                                },
-                                {
-                                    title: "Страхование",
-                                    description: "Полное страховое сопровождение вашего путешествия",
-                                    icon: "fas fa-shield-alt"
                                 }
                             ]
                         },
@@ -409,7 +399,6 @@
             selectSection(sectionId) {
                 console.log('🎯 Selecting section:', sectionId);
                 
-                // Update UI
                 document.querySelectorAll('.section-item').forEach(item => {
                     item.classList.remove('active');
                 });
@@ -418,15 +407,12 @@
                 this.currentSection = sectionId;
                 this.loadSectionData(sectionId);
                 
-                // Show editor
                 document.getElementById('content-editor').style.display = 'block';
-                
-                // Inject enhanced editor
                 this.injectEnhancedEditor();
             }
 
             loadSectionData(sectionId) {
-                console.log('📝 Loading section data for:', sectionId);
+                console.log('�� Loading section data for:', sectionId);
                 
                 if (!this.currentData.content[sectionId]) {
                     const defaultData = this.getDefaultData();
@@ -452,11 +438,9 @@
                     return;
                 }
 
-                // Clear previous content
                 contentEditor.innerHTML = '';
                 console.log('🔄 Injecting enhanced editor for section:', this.currentSection);
 
-                // Inject appropriate enhanced editor based on section
                 switch (this.currentSection) {
                     case 'hero':
                         this.injectHeroEditor(contentEditor);
@@ -580,7 +564,7 @@
                                         <input type="text" class="enhanced-form-control stat-value" 
                                                value="${stat.value}" 
                                                oninput="editor.updateStatBlock(${index}, 'value', this.value)"
-                                               placeholder="5000">
+                                               placeholder="5000+">
                                     </div>
                                     <div class="enhanced-form-group">
                                         <label>Подпись:</label>
@@ -721,11 +705,11 @@
                 }
                 if (!this.currentData.content.about.stats) {
                     this.currentData.content.about.stats = [];
-                    console.log('�� Created stats array');
+                    console.log('📁 Created stats array');
                 }
 
                 const newStat = {
-                    value: '1000',
+                    value: '1000+',
                     label: 'Новый показатель'
                 };
                 
@@ -859,7 +843,7 @@
                 this.injectEnhancedEditor();
             }
 
-            // Save Methods
+            // Save Methods - FIXED to properly save stats and services
             saveSection() {
                 console.log('💾 Saving section:', this.currentSection);
                 
@@ -882,22 +866,32 @@
                 console.log('📝 Basic fields updated:', { title, description });
 
                 // Get main data and merge
-                const mainData = window.dataManager.getData() || {};
+                const mainData = window.dataManager.getData() || this.getDefaultData();
                 if (!mainData.content) {
                     mainData.content = {};
                     console.log('📁 Created content in main data');
                 }
                 
-                // Merge our changes
-                Object.keys(this.currentData.content).forEach(section => {
-                    if (!mainData.content[section]) {
-                        mainData.content[section] = {};
-                    }
-                    Object.assign(mainData.content[section], this.currentData.content[section]);
-                    console.log('🔄 Merged section:', section, mainData.content[section]);
-                });
+                // Ensure the section exists in main data
+                if (!mainData.content[this.currentSection]) {
+                    mainData.content[this.currentSection] = {};
+                }
+                
+                // Merge ALL changes including stats and services
+                Object.assign(mainData.content[this.currentSection], this.currentData.content[this.currentSection]);
+                
+                console.log('🔄 Merged section data:', this.currentSection, mainData.content[this.currentSection]);
 
                 mainData.lastUpdate = new Date().toISOString();
+
+                // Use DataManager methods for stats and services to ensure proper saving
+                if (this.currentSection === 'about' && mainData.content.about?.stats) {
+                    window.dataManager.updateStats(mainData.content.about.stats);
+                }
+                
+                if (this.currentSection === 'services' && mainData.content.services?.services) {
+                    window.dataManager.updateServices(mainData.content.services.services);
+                }
 
                 if (window.dataManager.setData(mainData)) {
                     console.log('✅ Data saved successfully');
@@ -933,7 +927,6 @@
 
             showNotification(message, type = 'success') {
                 console.log(`💬 ${type}: ${message}`);
-                // Simple alert for now - can be replaced with toast notifications
                 alert(`${type === 'success' ? '✅' : '❌'} ${message}`);
             }
         }
