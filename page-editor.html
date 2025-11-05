@@ -304,7 +304,7 @@
     </div>
 
     <script>
-        // Enhanced Page Editor with fixed stats and services
+        // Enhanced Page Editor with fixed stats and services - FIXED VERSION
         class SimplePageEditor {
             constructor() {
                 this.currentSection = null;
@@ -412,7 +412,7 @@
             }
 
             loadSectionData(sectionId) {
-                console.log('�� Loading section data for:', sectionId);
+                console.log('📝 Loading section data for:', sectionId);
                 
                 if (!this.currentData.content[sectionId]) {
                     const defaultData = this.getDefaultData();
@@ -843,7 +843,7 @@
                 this.injectEnhancedEditor();
             }
 
-            // Save Methods - FIXED to properly save stats and services
+            // Save Methods - FIXED: Removed calls to non-existent methods
             saveSection() {
                 console.log('💾 Saving section:', this.currentSection);
                 
@@ -884,15 +884,7 @@
 
                 mainData.lastUpdate = new Date().toISOString();
 
-                // Use DataManager methods for stats and services to ensure proper saving
-                if (this.currentSection === 'about' && mainData.content.about?.stats) {
-                    window.dataManager.updateStats(mainData.content.about.stats);
-                }
-                
-                if (this.currentSection === 'services' && mainData.content.services?.services) {
-                    window.dataManager.updateServices(mainData.content.services.services);
-                }
-
+                // Simply save the entire data structure
                 if (window.dataManager.setData(mainData)) {
                     console.log('✅ Data saved successfully');
                     this.showSaveIndicator('Изменения сохранены успешно!');

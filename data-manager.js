@@ -1,4 +1,4 @@
-// Enhanced Data Manager with country images and fixed stats
+// Enhanced Data Manager with all required methods
 class DataManager {
     constructor() {
         this.storageKey = 'worldtravel_data';
@@ -8,6 +8,13 @@ class DataManager {
     init() {
         console.log('🚀 DataManager initialized');
         this.ensureDefaultData();
+        
+        // Global error handler for DataManager
+        window.addEventListener('error', (e) => {
+            if (e.message.includes('DataManager')) {
+                console.error('🚨 Global error caught for DataManager:', e.error);
+            }
+        });
     }
 
     ensureDefaultData() {
@@ -27,7 +34,7 @@ class DataManager {
                     id: 1,
                     name: "Италия",
                     description: "Страна искусства, древней истории и самой вкусной кухни в мире.",
-                    image: "images/italy.jpg",
+                    image: "images/travel-placeholder.svg",
                     tours: [
                         { id: 1, name: "Римские каникулы", price: "€600", duration: "5 дней" },
                         { id: 2, name: "Венецианская романтика", price: "€550", duration: "4 дня" }
@@ -37,7 +44,7 @@ class DataManager {
                     id: 2, 
                     name: "Франция",
                     description: "Романтическая Франция с её богатой историей и изысканной кухней.",
-                    image: "images/france.jpg",
+                    image: "images/travel-placeholder.svg",
                     tours: [
                         { id: 3, name: "Парижские огни", price: "€700", duration: "6 дней" },
                         { id: 4, name: "Лазурный берег", price: "€800", duration: "7 дней" }
@@ -47,11 +54,14 @@ class DataManager {
             content: {
                 hero: {
                     title: "Откройте мир с WorldTravel",
-                    description: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь."
+                    description: "Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.",
+                    buttonText: "Начать путешествие",
+                    backgroundImage: ""
                 },
                 about: {
                     title: "О нас",
                     description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы.",
+                    image: "",
                     stats: [
                         { value: "5000+", label: "Довольных клиентов" },
                         { value: "50+", label: "Стран мира" },
@@ -71,8 +81,26 @@ class DataManager {
                             title: "Отели", 
                             description: "Бронирование отелей любого уровня комфорта по всему миру",
                             icon: "fas fa-hotel"
+                        },
+                        {
+                            title: "Туры",
+                            description: "Индивидуальные и групповые туры с профессиональными гидами", 
+                            icon: "fas fa-map-marked-alt"
+                        },
+                        {
+                            title: "Страхование",
+                            description: "Полное страховое сопровождение вашего путешествия",
+                            icon: "fas fa-shield-alt"
                         }
                     ]
+                },
+                destinations: {
+                    title: "Направления", 
+                    subtitle: "Откройте для себя лучшие направления мира с нашими эксклюзивными турами"
+                },
+                contact: {
+                    title: "Контакты",
+                    description: "Свяжитесь с нами для планирования вашего идеального путешествия"
                 }
             },
             contacts: {
@@ -246,21 +274,23 @@ class DataManager {
         return this.setData(data);
     }
 
-    // Stats management
+    // Stats management - FIXED: Added missing method
     updateStats(stats) {
         const data = this.getData();
         if (!data) return false;
 
+        if (!data.content) data.content = {};
         if (!data.content.about) data.content.about = {};
         data.content.about.stats = stats;
         return this.setData(data);
     }
 
-    // Services management
+    // Services management - FIXED: Added missing method
     updateServices(services) {
         const data = this.getData();
         if (!data) return false;
 
+        if (!data.content) data.content = {};
         if (!data.content.services) data.content.services = {};
         data.content.services.services = services;
         return this.setData(data);
@@ -271,6 +301,12 @@ class DataManager {
         const data = this.getData();
         window.dispatchEvent(new CustomEvent('dataUpdated', { detail: data }));
         return data;
+    }
+
+    // Reset to default
+    resetToDefault() {
+        const defaultData = this.getDefaultData();
+        return this.setData(defaultData);
     }
 
     // Debug
@@ -289,5 +325,5 @@ class DataManager {
 // Initialize DataManager
 if (typeof window !== 'undefined') {
     window.dataManager = new DataManager();
-    console.log('✅ DataManager ready');
+    console.log('✅ DataManager ready with all methods');
 }

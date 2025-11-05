@@ -1,4 +1,4 @@
-// Enhanced Content Sync with proper stats and services handling
+// Enhanced Content Sync with proper error handling
 (function() {
     'use strict';
     
@@ -6,90 +6,119 @@
     
     let lastDataHash = '';
     let syncInterval;
+    let errorCount = 0;
+    const maxErrors = 5;
     
     function startEnhancedSync() {
         console.log('🚀 Starting enhanced content sync...');
         
         // Immediate sync
-        syncAllContent();
+        safeSyncAllContent();
         
         // Fast sync for first 30 seconds
-        syncInterval = setInterval(syncAllContent, 500);
+        syncInterval = setInterval(safeSyncAllContent, 500);
         setTimeout(() => {
             clearInterval(syncInterval);
             // Continue with normal sync
-            syncInterval = setInterval(syncAllContent, 2000);
+            syncInterval = setInterval(safeSyncAllContent, 2000);
         }, 30000);
         
         // Sync on storage events
         window.addEventListener('storage', function(e) {
             if (e.key === 'worldtravel_data') {
-                setTimeout(syncAllContent, 100);
+                setTimeout(safeSyncAllContent, 100);
             }
         });
         
         // Sync when page becomes visible
         document.addEventListener('visibilitychange', function() {
             if (!document.hidden) {
-                syncAllContent();
+                safeSyncAllContent();
             }
+        });
+        
+        // Sync on data update events
+        window.addEventListener('dataUpdated', function(e) {
+            setTimeout(safeSyncAllContent, 50);
         });
         
         console.log('✅ Enhanced content sync started');
     }
     
-    function syncAllContent() {
+    function safeSyncAllContent() {
         try {
-            const data = getCurrentData();
-            if (!data) return;
+            if (errorCount >= maxErrors) {
+                console.warn('⚠️ Too many errors, skipping sync');
+                return;
+            }
             
-            const dataHash = calculateDataHash(data);
-            if (dataHash === lastDataHash) return;
-            
-            console.log('🔄 Syncing content...');
-            
-            // Sync in specific order
-            syncContacts(data.contacts);
-            syncContentSections(data.content);
-            syncStats(data.content);
-            syncServices(data.content);
-            syncFooter(data);
-            syncNavigation(data.content);
-            syncSettings(data.settings);
-            
-            lastDataHash = dataHash;
-            console.log('✅ Content synced successfully');
+            syncAllContent();
+            errorCount = 0; // Reset error count on success
             
         } catch (error) {
-            console.error('❌ Sync error:', error);
+            errorCount++;
+            console.error(`❌ Sync error (${errorCount}/${maxErrors}):`, error);
         }
+    }
+    
+    function syncAllContent() {
+        const data = getCurrentData();
+        if (!data) {
+            console.log('📭 No data available for sync');
+            return;
+        }
+        
+        const dataHash = calculateDataHash(data);
+        if (dataHash === lastDataHash) {
+            return; // No changes
+        }
+        
+        console.log('🔄 Syncing content...', {
+            contacts: !!data.contacts,
+            content: !!data.content,
+            stats: data.content?.about?.stats?.length || 0,
+            services: data.content?.services?.services?.length || 0
+        });
+        
+        // Sync in specific order
+        syncContacts(data.contacts);
+        syncContentSections(data.content);
+        syncStats(data.content);
+        syncServices(data.content);
+        syncFooter(data);
+        syncNavigation(data.content);
+        syncSettings(data.settings);
+        
+        lastDataHash = dataHash;
+        console.log('✅ Content synced successfully');
     }
     
     function getCurrentData() {
         // Try multiple data sources
         if (window.dataManager && window.dataManager.getData) {
-            return window.dataManager.getData();
+            const data = window.dataManager.getData();
+            if (data) return data;
         }
         
-        const localData = localStorage.getItem('worldtravel_data');
-        if (localData) {
-            try {
+        try {
+            const localData = localStorage.getItem('worldtravel_data');
+            if (localData) {
                 return JSON.parse(localData);
-            } catch (e) {
-                console.error('❌ Error parsing local data');
             }
+        } catch (e) {
+            console.error('❌ Error parsing local data');
         }
         
         return null;
     }
     
     function calculateDataHash(data) {
-        return JSON.stringify({
+        const importantData = {
             contacts: data.contacts,
             content: data.content,
-            settings: data.settings,
-            timestamp: data.lastUpdate
-        });
+            settings: data.settings
+        };
+        return JSON.stringify(importantData);
     }
     
     function syncContacts(contacts) {
@@ -105,7 +134,7 @@
         contactMap.forEach(item => {
             if (item.value) {
                 item.selectors.forEach(selector => {
-                    updateElements(selector, item.value);
+                    safeUpdateElements(selector, item.value);
                 });
             }
         });
@@ -116,32 +145,32 @@
         
         // Hero section
         if (content.hero) {
-            updateElements('#home h1, .hero h1', content.hero.title);
-            updateElements('#home p, .hero p', content.hero.description);
+            safeUpdateElements('#home h1, .hero h1', content.hero.title);
+            safeUpdateElements('#home p, .hero p', content.hero.description);
         }
         
         // About section
         if (content.about) {
-            updateElements('#about .section-title', content.about.title);
-            updateElements('.about-text p', content.about.description);
+            safeUpdateElements('#about .section-title', content.about.title);
+            safeUpdateElements('.about-text p', content.about.description);
         }
         
         // Services section
         if (content.services) {
-            updateElements('#services .section-title', content.services.title);
-            updateElements('#services .section-subtitle', content.services.description);
+            safeUpdateElements('#services .section-title', content.services.title);
+            safeUpdateElements('#services .section-subtitle', content.services.description);
         }
         
         // Destinations section
         if (content.destinations) {
-            updateElements('#destinations .section-title', content.destinations.title);
-            updateElements('.destinations .section-subtitle', content.destinations.subtitle);
+            safeUpdateElements('#destinations .section-title', content.destinations.title);
+            safeUpdateElements('.destinations .section-subtitle', content.destinations.subtitle);
         }
         
         // Contact section
         if (content.contact) {
-            updateElements('#contact .section-title', content.contact.title);
-            updateElements('#contact .section-subtitle', content.contact.description);
+            safeUpdateElements('#contact .section-title', content.contact.title);
+            safeUpdateElements('#contact .section-subtitle', content.contact.description);
         }
     }
     
@@ -158,16 +187,17 @@
                 const valueElement = statElements[index].querySelector('h3');
                 const labelElement = statElements[index].querySelector('p');
                 
-                if (valueElement && valueElement.textContent !== stat.value) {
+                if (valueElement) {
                     valueElement.textContent = stat.value;
                     valueElement.setAttribute('data-target', stat.value);
                 }
                 
-                if (labelElement && labelElement.textContent !== stat.label) {
+                if (labelElement) {
                     labelElement.textContent = stat.label;
                 }
                 
                 statElements[index].style.display = 'block';
+                statElements[index].classList.add('animate-counter');
             }
         });
         
@@ -191,15 +221,15 @@
                 const descElement = serviceCards[index].querySelector('p');
                 const iconElement = serviceCards[index].querySelector('.service-icon i');
                 
-                if (titleElement && titleElement.textContent !== service.title) {
+                if (titleElement) {
                     titleElement.textContent = service.title;
                 }
                 
-                if (descElement && descElement.textContent !== service.description) {
+                if (descElement) {
                     descElement.textContent = service.description;
                 }
                 
-                if (iconElement && service.icon && iconElement.className !== service.icon) {
+                if (iconElement && service.icon) {
                     iconElement.className = service.icon;
                 }
                 
@@ -215,8 +245,8 @@
     
     function syncFooter(data) {
         if (data.footer) {
-            updateElements('.footer-description', data.footer.description);
-            updateElementsHTML('.footer-copyright', data.footer.copyright);
+            safeUpdateElements('.footer-description', data.footer.description);
+            safeUpdateElementsHTML('.footer-copyright', data.footer.copyright);
         }
     }
     
@@ -232,36 +262,44 @@
         
         navMap.forEach(item => {
             if (item.title) {
-                updateElements(`.nav-links a[href="${item.href}"]`, item.title);
-                updateElements(`.footer-section:nth-child(2) a[href="${item.href}"]`, item.title);
+                safeUpdateElements(`.nav-links a[href="${item.href}"]`, item.title);
+                safeUpdateElements(`.footer-section:nth-child(2) a[href="${item.href}"]`, item.title);
             }
         });
     }
     
     function syncSettings(settings) {
-        if (settings?.siteTitle) {
+        if (settings?.siteTitle && document.title !== settings.siteTitle) {
             document.title = settings.siteTitle;
         }
     }
     
-    function updateElements(selector, value) {
+    function safeUpdateElements(selector, value) {
         if (!value) return;
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(el => {
-            if (el.textContent !== value) {
-                el.textContent = value;
-            }
-        });
+        try {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                if (el.textContent !== value) {
+                    el.textContent = value;
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error updating elements:', selector, error);
+        }
     }
     
-    function updateElementsHTML(selector, value) {
+    function safeUpdateElementsHTML(selector, value) {
         if (!value) return;
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(el => {
-            if (el.innerHTML !== value) {
-                el.innerHTML = value;
-            }
-        });
+        try {
+            const elements = document.querySelectorAll(selector);
+            elements.forEach(el => {
+                if (el.innerHTML !== value) {
+                    el.innerHTML = value;
+                }
+            });
+        } catch (error) {
+            console.error('❌ Error updating HTML elements:', selector, error);
+        }
     }
     
     // Start sync when DOM is ready
@@ -272,6 +310,6 @@
     }
     
     // Global function to force sync
-    window.forceContentSync = syncAllContent;
+    window.forceContentSync = safeSyncAllContent;
     
 })();

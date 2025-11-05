@@ -1,4 +1,4 @@
-// Enhanced main script with country images and fixed stats
+// Enhanced main script with fixed UI and removed favorite buttons
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Main script initialized');
     
@@ -13,6 +13,9 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Start content sync
     startContentSync();
+    
+    // Remove favorite buttons
+    removeFavoriteButtons();
 });
 
 function initNavigation() {
@@ -74,7 +77,7 @@ function initAnimations() {
 }
 
 function animateCounter(counterElement) {
-    const target = parseInt(counterElement.getAttribute('data-target'));
+    const target = parseInt(counterElement.getAttribute('data-target').replace('+', '').replace(' лет', ''));
     const duration = 2000;
     const step = target / (duration / 16);
     let current = 0;
@@ -85,7 +88,9 @@ function animateCounter(counterElement) {
             current = target;
             clearInterval(timer);
         }
-        counterElement.querySelector('h3').textContent = Math.floor(current).toLocaleString();
+        counterElement.querySelector('h3').textContent = Math.floor(current).toLocaleString() + 
+            (counterElement.getAttribute('data-target').includes('+') ? '+' : '') +
+            (counterElement.getAttribute('data-target').includes('лет') ? ' лет' : '');
     }, 16);
 }
 
@@ -307,6 +312,32 @@ function updateServices() {
 
 function updateContentSections() {
     // Additional content updates can be added here
+}
+
+// Remove favorite buttons from tour cards
+function removeFavoriteButtons() {
+    // Remove any existing favorite buttons
+    document.querySelectorAll('.favorite-btn, .btn-favorite, [class*="favorite"]').forEach(btn => {
+        btn.remove();
+    });
+    
+    // Also remove from any dynamically created elements
+    const observer = new MutationObserver(function(mutations) {
+        mutations.forEach(function(mutation) {
+            mutation.addedNodes.forEach(function(node) {
+                if (node.nodeType === 1) { // Element node
+                    node.querySelectorAll?.('.favorite-btn, .btn-favorite, [class*="favorite"]').forEach(btn => {
+                        btn.remove();
+                    });
+                }
+            });
+        });
+    });
+    
+    observer.observe(document.body, {
+        childList: true,
+        subtree: true
+    });
 }
 
 // Search functionality
