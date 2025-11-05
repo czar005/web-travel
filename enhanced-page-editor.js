@@ -1,47 +1,45 @@
-// Enhanced Page Editor with full section management - COMPLETELY FIXED VERSION
+// Enhanced Page Editor - сохраняет ВСЕ блоки
 class EnhancedPageEditor {
     constructor() {
         this.currentSection = null;
-        this.originalEditor = null;
         this.currentData = null;
         this.init();
     }
 
     init() {
         console.log('🚀 Enhanced Page Editor initialized');
-        this.waitForOriginalEditor();
-        this.injectEnhancedStyles();
+        this.setupSectionHandlers();
+        this.loadData();
     }
 
-    waitForOriginalEditor() {
-        if (window.editor) {
-            this.originalEditor = window.editor;
-            this.loadCurrentData();
-            this.patchEditorMethods();
-            console.log('✅ Enhanced editor connected to original editor');
-        } else {
-            setTimeout(() => this.waitForOriginalEditor(), 100);
-        }
+    setupSectionHandlers() {
+        const sectionItems = document.querySelectorAll('.section-item');
+        sectionItems.forEach(item => {
+            item.addEventListener('click', () => {
+                const sectionId = item.getAttribute('data-section');
+                this.selectSection(sectionId);
+            });
+        });
     }
 
-    loadCurrentData() {
+    loadData() {
         if (window.dataManager) {
             this.currentData = window.dataManager.getData();
-            console.log('📁 Loaded data from DataManager:', this.currentData);
-        }
-        
-        if (!this.currentData) {
+            console.log('📁 Initial data loaded:', this.currentData);
+            
+            if (!this.currentData) {
+                this.currentData = this.getDefaultData();
+                console.log('📁 Using default data');
+            }
+            
+            if (!this.currentData.content) {
+                this.currentData.content = {};
+                console.log('📁 Created content structure');
+            }
+        } else {
             this.currentData = this.getDefaultData();
-            console.log('📁 Using default data structure');
+            console.log('📁 DataManager not available, using default data');
         }
-        
-        // Ensure content structure exists
-        if (!this.currentData.content) {
-            this.currentData.content = {};
-            console.log('📁 Created content structure');
-        }
-
-        console.log('✅ Current data loaded successfully');
     }
 
     getDefaultData() {
@@ -58,13 +56,14 @@ class EnhancedPageEditor {
                     description: "WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.",
                     image: "",
                     stats: [
-                        { value: "5000", label: "Довольных клиентов" },
-                        { value: "50", label: "Стран мира" },
+                        { value: "5000+", label: "Довольных клиентов" },
+                        { value: "50+", label: "Стран мира" },
                         { value: "10 лет", label: "Опыта работы" }
                     ]
                 },
                 services: {
                     title: "Услуги",
+                    description: "Наши основные направления услуг для вашего комфортного путешествия",
                     services: [
                         {
                             title: "Авиабилеты",
@@ -75,16 +74,6 @@ class EnhancedPageEditor {
                             title: "Отели", 
                             description: "Бронирование отелей любого уровня комфорта по всему миру",
                             icon: "fas fa-hotel"
-                        },
-                        {
-                            title: "Туры",
-                            description: "Индивидуальные и групповые туры с профессиональными гидами", 
-                            icon: "fas fa-map-marked-alt"
-                        },
-                        {
-                            title: "Страхование",
-                            description: "Полное страховое сопровождение вашего путешествия",
-                            icon: "fas fa-shield-alt"
                         }
                     ]
                 },
@@ -93,694 +82,327 @@ class EnhancedPageEditor {
                     subtitle: "Откройте для себя лучшие направления мира с нашими эксклюзивными турами"
                 },
                 contact: {
-                    title: "Контакты"
+                    title: "Контакты",
+                    description: "Свяжитесь с нами для планирования вашего идеального путешествия"
                 }
             },
             lastUpdate: new Date().toISOString()
         };
     }
 
-    injectEnhancedStyles() {
-        // Remove existing styles to avoid duplicates
-        const existingStyle = document.getElementById('enhanced-editor-styles');
-        if (existingStyle) {
-            existingStyle.remove();
+    selectSection(sectionId) {
+        console.log('🎯 Selecting section:', sectionId);
+        
+        document.querySelectorAll('.section-item').forEach(item => {
+            item.classList.remove('active');
+        });
+        document.querySelector(`[data-section="${sectionId}"]`).classList.add('active');
+
+        this.currentSection = sectionId;
+        this.loadSectionData(sectionId);
+        
+        document.getElementById('content-editor').style.display = 'block';
+        this.injectEnhancedEditor();
+    }
+
+    loadSectionData(sectionId) {
+        console.log('📝 Loading section data for:', sectionId);
+        
+        if (!this.currentData.content[sectionId]) {
+            const defaultData = this.getDefaultData();
+            this.currentData.content[sectionId] = defaultData.content[sectionId] || {};
+            console.log('📁 Created section data:', this.currentData.content[sectionId]);
         }
 
-        const styles = `
-            .enhanced-editor-section {
-                background: #f8f9fa;
-                border-radius: 10px;
-                padding: 20px;
-                margin: 20px 0;
-                border: 2px solid #e9ecef;
-            }
-            
-            .enhanced-editor-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
-                border-bottom: 2px solid #dee2e6;
-            }
-            
-            .enhanced-editor-title {
-                color: #2c5aa0;
-                font-size: 1.2em;
-                font-weight: 600;
-            }
-            
-            .stats-grid-editor {
-                display: grid;
-                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-                gap: 15px;
-                margin: 15px 0;
-            }
-            
-            .stat-editor-item {
-                background: white;
-                padding: 15px;
-                border-radius: 8px;
-                border: 1px solid #dee2e6;
-                transition: all 0.3s ease;
-            }
-            
-            .stat-editor-item:hover {
-                border-color: #2c5aa0;
-                box-shadow: 0 2px 8px rgba(44, 90, 160, 0.1);
-            }
-            
-            .image-manager-section {
-                background: white;
-                padding: 20px;
-                border-radius: 8px;
-                margin: 15px 0;
-                border: 2px dashed #dee2e6;
-            }
-            
-            .image-preview-container {
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 15px;
-                margin: 15px 0;
-            }
-            
-            .image-preview {
-                max-width: 300px;
-                max-height: 200px;
-                border-radius: 8px;
-                border: 2px solid #e9ecef;
-            }
-            
-            .image-actions {
-                display: flex;
-                gap: 10px;
-                flex-wrap: wrap;
-                justify-content: center;
-            }
-            
-            .block-item {
-                background: white;
-                padding: 15px;
-                margin: 10px 0;
-                border-radius: 8px;
-                border-left: 4px solid #2c5aa0;
-                transition: all 0.3s ease;
-            }
-            
-            .block-item:hover {
-                transform: translateX(5px);
-                box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            }
-            
-            .add-block-btn {
-                background: #28a745;
-                color: white;
-                border: none;
-                padding: 10px 20px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 14px;
-                transition: background 0.3s ease;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            
-            .add-block-btn:hover {
-                background: #218838;
-            }
-            
-            .remove-block-btn {
-                background: #dc3545;
-                color: white;
-                border: none;
-                padding: 6px 12px;
-                border-radius: 4px;
-                cursor: pointer;
-                font-size: 12px;
-                transition: background 0.3s ease;
-            }
-            
-            .remove-block-btn:hover {
-                background: #c82333;
-            }
-            
-            .enhanced-form-group {
-                margin-bottom: 15px;
-            }
-            
-            .enhanced-form-group label {
-                display: block;
-                margin-bottom: 5px;
-                font-weight: 600;
-                color: #495057;
-            }
-            
-            .enhanced-form-control {
-                width: 100%;
-                padding: 10px 12px;
-                border: 1px solid #ced4da;
-                border-radius: 6px;
-                font-size: 14px;
-                transition: border-color 0.3s ease;
-            }
-            
-            .enhanced-form-control:focus {
-                outline: none;
-                border-color: #2c5aa0;
-                box-shadow: 0 0 0 3px rgba(44, 90, 160, 0.1);
-            }
-
-            .enhanced-save-section {
-                background: #d4edda;
-                border: 2px solid #c3e6cb;
-                border-radius: 10px;
-                padding: 20px;
-                margin: 20px 0;
-                text-align: center;
-            }
-
-            .enhanced-save-btn {
-                background: #28a745;
-                color: white;
-                border: none;
-                padding: 12px 30px;
-                border-radius: 6px;
-                cursor: pointer;
-                font-size: 16px;
-                font-weight: 600;
-                transition: all 0.3s ease;
-                display: inline-flex;
-                align-items: center;
-                gap: 10px;
-            }
-
-            .enhanced-save-btn:hover {
-                background: #218838;
-                transform: translateY(-2px);
-                box-shadow: 0 4px 12px rgba(40, 167, 69, 0.3);
-            }
-
-            .enhanced-save-btn:active {
-                transform: translateY(0);
-            }
-        `;
-        
-        const styleElement = document.createElement('style');
-        styleElement.id = 'enhanced-editor-styles';
-        styleElement.textContent = styles;
-        document.head.appendChild(styleElement);
-        console.log('✅ Enhanced styles injected');
+        const sectionData = this.currentData.content[sectionId];
+        if (sectionData) {
+            document.getElementById('section-title').value = sectionData.title || '';
+            document.getElementById('section-description').value = sectionData.description || '';
+            console.log('✅ Loaded basic data:', { 
+                title: sectionData.title, 
+                description: sectionData.description 
+            });
+        }
     }
 
-    patchEditorMethods() {
-        console.log('🔧 Patching editor methods...');
-
-        // Store original method
-        const originalShowContentEditor = this.originalEditor.showContentEditor;
-        
-        // Enhanced method
-        this.originalEditor.showContentEditor = () => {
-            console.log('🔄 Enhanced editor: showContentEditor called');
-            originalShowContentEditor.call(this.originalEditor);
-            setTimeout(() => {
-                this.injectEnhancedEditors();
-            }, 100);
-        };
-
-        console.log('✅ Editor methods patched successfully');
-    }
-
-    injectEnhancedEditors() {
-        const contentEditor = document.getElementById('content-editor');
+    injectEnhancedEditor() {
+        const contentEditor = document.getElementById('enhanced-editor-content');
         if (!contentEditor) {
-            console.error('❌ Content editor not found');
+            console.error('❌ Enhanced editor container not found');
             return;
         }
 
-        // Remove any existing enhanced editors
-        const existingEnhancedEditors = contentEditor.querySelectorAll('.enhanced-editor-section');
-        existingEnhancedEditors.forEach(editor => {
-            console.log('🗑️ Removing existing enhanced editor');
-            editor.remove();
-        });
+        contentEditor.innerHTML = '';
+        console.log('🔄 Injecting enhanced editor for section:', this.currentSection);
 
-        // Get current section from the main editor
-        this.currentSection = this.originalEditor.currentSection;
-        console.log('📝 Current section:', this.currentSection);
-        
-        // Load current data for the section
-        this.loadSectionData();
-
-        // Inject appropriate enhanced editor based on section
         switch (this.currentSection) {
             case 'hero':
-                this.injectHeroEditor();
+                this.injectHeroEditor(contentEditor);
                 break;
             case 'about':
-                this.injectAboutEditor();
+                this.injectAboutEditor(contentEditor);
                 break;
             case 'services':
-                this.injectServicesEditor();
+                this.injectServicesEditor(contentEditor);
                 break;
             case 'destinations':
-                this.injectDestinationsEditor();
+                this.injectDestinationsEditor(contentEditor);
                 break;
             case 'contact':
-                this.injectContactEditor();
+                this.injectContactEditor(contentEditor);
                 break;
             default:
                 console.warn('⚠️ Unknown section:', this.currentSection);
-                return;
-        }
-
-        // Add save button section
-        this.injectSaveSection();
-
-        console.log('✅ Enhanced editor injected for section:', this.currentSection);
-    }
-
-    loadSectionData() {
-        if (!this.currentData.content[this.currentSection]) {
-            console.log('📁 Creating section data for:', this.currentSection);
-            const defaultData = this.getDefaultData();
-            this.currentData.content[this.currentSection] = defaultData.content[this.currentSection] || {};
         }
     }
 
-    injectSaveSection() {
-        const contentEditor = document.getElementById('content-editor');
-        if (!contentEditor) return;
-
-        const saveSectionHTML = `
-            <div class="enhanced-save-section">
-                <h3 style="color: #155724; margin-bottom: 15px;">💾 Сохранение изменений</h3>
-                <p style="color: #0c5460; margin-bottom: 20px;">Нажмите кнопку ниже чтобы сохранить все изменения в этой секции</p>
-                <button class="enhanced-save-btn" onclick="window.enhancedEditor.saveEnhancedSection()">
-                    <i class="fas fa-save"></i> Сохранить секцию
-                </button>
-                <p style="color: #856404; margin-top: 15px; font-size: 0.9em;">
-                    <i class="fas fa-info-circle"></i> Изменения появятся в предпросмотре после сохранения
-                </p>
-            </div>
-        `;
-
-        contentEditor.insertAdjacentHTML('beforeend', saveSectionHTML);
-    }
-
-    injectHeroEditor() {
-        const contentEditor = document.getElementById('content-editor');
-        if (!contentEditor) return;
-
-        const sectionData = this.currentData.content.hero || {};
-        console.log('🎯 Injecting hero editor with data:', sectionData);
+    // Hero Section Editor
+    injectHeroEditor(container) {
+        const data = this.currentData.content.hero || {};
+        console.log('🎯 Injecting hero editor with data:', data);
         
-        const heroEditorHTML = `
-            <div class="enhanced-editor-section">
-                <div class="enhanced-editor-header">
-                    <div class="enhanced-editor-title">🎯 Управление главным баннером</div>
-                </div>
-                
-                <div class="image-manager-section">
-                    <div class="enhanced-form-group">
-                        <label>Фоновое изображение:</label>
-                        <div class="image-preview-container">
-                            ${sectionData.backgroundImage ? 
-                                `<img src="${sectionData.backgroundImage}" alt="Preview" class="image-preview" onerror="this.style.display='none'">` :
-                                `<div style="text-align: center; color: #6c757d; padding: 20px;">
-                                    <i class="fas fa-image" style="font-size: 3em; margin-bottom: 10px;"></i>
-                                    <div>Изображение не установлено</div>
-                                </div>`
-                            }
-                            <div class="image-actions">
-                                <button type="button" class="btn-admin" onclick="window.enhancedEditor.uploadImage('hero', 'backgroundImage')">
-                                    <i class="fas fa-upload"></i> Загрузить изображение
-                                </button>
-                                <button type="button" class="btn-admin secondary" onclick="window.enhancedEditor.setImageUrl('hero', 'backgroundImage')">
-                                    <i class="fas fa-link"></i> Указать URL
-                                </button>
-                                ${sectionData.backgroundImage ? `
-                                <button type="button" class="btn-admin danger" onclick="window.enhancedEditor.removeImage('hero', 'backgroundImage')">
-                                    <i class="fas fa-trash"></i> Удалить
-                                </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+        const html = 
+            '<div class="enhanced-editor-section">' +
+            '<div class="enhanced-editor-header">' +
+            '<div class="enhanced-editor-title">🎯 Дополнительные настройки</div>' +
+            '</div>' +
+            
+            '<div class="image-manager-section">' +
+            '<div class="enhanced-form-group">' +
+            '<label>Фоновое изображение:</label>' +
+            '<div class="image-preview-container">' +
+            (data.backgroundImage ? 
+                '<img src="' + data.backgroundImage + '" alt="Preview" class="image-preview" onerror="this.style.display=\'none\'">' :
+                '<div style="text-align: center; color: #6c757d; padding: 20px;">' +
+                '<i class="fas fa-image" style="font-size: 3em; margin-bottom: 10px;"></i>' +
+                '<div>Изображение не установлено</div>' +
+                '</div>'
+            ) +
+            '<div class="image-actions">' +
+            '<button type="button" class="btn-admin" onclick="editor.uploadImage(\'backgroundImage\')">' +
+            '<i class="fas fa-upload"></i> Загрузить' +
+            '</button>' +
+            '<button type="button" class="btn-admin secondary" onclick="editor.setImageUrl(\'backgroundImage\')">' +
+            '<i class="fas fa-link"></i> URL' +
+            '</button>' +
+            (data.backgroundImage ? 
+            '<button type="button" class="btn-admin danger" onclick="editor.removeImage(\'backgroundImage\')">' +
+            '<i class="fas fa-trash"></i> Удалить' +
+            '</button>' : '') +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
 
-                <div class="enhanced-form-group">
-                    <label>Заголовок баннера:</label>
-                    <input type="text" class="enhanced-form-control" id="hero-title-input" 
-                           value="${sectionData.title || 'Откройте мир с WorldTravel'}" 
-                           oninput="window.enhancedEditor.updateSectionData('hero', 'title', this.value)">
-                </div>
+            '<div class="enhanced-form-group">' +
+            '<label>Текст кнопки:</label>' +
+            '<input type="text" class="enhanced-form-control" id="hero-button-text" ' +
+            'value="' + (data.buttonText || 'Начать путешествие') + '" ' +
+            'oninput="editor.updateHeroField(\'buttonText\', this.value)">' +
+            '</div>' +
+            '</div>';
 
-                <div class="enhanced-form-group">
-                    <label>Описание баннера:</label>
-                    <textarea class="enhanced-form-control" id="hero-description-input" rows="4"
-                              oninput="window.enhancedEditor.updateSectionData('hero', 'description', this.value)">${sectionData.description || 'Мы создаем незабываемые путешествия по всему миру. От экзотических пляжей до горных вершин - ваше приключение начинается здесь.'}</textarea>
-                </div>
-
-                <div class="enhanced-form-group">
-                    <label>Текст кнопки:</label>
-                    <input type="text" class="enhanced-form-control" id="hero-button-text" 
-                           value="${sectionData.buttonText || 'Начать путешествие'}" 
-                           oninput="window.enhancedEditor.updateSectionData('hero', 'buttonText', this.value)">
-                </div>
-            </div>
-        `;
-
-        contentEditor.insertAdjacentHTML('beforeend', heroEditorHTML);
+        container.innerHTML = html;
     }
 
-    injectAboutEditor() {
-        const contentEditor = document.getElementById('content-editor');
-        if (!contentEditor) return;
-
-        const sectionData = this.currentData.content.about || {};
-        const stats = sectionData.stats || [
-            { value: '5000', label: 'Довольных клиентов' },
-            { value: '50', label: 'Стран мира' },
-            { value: '10 лет', label: 'Опыта работы' }
-        ];
-
+    // About Section Editor with Stats
+    injectAboutEditor(container) {
+        const data = this.currentData.content.about || {};
+        const stats = data.stats || [];
         console.log('🏢 Injecting about editor with stats:', stats);
 
-        const aboutEditorHTML = `
-            <div class="enhanced-editor-section">
-                <div class="enhanced-editor-header">
-                    <div class="enhanced-editor-title">🏢 Управление секцией "О компании"</div>
-                </div>
+        const html = 
+            '<div class="enhanced-editor-section">' +
+            '<div class="enhanced-editor-header">' +
+            '<div class="enhanced-editor-title">�� Управление статистикой</div>' +
+            '<button type="button" class="add-block-btn" onclick="editor.addStatBlock()">' +
+            '<i class="fas fa-plus"></i> Добавить блок' +
+            '</button>' +
+            '</div>' +
 
-                <div class="image-manager-section">
-                    <div class="enhanced-form-group">
-                        <label>Изображение компании:</label>
-                        <div class="image-preview-container">
-                            ${sectionData.image ? 
-                                `<img src="${sectionData.image}" alt="Preview" class="image-preview" onerror="this.style.display='none'">` :
-                                `<div style="text-align: center; color: #6c757d; padding: 20px;">
-                                    <i class="fas fa-building" style="font-size: 3em; margin-bottom: 10px;"></i>
-                                    <div>Изображение не установлено</div>
-                                </div>`
-                            }
-                            <div class="image-actions">
-                                <button type="button" class="btn-admin" onclick="window.enhancedEditor.uploadImage('about', 'image')">
-                                    <i class="fas fa-upload"></i> Загрузить изображение
-                                </button>
-                                <button type="button" class="btn-admin secondary" onclick="window.enhancedEditor.setImageUrl('about', 'image')">
-                                    <i class="fas fa-link"></i> Указать URL
-                                </button>
-                                ${sectionData.image ? `
-                                <button type="button" class="btn-admin danger" onclick="window.enhancedEditor.removeImage('about', 'image')">
-                                    <i class="fas fa-trash"></i> Удалить
-                                </button>
-                                ` : ''}
-                            </div>
-                        </div>
-                    </div>
-                </div>
+            '<div class="image-manager-section">' +
+            '<div class="enhanced-form-group">' +
+            '<label>Изображение компании:</label>' +
+            '<div class="image-preview-container">' +
+            (data.image ? 
+                '<img src="' + data.image + '" alt="Preview" class="image-preview" onerror="this.style.display=\'none\'">' :
+                '<div style="text-align: center; color: #6c757d; padding: 20px;">' +
+                '<i class="fas fa-building" style="font-size: 3em; margin-bottom: 10px;"></i>' +
+                '<div>Изображение не установлено</div>' +
+                '</div>'
+            ) +
+            '<div class="image-actions">' +
+            '<button type="button" class="btn-admin" onclick="editor.uploadImage(\'image\')">' +
+            '<i class="fas fa-upload"></i> Загрузить' +
+            '</button>' +
+            '<button type="button" class="btn-admin secondary" onclick="editor.setImageUrl(\'image\')">' +
+            '<i class="fas fa-link"></i> URL' +
+            '</button>' +
+            (data.image ? 
+            '<button type="button" class="btn-admin danger" onclick="editor.removeImage(\'image\')">' +
+            '<i class="fas fa-trash"></i> Удалить' +
+            '</button>' : '') +
+            '</div>' +
+            '</div>' +
+            '</div>' +
+            '</div>' +
 
-                <div class="enhanced-form-group">
-                    <label>Заголовок секции:</label>
-                    <input type="text" class="enhanced-form-control" id="about-title-input" 
-                           value="${sectionData.title || 'О нас'}" 
-                           oninput="window.enhancedEditor.updateSectionData('about', 'title', this.value)">
-                </div>
+            '<div class="stats-grid-editor" id="stats-editor-container">' +
+            (stats.map((stat, index) => 
+                '<div class="stat-editor-item">' +
+                '<div class="enhanced-form-group">' +
+                '<label>Значение:</label>' +
+                '<input type="text" class="enhanced-form-control stat-value" ' +
+                'value="' + stat.value + '" ' +
+                'oninput="editor.updateStatBlock(' + index + ', \'value\', this.value)"' +
+                'placeholder="5000+">' +
+                '</div>' +
+                '<div class="enhanced-form-group">' +
+                '<label>Подпись:</label>' +
+                '<input type="text" class="enhanced-form-control stat-label" ' +
+                'value="' + stat.label + '" ' +
+                'oninput="editor.updateStatBlock(' + index + ', \'label\', this.value)"' +
+                'placeholder="Довольных клиентов">' +
+                '</div>' +
+                '<div style="text-align: right;">' +
+                '<button type="button" class="remove-block-btn" onclick="editor.removeStatBlock(' + index + ')">' +
+                '<i class="fas fa-trash"></i> Удалить' +
+                '</button>' +
+                '</div>' +
+                '</div>'
+            ).join('')) +
+            (stats.length === 0 ? 
+                '<div style="text-align: center; padding: 40px 20px; color: #666; grid-column: 1 / -1;">' +
+                '<i class="fas fa-chart-bar" style="font-size: 3em; margin-bottom: 15px; display: block; color: #ccc;"></i>' +
+                '<p>Статистика не добавлена</p>' +
+                '<small>Добавьте первый блок статистики</small>' +
+                '</div>' : '') +
+            '</div>' +
+            '</div>';
 
-                <div class="enhanced-form-group">
-                    <label>Описание компании:</label>
-                    <textarea class="enhanced-form-control" id="about-description-input" rows="4"
-                              oninput="window.enhancedEditor.updateSectionData('about', 'description', this.value)">${sectionData.description || 'WorldTravel - это команда профессиональных путешественников и экспертов по туризму с более чем 10-летним опытом работы. Мы специализируемся на создании индивидуальных маршрутов и уникальных travel-решений.'}</textarea>
-                </div>
-
-                <div class="enhanced-editor-header" style="margin-top: 30px;">
-                    <div class="enhanced-editor-title">📊 Управление статистикой</div>
-                    <button type="button" class="add-block-btn" onclick="window.enhancedEditor.addStatBlock()">
-                        <i class="fas fa-plus"></i> Добавить блок
-                    </button>
-                </div>
-
-                <div class="stats-grid-editor" id="stats-editor-container">
-                    ${stats.map((stat, index) => `
-                        <div class="stat-editor-item" data-index="${index}">
-                            <div class="enhanced-form-group">
-                                <label>Значение:</label>
-                                <input type="text" class="enhanced-form-control stat-value" 
-                                       value="${stat.value}" 
-                                       oninput="window.enhancedEditor.updateStatBlock(${index}, 'value', this.value)"
-                                       placeholder="5000">
-                            </div>
-                            <div class="enhanced-form-group">
-                                <label>Подпись:</label>
-                                <input type="text" class="enhanced-form-control stat-label" 
-                                       value="${stat.label}" 
-                                       oninput="window.enhancedEditor.updateStatBlock(${index}, 'label', this.value)"
-                                       placeholder="Довольных клиентов">
-                            </div>
-                            <div style="text-align: right;">
-                                <button type="button" class="remove-block-btn" onclick="window.enhancedEditor.removeStatBlock(${index})">
-                                    <i class="fas fa-trash"></i> Удалить
-                                </button>
-                            </div>
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-
-        contentEditor.insertAdjacentHTML('beforeend', aboutEditorHTML);
+        container.innerHTML = html;
+        console.log('✅ About editor injected with', stats.length, 'stats blocks');
     }
 
-    injectServicesEditor() {
-        const contentEditor = document.getElementById('content-editor');
-        if (!contentEditor) return;
-
-        const sectionData = this.currentData.content.services || {};
-        const services = sectionData.services || [
-            { 
-                title: 'Авиабилеты', 
-                description: 'Подбор и бронирование лучших авиаперелетов по выгодным ценам',
-                icon: 'fas fa-plane'
-            },
-            { 
-                title: 'Отели', 
-                description: 'Бронирование отелей любого уровня комфорта по всему миру',
-                icon: 'fas fa-hotel'
-            },
-            { 
-                title: 'Туры', 
-                description: 'Индивидуальные и групповые туры с профессиональными гидами',
-                icon: 'fas fa-map-marked-alt'
-            },
-            { 
-                title: 'Страхование', 
-                description: 'Полное страховое сопровождение вашего путешествия',
-                icon: 'fas fa-shield-alt'
-            }
-        ];
-
+    // Services Section Editor
+    injectServicesEditor(container) {
+        const data = this.currentData.content.services || {};
+        const services = data.services || [];
         console.log('⚡ Injecting services editor with services:', services);
 
-        const servicesEditorHTML = `
-            <div class="enhanced-editor-section">
-                <div class="enhanced-editor-header">
-                    <div class="enhanced-editor-title">⚡ Управление услугами</div>
-                    <button type="button" class="add-block-btn" onclick="window.enhancedEditor.addServiceBlock()">
-                        <i class="fas fa-plus"></i> Добавить услугу
-                    </button>
-                </div>
+        const html = 
+            '<div class="enhanced-editor-section">' +
+            '<div class="enhanced-editor-header">' +
+            '<div class="enhanced-editor-title">⚡ Управление услугами</div>' +
+            '<button type="button" class="add-block-btn" onclick="editor.addServiceBlock()">' +
+            '<i class="fas fa-plus"></i> Добавить услугу' +
+            '</button>' +
+            '</div>' +
 
-                <div class="enhanced-form-group">
-                    <label>Заголовок секции:</label>
-                    <input type="text" class="enhanced-form-control" id="services-title-input" 
-                           value="${sectionData.title || 'Услуги'}" 
-                           oninput="window.enhancedEditor.updateSectionData('services', 'title', this.value)">
-                </div>
+            '<div id="services-editor-container">' +
+            (services.map((service, index) => 
+                '<div class="block-item">' +
+                '<div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: start; margin-bottom: 10px;">' +
+                '<div class="enhanced-form-group">' +
+                '<label>Название услуги:</label>' +
+                '<input type="text" class="enhanced-form-control service-title" ' +
+                'value="' + service.title + '" ' +
+                'oninput="editor.updateServiceBlock(' + index + ', \'title\', this.value)"' +
+                'placeholder="Авиабилеты">' +
+                '</div>' +
+                '<div class="enhanced-form-group">' +
+                '<label>Иконка:</label>' +
+                '<input type="text" class="enhanced-form-control service-icon" ' +
+                'value="' + service.icon + '" ' +
+                'oninput="editor.updateServiceBlock(' + index + ', \'icon\', this.value)"' +
+                'placeholder="fas fa-plane">' +
+                '</div>' +
+                '<div>' +
+                '<button type="button" class="remove-block-btn" onclick="editor.removeServiceBlock(' + index + ')">' +
+                '<i class="fas fa-trash"></i> Удалить' +
+                '</button>' +
+                '</div>' +
+                '</div>' +
+                '<div class="enhanced-form-group">' +
+                '<label>Описание услуги:</label>' +
+                '<textarea class="enhanced-form-control service-description" rows="2"' +
+                'oninput="editor.updateServiceBlock(' + index + ', \'description\', this.value)"' +
+                'placeholder="Описание услуги...">' + service.description + '</textarea>' +
+                '</div>' +
+                (service.icon ? 
+                '<div style="background: #e9ecef; padding: 8px 12px; border-radius: 4px; margin-top: 8px; font-size: 0.9em;">' +
+                '<i class="' + service.icon + '" style="margin-right: 6px;"></i>' +
+                '<span>Предпросмотр иконки</span>' +
+                '</div>' : '') +
+                '</div>'
+            ).join('')) +
+            (services.length === 0 ? 
+                '<div style="text-align: center; padding: 40px 20px; color: #666;">' +
+                '<i class="fas fa-concierge-bell" style="font-size: 3em; margin-bottom: 15px; display: block; color: #ccc;"></i>' +
+                '<p>Услуги не добавлены</p>' +
+                '<small>Добавьте первую услугу</small>' +
+                '</div>' : '') +
+            '</div>' +
+            '</div>';
 
-                <div id="services-editor-container">
-                    ${services.map((service, index) => `
-                        <div class="block-item" data-index="${index}">
-                            <div style="display: grid; grid-template-columns: 1fr 1fr auto; gap: 15px; align-items: start;">
-                                <div class="enhanced-form-group">
-                                    <label>Название услуги:</label>
-                                    <input type="text" class="enhanced-form-control service-title" 
-                                           value="${service.title}" 
-                                           oninput="window.enhancedEditor.updateServiceBlock(${index}, 'title', this.value)"
-                                           placeholder="Авиабилеты">
-                                </div>
-                                <div class="enhanced-form-group">
-                                    <label>Иконка (FontAwesome):</label>
-                                    <input type="text" class="enhanced-form-control service-icon" 
-                                           value="${service.icon}" 
-                                           oninput="window.enhancedEditor.updateServiceBlock(${index}, 'icon', this.value)"
-                                           placeholder="fas fa-plane">
-                                    <small style="color: #6c757d;">Используйте классы FontAwesome, например: fas fa-plane</small>
-                                </div>
-                                <div>
-                                    <button type="button" class="remove-block-btn" onclick="window.enhancedEditor.removeServiceBlock(${index})">
-                                        <i class="fas fa-trash"></i> Удалить
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="enhanced-form-group">
-                                <label>Описание услуги:</label>
-                                <textarea class="enhanced-form-control service-description" rows="3"
-                                          oninput="window.enhancedEditor.updateServiceBlock(${index}, 'description', this.value)"
-                                          placeholder="Описание услуги...">${service.description}</textarea>
-                            </div>
-                            ${service.icon ? `
-                            <div style="background: #e9ecef; padding: 10px; border-radius: 4px; margin-top: 10px;">
-                                <i class="${service.icon}" style="margin-right: 8px;"></i>
-                                <span>Предпросмотр иконки</span>
-                            </div>
-                            ` : ''}
-                        </div>
-                    `).join('')}
-                </div>
-            </div>
-        `;
-
-        contentEditor.insertAdjacentHTML('beforeend', servicesEditorHTML);
+        container.innerHTML = html;
+        console.log('✅ Services editor injected with', services.length, 'services');
     }
 
-    injectDestinationsEditor() {
-        const contentEditor = document.getElementById('content-editor');
-        if (!contentEditor) return;
-
-        const sectionData = this.currentData.content.destinations || {};
-
-        const destinationsEditorHTML = `
-            <div class="enhanced-editor-section">
-                <div class="enhanced-editor-header">
-                    <div class="enhanced-editor-title">🌍 Управление направлениями</div>
-                </div>
-
-                <div class="enhanced-form-group">
-                    <label>Заголовок секции:</label>
-                    <input type="text" class="enhanced-form-control" id="destinations-title-input" 
-                           value="${sectionData.title || 'Направления'}" 
-                           oninput="window.enhancedEditor.updateSectionData('destinations', 'title', this.value)">
-                </div>
-
-                <div class="enhanced-form-group">
-                    <label>Подзаголовок:</label>
-                    <textarea class="enhanced-form-control" id="destinations-subtitle-input" rows="3"
-                              oninput="window.enhancedEditor.updateSectionData('destinations', 'subtitle', this.value)">${sectionData.subtitle || 'Откройте для себя лучшие направления мира с нашими эксклюзивными турами'}</textarea>
-                </div>
-
-                <div class="admin-hint">
-                    💡 Управление странами и турами осуществляется через основную админ-панель
-                </div>
-            </div>
-        `;
-
-        contentEditor.insertAdjacentHTML('beforeend', destinationsEditorHTML);
+    // Other section editors
+    injectDestinationsEditor(container) {
+        container.innerHTML = 
+            '<div class="enhanced-editor-section">' +
+            '<div class="enhanced-editor-header">' +
+            '<div class="enhanced-editor-title">🌍 Дополнительные настройки</div>' +
+            '</div>' +
+            '<p style="color: #666; margin: 0;">Для этой секции доступны только основные настройки</p>' +
+            '</div>';
     }
 
-    injectContactEditor() {
-        const contentEditor = document.getElementById('content-editor');
-        if (!contentEditor) return;
-
-        const sectionData = this.currentData.content.contact || {};
-
-        const contactEditorHTML = `
-            <div class="enhanced-editor-section">
-                <div class="enhanced-editor-header">
-                    <div class="enhanced-editor-title">📞 Управление контактами</div>
-                </div>
-
-                <div class="enhanced-form-group">
-                    <label>Заголовок секции:</label>
-                    <input type="text" class="enhanced-form-control" id="contact-title-input" 
-                           value="${sectionData.title || 'Контакты'}" 
-                           oninput="window.enhancedEditor.updateSectionData('contact', 'title', this.value)">
-                </div>
-
-                <div class="admin-hint">
-                    💡 Контактная информация (телефон, email, адрес) управляется через основную админ-панель в разделе "Контакты"
-                </div>
-            </div>
-        `;
-
-        contentEditor.insertAdjacentHTML('beforeend', contactEditorHTML);
-    }
-
-    // Image Management Methods
-    uploadImage(section, field) {
-        const input = document.createElement('input');
-        input.type = 'file';
-        input.accept = 'image/*';
-        input.onchange = (e) => {
-            const file = e.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.setImage(section, field, e.target.result);
-                };
-                reader.readAsDataURL(file);
-            }
-        };
-        input.click();
-    }
-
-    setImageUrl(section, field) {
-        const url = prompt('Введите URL изображения:');
-        if (url) {
-            this.setImage(section, field, url);
-        }
-    }
-
-    removeImage(section, field) {
-        if (confirm('Удалить изображение?')) {
-            this.setImage(section, field, '');
-        }
-    }
-
-    setImage(section, field, url) {
-        console.log('🖼️ Setting image for', section, field, url);
-        
-        if (!this.currentData.content[section]) {
-            this.currentData.content[section] = {};
-        }
-        
-        this.currentData.content[section][field] = url;
-        this.showNotification('Изображение обновлено', 'success');
-        this.refreshPreview();
+    injectContactEditor(container) {
+        container.innerHTML = 
+            '<div class="enhanced-editor-section">' +
+            '<div class="enhanced-editor-header">' +
+            '<div class="enhanced-editor-title">📞 Дополнительные настройки</div>' +
+            '</div>' +
+            '<p style="color: #666; margin: 0;">Для этой секции доступны только основные настройки</p>' +
+            '</div>';
     }
 
     // Data Management Methods
-    updateSectionData(section, field, value) {
-        console.log('📝 Updating section data:', section, field, value);
-        
-        if (!this.currentData.content[section]) {
-            this.currentData.content[section] = {};
+    updateHeroField(field, value) {
+        console.log('🎯 Updating hero field:', field, value);
+        if (!this.currentData.content.hero) {
+            this.currentData.content.hero = {};
         }
-        this.currentData.content[section][field] = value;
-        this.refreshPreview();
+        this.currentData.content.hero[field] = value;
     }
 
-    // Stat Blocks Management
+    // Stats Management
     addStatBlock() {
         console.log('➕ Adding stat block');
         
         if (!this.currentData.content.about) {
             this.currentData.content.about = {};
+            console.log('📁 Created about section');
         }
         if (!this.currentData.content.about.stats) {
             this.currentData.content.about.stats = [];
+            console.log('📁 Created stats array');
         }
 
-        this.currentData.content.about.stats.push({
-            value: 'Новое значение',
-            label: 'Новая подпись'
-        });
+        const newStat = {
+            value: '1000+',
+            label: 'Новый показатель'
+        };
+        
+        this.currentData.content.about.stats.push(newStat);
+        console.log('✅ Added stat block:', newStat);
+        console.log('📊 Current stats:', this.currentData.content.about.stats);
 
-        this.injectAboutEditor();
         this.showNotification('Блок статистики добавлен', 'success');
+        this.injectAboutEditor(document.getElementById('enhanced-editor-content'));
     }
 
     updateStatBlock(index, field, value) {
@@ -788,7 +410,7 @@ class EnhancedPageEditor {
         
         if (this.currentData.content.about?.stats?.[index]) {
             this.currentData.content.about.stats[index][field] = value;
-            this.refreshPreview();
+            console.log('✅ Stat block updated:', this.currentData.content.about.stats[index]);
         } else {
             console.error('❌ Stat block not found at index:', index);
         }
@@ -798,33 +420,42 @@ class EnhancedPageEditor {
         console.log('🗑️ Removing stat block:', index);
         
         if (this.currentData.content.about?.stats?.[index]) {
-            this.currentData.content.about.stats.splice(index, 1);
-            this.injectAboutEditor();
+            const removed = this.currentData.content.about.stats.splice(index, 1);
+            console.log('✅ Stat block removed:', removed);
+            console.log('📊 Remaining stats:', this.currentData.content.about.stats);
+            
             this.showNotification('Блок статистики удален', 'success');
+            this.injectAboutEditor(document.getElementById('enhanced-editor-content'));
         } else {
             console.error('❌ Stat block not found at index:', index);
         }
     }
 
-    // Service Blocks Management
+    // Services Management
     addServiceBlock() {
         console.log('➕ Adding service block');
         
         if (!this.currentData.content.services) {
             this.currentData.content.services = {};
+            console.log('📁 Created services section');
         }
         if (!this.currentData.content.services.services) {
             this.currentData.content.services.services = [];
+            console.log('📁 Created services array');
         }
 
-        this.currentData.content.services.services.push({
+        const newService = {
             title: 'Новая услуга',
             description: 'Описание новой услуги',
             icon: 'fas fa-star'
-        });
+        };
+        
+        this.currentData.content.services.services.push(newService);
+        console.log('✅ Added service block:', newService);
+        console.log('⚡ Current services:', this.currentData.content.services.services);
 
-        this.injectServicesEditor();
         this.showNotification('Услуга добавлена', 'success');
+        this.injectServicesEditor(document.getElementById('enhanced-editor-content'));
     }
 
     updateServiceBlock(index, field, value) {
@@ -832,7 +463,7 @@ class EnhancedPageEditor {
         
         if (this.currentData.content.services?.services?.[index]) {
             this.currentData.content.services.services[index][field] = value;
-            this.refreshPreview();
+            console.log('✅ Service block updated:', this.currentData.content.services.services[index]);
         } else {
             console.error('❌ Service block not found at index:', index);
         }
@@ -842,113 +473,150 @@ class EnhancedPageEditor {
         console.log('🗑️ Removing service block:', index);
         
         if (this.currentData.content.services?.services?.[index]) {
-            this.currentData.content.services.services.splice(index, 1);
-            this.injectServicesEditor();
+            const removed = this.currentData.content.services.services.splice(index, 1);
+            console.log('✅ Service block removed:', removed);
+            console.log('⚡ Remaining services:', this.currentData.content.services.services);
+            
             this.showNotification('Услуга удалена', 'success');
+            this.injectServicesEditor(document.getElementById('enhanced-editor-content'));
         } else {
             console.error('❌ Service block not found at index:', index);
         }
     }
 
-    // Save and Preview Methods
-    saveEnhancedSection() {
-        console.log('💾 Saving enhanced section:', this.currentSection);
+    // Image Management
+    uploadImage(field) {
+        const input = document.createElement('input');
+        input.type = 'file';
+        input.accept = 'image/*';
+        input.onchange = (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.setImage(field, e.target.result);
+                };
+                reader.readAsDataURL(file);
+            }
+        };
+        input.click();
+    }
+
+    setImageUrl(field) {
+        const url = prompt('Введите URL изображения:');
+        if (url) {
+            this.setImage(field, url);
+        }
+    }
+
+    removeImage(field) {
+        if (confirm('Удалить изображение?')) {
+            this.setImage(field, '');
+        }
+    }
+
+    setImage(field, url) {
+        console.log('🖼️ Setting image for', field, url);
         
-        if (!window.dataManager) {
-            this.showNotification('Ошибка: DataManager не доступен', 'error');
+        if (!this.currentData.content[this.currentSection]) {
+            this.currentData.content[this.currentSection] = {};
+        }
+        this.currentData.content[this.currentSection][field] = url;
+        
+        this.showNotification('Изображение обновлено', 'success');
+        this.injectEnhancedEditor();
+    }
+
+    // Save Methods
+    saveSection() {
+        console.log('💾 Saving section:', this.currentSection);
+        
+        if (!this.currentSection || !window.dataManager) {
+            console.error('❌ Cannot save: no section selected or DataManager not available');
             return;
         }
 
-        // Get the main data
-        const mainData = window.dataManager.getData();
-        if (!mainData) {
-            this.showNotification('Ошибка: Не удалось получить данные', 'error');
-            return;
+        // Update basic fields
+        const title = document.getElementById('section-title').value;
+        const description = document.getElementById('section-description').value;
+
+        if (!this.currentData.content[this.currentSection]) {
+            this.currentData.content[this.currentSection] = {};
         }
 
+        this.currentData.content[this.currentSection].title = title;
+        this.currentData.content[this.currentSection].description = description;
+
+        console.log('📝 Basic fields updated:', { title, description });
+
+        // Get main data and merge
+        const mainData = window.dataManager.getData() || this.getDefaultData();
         if (!mainData.content) {
             mainData.content = {};
+            console.log('📁 Created content in main data');
         }
-
-        // Update the main data with our enhanced data for current section
-        if (this.currentSection && this.currentData.content[this.currentSection]) {
-            mainData.content[this.currentSection] = {
-                ...mainData.content[this.currentSection],
-                ...this.currentData.content[this.currentSection]
-            };
+        
+        // Ensure the section exists in main data
+        if (!mainData.content[this.currentSection]) {
+            mainData.content[this.currentSection] = {};
         }
+        
+        // Merge ALL changes including stats and services
+        Object.assign(mainData.content[this.currentSection], this.currentData.content[this.currentSection]);
+        
+        console.log('🔄 Merged section data:', this.currentSection, mainData.content[this.currentSection]);
 
-        // Save to data manager
+        mainData.lastUpdate = new Date().toISOString();
+
+        // Save the entire data structure
         if (window.dataManager.setData(mainData)) {
-            this.showNotification('Секция успешно сохранена!', 'success');
-            this.refreshPreview();
-            
-            // Also update the basic editor fields
-            this.updateBasicEditorFields();
+            console.log('✅ Data saved successfully');
+            this.showSaveIndicator('Изменения сохранены успешно!');
+            this.safeRefresh();
         } else {
-            this.showNotification('Ошибка сохранения', 'error');
+            console.error('❌ Failed to save data');
+            alert('Ошибка сохранения');
         }
     }
 
-    updateBasicEditorFields() {
-        if (this.currentSection && this.currentData.content[this.currentSection]) {
-            const sectionData = this.currentData.content[this.currentSection];
-            
-            const titleField = document.getElementById('section-title');
-            const descriptionField = document.getElementById('section-description');
-            
-            if (titleField && sectionData.title) {
-                titleField.value = sectionData.title;
-            }
-            if (descriptionField && sectionData.description) {
-                descriptionField.value = sectionData.description;
-            }
-        }
+    safeRefresh() {
+        const frame = document.getElementById('preview-frame');
+        frame.src = frame.src.split('?')[0] + '?editor=true&nocache=' + Date.now();
+        console.log('🔄 Preview refreshed');
     }
 
-    refreshPreview() {
-        console.log('🔄 Refreshing preview');
-        // Trigger a preview refresh
-        if (this.originalEditor && this.originalEditor.safeRefresh) {
-            this.originalEditor.safeRefresh();
-        }
+    saveAndExit() {
+        window.location.href = 'admin.html';
+    }
+
+    showSaveIndicator(message) {
+        const indicator = document.getElementById('save-indicator');
+        const messageEl = document.getElementById('save-message');
+        
+        messageEl.textContent = message;
+        indicator.classList.add('show');
+        
+        setTimeout(() => {
+            indicator.classList.remove('show');
+        }, 3000);
     }
 
     showNotification(message, type = 'success') {
-        console.log('💬 Notification:', message, type);
-        
-        // Use the original editor's notification system if available
-        if (this.originalEditor && this.originalEditor.showNotification) {
-            this.originalEditor.showNotification(message, type);
-        } else {
-            // Fallback notification
-            const indicator = document.getElementById('save-indicator');
-            const messageEl = document.getElementById('save-message');
-            
-            if (indicator && messageEl) {
-                messageEl.textContent = message;
-                indicator.className = 'save-indicator';
-                if (type === 'success') {
-                    indicator.style.background = '#d4edda';
-                    indicator.style.color = '#155724';
-                } else {
-                    indicator.style.background = '#f8d7da';
-                    indicator.style.color = '#721c24';
-                }
-                indicator.classList.add('show');
-                
-                setTimeout(() => {
-                    indicator.classList.remove('show');
-                }, 3000);
-            } else {
-                // Final fallback
-                alert(`${type === 'success' ? '✅' : '❌'} ${message}`);
-            }
-        }
+        console.log('💬 ' + type + ': ' + message);
+        alert((type === 'success' ? '✅' : '❌') + ' ' + message);
     }
 }
 
-// Initialize enhanced editor
-console.log('🎬 Starting enhanced page editor...');
-const enhancedEditor = new EnhancedPageEditor();
-window.enhancedEditor = enhancedEditor;
+// Initialize editor when dataManager is ready
+const initEditor = () => {
+    if (window.dataManager) {
+        console.log('🎬 Initializing enhanced page editor...');
+        window.editor = new EnhancedPageEditor();
+        console.log('✅ Enhanced page editor initialized successfully');
+    } else {
+        console.log('⏳ Waiting for DataManager...');
+        setTimeout(initEditor, 100);
+    }
+};
+
+document.addEventListener('DOMContentLoaded', initEditor);
