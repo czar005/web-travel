@@ -1,187 +1,218 @@
-// Bulletproof sync - absolutely guaranteed to work
+// Bulletproof Sync - абсолютно надежная синхронизация
 (function() {
     'use strict';
     
     console.log('🎯 BULLETPROOF SYNC LOADED');
     
-    let lastSuccessData = null;
+    let syncAttempts = 0;
+    const MAX_SYNC_ATTEMPTS = 100;
     
     function bulletproofSync() {
+        syncAttempts++;
+        if (syncAttempts > MAX_SYNC_ATTEMPTS) {
+            console.log('🛑 Max sync attempts reached');
+            return;
+        }
+        
         try {
-            console.log('🔄 Checking for data updates...');
+            console.log('🔄 Bulletproof sync attempt:', syncAttempts);
             
-            // Get data from localStorage
-            const rawData = localStorage.getItem('worldtravel_data');
-            if (!rawData) {
-                console.log('📭 No data in localStorage');
+            // 1. Получаем данные ВСЕМИ возможными способами
+            const data = getAllData();
+            if (!data) {
+                console.log('📭 No data available');
                 return;
             }
             
-            // Parse data
-            let data;
-            try {
-                data = JSON.parse(rawData);
-            } catch (e) {
-                console.log('❌ Data parsing failed');
-                return;
-            }
+            console.log('📦 Sync data:', data);
             
-            // Check if data is different from last success
-            if (lastSuccessData && JSON.stringify(data) === JSON.stringify(lastSuccessData)) {
-                console.log('📋 No data changes detected');
-                return; // No changes
-            }
+            // 2. Применяем ВСЕ обновления агрессивно
+            applyAllUpdatesAggressively(data);
             
-            console.log('🔄 APPLYING DATA TO PAGE...', data);
-            
-            // APPLY CONTACTS
-            if (data.contacts) {
-                console.log('📞 Applying contacts:', data.contacts);
-                
-                // Phone
-                updateElements('.contact-info .contact-item:nth-child(1) p', data.contacts.phone);
-                updateElements('.footer-section:nth-child(3) p:nth-child(1)', data.contacts.phone);
-                
-                // Email
-                updateElements('.contact-info .contact-item:nth-child(2) p', data.contacts.email);
-                updateElements('.footer-section:nth-child(3) p:nth-child(2)', data.contacts.email);
-                
-                // Address
-                updateElements('.contact-info .contact-item:nth-child(3) p', data.contacts.address);
-                updateElements('.footer-section:nth-child(3) p:nth-child(3)', data.contacts.address);
-                
-                // Hours
-                updateElements('.contact-info .contact-item:nth-child(4) p', data.contacts.hours);
-                updateElements('.footer-section:nth-child(3) p:nth-child(4)', data.contacts.hours);
-            }
-            
-            // APPLY FOOTER
-            if (data.footer) {
-                console.log('🏠 Applying footer:', data.footer);
-                updateElements('.footer-section:first-child p', data.footer.description);
-                updateElementsHTML('.footer-bottom p', data.footer.copyright);
-            }
-            
-            // APPLY CONTENT SECTIONS
-            if (data.content) {
-                console.log('📄 Applying content:', Object.keys(data.content));
-                
-                // About
-                if (data.content.about) {
-                    updateElements('#about .section-title', data.content.about.title);
-                    updateElements('.about-text p', data.content.about.description);
-                }
-                
-                // Services
-                if (data.content.services) {
-                    updateElements('#services .section-title', data.content.services.title);
-                }
-                
-                // Destinations
-                if (data.content.destinations) {
-                    updateElements('#destinations .section-title', data.content.destinations.title);
-                    updateElements('.destinations .section-subtitle', data.content.destinations.subtitle);
-                }
-                
-                // Contact
-                if (data.content.contact) {
-                    updateElements('#contact .section-title', data.content.contact.title);
-                }
-                
-                // Hero
-                if (data.content.hero) {
-                    updateElements('#home h1', data.content.hero.title);
-                    updateElements('#home p', data.content.hero.subtitle);
-                }
-            }
-            
-            // APPLY NAVIGATION
-            if (data.content) {
-                console.log('🧭 Applying navigation');
-                updateNavLink('#about', data.content.about?.title);
-                updateNavLink('#services', data.content.services?.title);
-                updateNavLink('#destinations', data.content.destinations?.title);
-                updateNavLink('#contact', data.content.contact?.title);
-            }
-            
-            lastSuccessData = data;
-            console.log('✅ PAGE UPDATED SUCCESSFULLY!');
+            console.log('✅ Bulletproof sync completed');
             
         } catch (error) {
-            console.log('❌ Sync error:', error);
+            console.log('❌ Bulletproof sync error:', error);
         }
     }
     
-    function updateElements(selector, value) {
+    function getAllData() {
+        // Приоритет 1: dataManager
+        if (window.dataManager && window.dataManager.getData) {
+            try {
+                const data = window.dataManager.getData();
+                if (data && data.content) {
+                    console.log('🎯 Using dataManager data');
+                    return data;
+                }
+            } catch (e) {
+                console.log('⚠️ dataManager failed');
+            }
+        }
+        
+        // Приоритет 2: localStorage
+        const localData = localStorage.getItem('worldtravel_data');
+        if (localData) {
+            try {
+                const data = JSON.parse(localData);
+                if (data && data.content) {
+                    console.log('📁 Using localStorage data');
+                    return data;
+                }
+            } catch (e) {
+                console.log('⚠️ localStorage parse failed');
+            }
+        }
+        
+        // Приоритет 3: sessionStorage
+        const sessionData = sessionStorage.getItem('worldtravel_data');
+        if (sessionData) {
+            try {
+                const data = JSON.parse(sessionData);
+                if (data && data.content) {
+                    console.log('💾 Using sessionStorage data');
+                    return data;
+                }
+            } catch (e) {
+                console.log('⚠️ sessionStorage parse failed');
+            }
+        }
+        
+        // Приоритет 4: глобальная переменная (если есть)
+        if (window.worldTravelData) {
+            console.log('🌐 Using window.worldTravelData');
+            return window.worldTravelData;
+        }
+        
+        return null;
+    }
+    
+    function applyAllUpdatesAggressively(data) {
+        // CONTENT - применяем ВСЕ поля агрессивно
+        if (data.content) {
+            console.group('📄 APPLYING CONTENT AGGRESSIVELY');
+            
+            // Hero section
+            if (data.content.hero) {
+                forceUpdate('#home h1', data.content.hero.title);
+                forceUpdate('#home p', data.content.hero.description);
+                forceUpdate('.hero h1', data.content.hero.title);
+                forceUpdate('.hero p', data.content.hero.description);
+            }
+            
+            // About section
+            if (data.content.about) {
+                forceUpdate('#about .section-title', data.content.about.title);
+                forceUpdate('.about-text p', data.content.about.description);
+            }
+            
+            // Services section
+            if (data.content.services) {
+                forceUpdate('#services .section-title', data.content.services.title);
+            }
+            
+            // Destinations section
+            if (data.content.destinations) {
+                forceUpdate('#destinations .section-title', data.content.destinations.title);
+                forceUpdate('.destinations .section-subtitle', data.content.destinations.subtitle);
+            }
+            
+            // Contact section
+            if (data.content.contact) {
+                forceUpdate('#contact .section-title', data.content.contact.title);
+            }
+            
+            console.groupEnd();
+        }
+        
+        // CONTACTS - применяем ВСЕ контакты
+        if (data.contacts) {
+            console.group('📞 APPLYING CONTACTS AGGRESSIVELY');
+            
+            forceUpdate('.contact-info .contact-item:nth-child(1) p', data.contacts.phone);
+            forceUpdate('.footer-section:nth-child(3) p:nth-child(1)', data.contacts.phone);
+            forceUpdate('.footer-phone', data.contacts.phone);
+            
+            forceUpdate('.contact-info .contact-item:nth-child(2) p', data.contacts.email);
+            forceUpdate('.footer-section:nth-child(3) p:nth-child(2)', data.contacts.email);
+            forceUpdate('.footer-email', data.contacts.email);
+            
+            forceUpdate('.contact-info .contact-item:nth-child(3) p', data.contacts.address);
+            forceUpdate('.footer-section:nth-child(3) p:nth-child(3)', data.contacts.address);
+            forceUpdate('.footer-address', data.contacts.address);
+            
+            forceUpdate('.contact-info .contact-item:nth-child(4) p', data.contacts.hours);
+            forceUpdate('.footer-section:nth-child(3) p:nth-child(4)', data.contacts.hours);
+            forceUpdate('.footer-hours', data.contacts.hours);
+            
+            console.groupEnd();
+        }
+        
+        // SETTINGS
+        if (data.settings && data.settings.siteTitle) {
+            document.title = data.settings.siteTitle;
+        }
+    }
+    
+    function forceUpdate(selector, value) {
         if (!value) return;
+        
         const elements = document.querySelectorAll(selector);
-        elements.forEach(el => {
-            if (el.textContent !== value) {
+        elements.forEach((el, index) => {
+            const oldValue = el.textContent;
+            if (oldValue !== value) {
                 el.textContent = value;
-                console.log('✅ Updated:', selector, 'to:', value);
+                console.log('✅ FORCE UPDATED:', selector + '[' + index + ']', '"' + oldValue + '" -> "' + value + '"');
             }
         });
+        
         if (elements.length === 0) {
-            console.log('⚠️ No elements found for:', selector);
+            console.log('⚠️ Selector not found:', selector);
         }
     }
     
-    function updateElementsHTML(selector, value) {
-        if (!value) return;
-        const elements = document.querySelectorAll(selector);
-        elements.forEach(el => {
-            if (el.innerHTML !== value) {
-                el.innerHTML = value;
-                console.log('✅ Updated HTML:', selector, 'to:', value);
-            }
-        });
-    }
-    
-    function updateNavLink(href, title) {
-        if (!title) return;
+    // АГРЕССИВНАЯ СИНХРОНИЗАЦИЯ
+    function startAggressiveSync() {
+        console.log('🚀 STARTING AGGRESSIVE SYNC');
         
-        // Header nav
-        updateElements(`.nav-links a[href="${href}"]`, title);
-        
-        // Footer nav
-        updateElements(`.footer-section:nth-child(2) a[href="${href}"]`, title);
-    }
-    
-    // AGGRESSIVE SYNC STRATEGY
-    function startBulletproofSync() {
-        console.log('🚀 Starting bulletproof sync...');
-        
-        // Sync immediately
+        // Синхронизация сразу
         bulletproofSync();
         
-        // Very fast sync for first 30 seconds
-        const fastInterval = setInterval(bulletproofSync, 100);
+        // Очень быстрая синхронизация первые 10 секунд
+        const fastSync = setInterval(bulletproofSync, 100);
         setTimeout(() => {
-            clearInterval(fastInterval);
-            // Continue with fast sync
-            setInterval(bulletproofSync, 500);
-        }, 30000);
+            clearInterval(fastSync);
+            // Быстрая синхронизация следующие 50 секунд
+            const mediumSync = setInterval(bulletproofSync, 500);
+            setTimeout(() => {
+                clearInterval(mediumSync);
+                // Нормальная синхронизация
+                setInterval(bulletproofSync, 2000);
+            }, 50000);
+        }, 10000);
         
-        // Sync on every possible event
-        window.addEventListener('storage', bulletproofSync);
-        window.addEventListener('focus', bulletproofSync);
-        window.addEventListener('load', bulletproofSync);
+        // Синхронизация при ЛЮБОМ событии
+        const events = ['storage', 'focus', 'load', 'mousemove', 'click', 'keydown'];
+        events.forEach(event => {
+            window.addEventListener(event, bulletproofSync);
+        });
+        
+        // Синхронизация при изменении видимости
         document.addEventListener('visibilitychange', bulletproofSync);
         
-        console.log('✅ Bulletproof sync activated');
+        console.log('✅ Aggressive sync started');
     }
     
-    // START IMMEDIATELY
+    // ЗАПУСК СРАЗУ
     if (document.readyState === 'loading') {
-        document.addEventListener('DOMContentLoaded', startBulletproofSync);
+        document.addEventListener('DOMContentLoaded', startAggressiveSync);
     } else {
-        startBulletproofSync();
+        startAggressiveSync();
     }
     
-    // Global function to force sync
+    // Глобальные функции
     window.forceBulletproofSync = bulletproofSync;
     window.bulletproofSync = bulletproofSync;
     
-    console.log('✅ Bulletproof sync functions registered');
-    
+    console.log('✅ Bulletproof sync ready');
 })();
