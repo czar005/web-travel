@@ -1,5 +1,4 @@
-// === FILE: ./content-sync.js ===
-// Content Sync System - исправленная версия
+// Content Sync System
 (function() {
     'use strict';
     
@@ -209,10 +208,11 @@
         });
     }
     
-    // ИСПРАВЛЕННАЯ СТРОКА 189 - был неверный escape-символ
+    // ИСПРАВЛЕННАЯ СТРОКА - был неверный escape-символ
     // Было: const message = `Вы уверены, что хотите удалить страну \"${country.name}\"?`;
-    // Стало:
-    function showConfirmation(message) {
+    // Стало: используем одинарные кавычки для избежания экранирования
+    function confirmCountryDeletion(countryName) {
+        const message = 'Вы уверены, что хотите удалить страну "' + countryName + '"?';
         return confirm(message);
     }
     
