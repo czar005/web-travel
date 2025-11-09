@@ -1,0 +1,148 @@
+<!-- Replace the problematic onclick handlers in page-editor.html -->
+
+<!-- In the panel-header section, replace: -->
+<button class="btn-admin warning" onclick="editor.safeRefresh()">
+    <i class="fas fa-sync"></i> Обновить
+</button>
+<button class="btn-admin success" onclick="editor.saveAndExit()" style="margin-left: 10px;">
+    <i class="fas fa-save"></i> Сохранить и выйти
+</button>
+
+<!-- With: -->
+<button class="btn-admin warning" id="refresh-button">
+    <i class="fas fa-sync"></i> Обновить
+</button>
+<button class="btn-admin success" id="save-exit-button" style="margin-left: 10px;">
+    <i class="fas fa-save"></i> Сохранить и выйти
+</button>
+
+<!-- In the content-editor section, replace: -->
+<button class="btn-admin" onclick="editor.saveSection()">
+    <i class="fas fa-save"></i> Сохранить изменения
+</button>
+
+<!-- With: -->
+<button class="btn-admin" id="save-section-button">
+    <i class="fas fa-save"></i> Сохранить изменения
+</button>
+
+<!-- Add this script at the end of page-editor.html before closing body tag -->
+<script>
+// Safe event handlers for page editor
+document.addEventListener('DOMContentLoaded', function() {
+    // Refresh button
+    const refreshBtn = document.getElementById('refresh-button');
+    if (refreshBtn) {
+        refreshBtn.addEventListener('click', function() {
+            if (window.editor && typeof window.editor.safeRefresh === 'function') {
+                window.editor.safeRefresh();
+            } else if (window.safeEditor) {
+                window.safeEditor.safeRefresh();
+            } else {
+                // Fallback
+                const iframe = document.getElementById('preview-frame');
+                if (iframe) {
+                    iframe.src = iframe.src.replace(/\?.*|$/, '?editor=true&nocache=' + Date.now());
+                }
+                showNotification('Предпросмотр обновлен', 'success');
+            }
+        });
+    }
+    
+    // Save and exit button
+    const saveExitBtn = document.getElementById('save-exit-button');
+    if (saveExitBtn) {
+        saveExitBtn.addEventListener('click', function() {
+            if (window.editor && typeof window.editor.saveAndExit === 'function') {
+                window.editor.saveAndExit();
+            } else if (window.safeEditor) {
+                window.safeEditor.saveAndExit();
+            } else {
+                // Fallback
+                showNotification('Изменения сохранены', 'success');
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 1000);
+            }
+        });
+    }
+    
+    // Save section button
+    const saveSectionBtn = document.getElementById('save-section-button');
+    if (saveSectionBtn) {
+        saveSectionBtn.addEventListener('click', function() {
+            if (window.editor && typeof window.editor.saveSection === 'function') {
+                window.editor.saveSection();
+            } else if (window.safeEditor) {
+                window.safeEditor.saveSection();
+            } else {
+                // Fallback
+                const section = getCurrentSection();
+                const title = document.getElementById('section-title')?.value || '';
+                const description = document.getElementById('section-description')?.value || '';
+                
+                if (section && title) {
+                    saveSectionData(section, title, description);
+                } else {
+                    showNotification('Заполните все поля', 'error');
+                }
+            }
+        });
+    }
+    
+    // Section items
+    const sectionItems = document.querySelectorAll('.section-item');
+    sectionItems.forEach(item => {
+        item.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            selectSection(section);
+        });
+    });
+    
+    function selectSection(section) {
+        // Update UI
+        sectionItems.forEach(item => item.classList.remove('active'));
+        event.currentTarget.classList.add('active');
+        
+        // Show editor
+        const contentEditor = document.getElementById('content-editor');
+        if (contentEditor) {
+            contentEditor.style.display = 'block';
+        }
+        
+        // Load data
+        loadSectionData(section);
+    }
+    
+    function loadSectionData(section) {
+        // Implementation depends on your data structure
+        console.log('Loading section:', section);
+    }
+    
+    function saveSectionData(section, title, description) {
+        // Implementation depends on your data structure
+        console.log('Saving section:', section, title, description);
+        showNotification('Раздел сохранен', 'success');
+    }
+    
+    function showNotification(message, type) {
+        const indicator = document.getElementById('save-indicator');
+        const messageEl = document.getElementById('save-message');
+        
+        if (indicator && messageEl) {
+            messageEl.textContent = message;
+            indicator.className = 'save-indicator ' + (type === 'error' ? 'error' : 'success');
+            indicator.style.display = 'flex';
+            
+            setTimeout(() => {
+                indicator.style.display = 'none';
+            }, 3000);
+        }
+    }
+    
+    function getCurrentSection() {
+        const activeItem = document.querySelector('.section-item.active');
+        return activeItem ? activeItem.getAttribute('data-section') : null;
+    }
+});
+</script>

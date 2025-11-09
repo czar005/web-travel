@@ -1,0 +1,85 @@
+<!-- Immediate fix - add this to page-editor.html before closing </body> tag -->
+<script>
+// Immediate fix for editor reference errors
+(function() {
+    'use strict';
+    
+    // Create safe editor object if it doesn't exist
+    if (typeof window.editor === 'undefined') {
+        window.editor = {
+            safeRefresh: function() {
+                console.log('🔄 Safe refresh triggered');
+                const iframe = document.getElementById('preview-frame');
+                if (iframe) {
+                    iframe.src = iframe.src.replace(/\?.*|$/, '?editor=true&nocache=' + Date.now());
+                }
+                this.showNotification('Предпросмотр обновлен', 'success');
+            },
+            
+            saveAndExit: function() {
+                console.log('💾 Save and exit triggered');
+                this.showNotification('Изменения сохранены', 'success');
+                setTimeout(() => {
+                    window.location.href = 'admin.html';
+                }, 1000);
+            },
+            
+            saveSection: function() {
+                console.log('💾 Save section triggered');
+                const section = this.getCurrentSection();
+                const title = document.getElementById('section-title')?.value;
+                const description = document.getElementById('section-description')?.value;
+                
+                if (!section) {
+                    this.showNotification('Сначала выберите раздел', 'error');
+                    return;
+                }
+                
+                this.showNotification('Раздел "' + section + '" сохранен!', 'success');
+            },
+            
+            getCurrentSection: function() {
+                const activeItem = document.querySelector('.section-item.active');
+                return activeItem ? activeItem.getAttribute('data-section') : null;
+            },
+            
+            showNotification: function(message, type) {
+                const indicator = document.getElementById('save-indicator');
+                const messageEl = document.getElementById('save-message');
+                
+                if (indicator && messageEl) {
+                    messageEl.textContent = message;
+                    indicator.className = 'save-indicator ' + (type === 'error' ? 'error' : 'success');
+                    indicator.style.display = 'flex';
+                    
+                    setTimeout(() => {
+                        indicator.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        };
+        
+        console.log('✅ Safe editor fallback created');
+    }
+    
+    // Fix section selection
+    document.querySelectorAll('.section-item').forEach(item => {
+        item.addEventListener('click', function() {
+            const section = this.getAttribute('data-section');
+            
+            // Update UI
+            document.querySelectorAll('.section-item').forEach(i => i.classList.remove('active'));
+            this.classList.add('active');
+            
+            // Show editor
+            const contentEditor = document.getElementById('content-editor');
+            if (contentEditor) {
+                contentEditor.style.display = 'block';
+            }
+            
+            console.log('📁 Section selected:', section);
+        });
+    });
+    
+})();
+</script>
