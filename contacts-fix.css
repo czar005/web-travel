@@ -1,0 +1,33 @@
+/* Contacts Fix CSS - гарантирует правильное отображение контактов */
+.contact-info .contact-item:nth-child(1) strong:after {
+    content: "Телефон:";
+}
+
+.contact-info .contact-item:nth-child(2) strong:after {
+    content: "Email:";
+}
+
+.contact-info .contact-item:nth-child(3) strong:after {
+    content: "Адрес:";
+}
+
+.contact-info .contact-item:nth-child(4) strong:after {
+    content: "Часы работы:";
+}
+
+/* Принудительно устанавливаем правильные значения если CSS сработает */
+.contact-phone {
+    content: "+7 (999) 123-45-67" !important;
+}
+
+.contact-email {
+    content: "info@worldtravel.com" !important;
+}
+
+.contact-address {
+    content: "Москва, ул. Туристическая, 15" !important;
+}
+
+.contact-hours {
+    content: "Пн-Пт: 9:00-18:00" !important;
+}
