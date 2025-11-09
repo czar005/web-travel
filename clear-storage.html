@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Clear Storage</title>
+</head>
+<body>
+    <h1>Clearing Storage...</h1>
+    <script>
+        localStorage.removeItem('worldtravel_data');
+        sessionStorage.removeItem('worldtravel_data');
+        console.log('✅ Storage cleared');
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 1000);
+    </script>
+</body>
+</html>
