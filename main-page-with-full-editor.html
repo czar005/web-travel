@@ -1,0 +1,22 @@
+<!-- Добавьте этот скрипт в index.html для активации полного редактора -->
+<script src="universal-sync-system.js"></script>
+<script src="complete-content-editor.js"></script>
+
+<!-- Остальные скрипты -->
+<script src="data-manager.js"></script>
+<script src="script.js"></script>
+
+<script>
+// Activate full editor when URL parameter is present
+if (window.location.search.includes('full-editor=true')) {
+    // Wait for universal system to load
+    const activateEditor = () => {
+        if (window.CompleteEditor) {
+            console.log('🎨 Full editor activated via URL parameter');
+        } else {
+            setTimeout(activateEditor, 100);
+        }
+    };
+    activateEditor();
+}
+</script>
