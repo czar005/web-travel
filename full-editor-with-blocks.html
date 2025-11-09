@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Полный редактор с управлением блоками - WorldTravel</title>
+    <link rel="stylesheet" href="admin-style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .editor-container {
+            display: flex;
+            height: 100vh;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .preview-panel {
+            flex: 1;
+            background: white;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .editor-panel {
+            width: 500px;
+            background: white;
+            border-left: 2px solid #e1e5e9;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .panel-header {
+            padding: 20px;
+            background: #2c5aa0;
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .panel-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 20px;
+        }
+
+        .preview-frame-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .preview-frame {
+            width: 100%;
+            height: 100%;
+            border: none;
+        }
+
+        .save-indicator {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 5px;
+            margin: 10px 20px;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .full-editor-btn {
+            background: #ffc107;
+            color: #000;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .full-editor-btn:hover {
+            background: #e0a800;
+        }
+
+        .blocks-management-btn {
+            background: #17a2b8;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-left: 10px;
+        }
+
+        .blocks-management-btn:hover {
+            background: #138496;
+        }
+    </style>
+</head>
+<body>
+    <div class="editor-container">
+        <div class="preview-panel">
+            <div class="panel-header">
+                <h2>Предпросмотр страницы</h2>
+                <div>
+                    <button class="btn-admin warning" id="refresh-button">
+                        <i class="fas fa-sync"></i> Обновить
+                    </button>
+                    <button class="full-editor-btn" id="full-editor-toggle">
+                        <i class="fas fa-edit"></i> Полный редактор
+                    </button>
+                    <button class="blocks-management-btn" id="blocks-toggle">
+                        <i class="fas fa-th"></i> Управление блоками
+                    </button>
+                    <button class="btn-admin success" id="save-exit-button" style="margin-left: 10px;">
+                        <i class="fas fa-save"></i> Сохранить и выйти
+                    </button>
+                </div>
+            </div>
+            
+            <div class="save-indicator" id="save-indicator">
+                <i class="fas fa-check-circle"></i>
+                <span id="save-message">Изменения сохранены</span>
+            </div>
+
+            <div class="preview-frame-container">
+                <iframe class="preview-frame" id="preview-frame" src="index.html?full-editor=true&blocks=true&nocache=1"></iframe>
+            </div>
+        </div>
+
+        <div class="editor-panel">
+            <div class="panel-header">
+                <h2>Редактор страницы</h2>
+            </div>
+
+            <div class="panel-content">
+                <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; margin-bottom: 20px; border-left: 4px solid #2c5aa0;">
+                    <h4 style="margin: 0 0 10px 0; color: #2c5aa0;">🎨 Расширенное редактирование</h4>
+                    <p style="margin: 0; color: #666; font-size: 14px; line-height: 1.5;">
+                        <strong>Полный редактор</strong> - редактируйте ЛЮБОЙ элемент на странице<br>
+                        <strong>Управление блоками</strong> - добавляйте, удаляйте и редактируйте карточки
+                    </p>
+                </div>
+
+                <h3>Быстрое редактирование секций</h3>
+                <p style="color: #666; margin-bottom: 20px;">Выберите секцию для базового редактирования</p>
+                
+                <div id="section-list">
+                    <div class="section-item" data-section="hero" style="padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: all 0.3s ease;">
+                        <div class="section-title" style="font-weight: 600; color: #2c5aa0;">Главный баннер</div>
+                        <div class="section-desc" style="color: #666; font-size: 14px;">Заголовок, описание, кнопка, изображение</div>
+                    </div>
+                    <div class="section-item" data-section="about" style="padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: all 0.3s ease;">
+                        <div class="section-title" style="font-weight: 600; color: #2c5aa0;">О компании</div>
+                        <div class="section-desc" style="color: #666; font-size: 14px;">Информация, статистика, изображение + <strong>📊 Управление статистикой</strong></div>
+                    </div>
+                    <div class="section-item" data-section="services" style="padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: all 0.3s ease;">
+                        <div class="section-title" style="font-weight: 600; color: #2c5aa0;">Услуги</div>
+                        <div class="section-desc" style="color: #666; font-size: 14px;">Карточки услуг, иконки, описания + <strong>🎯 Управление услугами</strong></div>
+                    </div>
+                    <div class="section-item" data-section="destinations" style="padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: all 0.3s ease;">
+                        <div class="section-title" style="font-weight: 600; color: #2c5aa0;">Направления</div>
+                        <div class="section-desc" style="color: #666; font-size: 14px;">Заголовки, описания, страны + <strong>🌍 Управление странами</strong></div>
+                    </div>
+                    <div class="section-item" data-section="contact" style="padding: 15px; background: #f8f9fa; border: 2px solid #e9ecef; border-radius: 8px; cursor: pointer; margin-bottom: 10px; transition: all 0.3s ease;">
+                        <div class="section-title" style="font-weight: 600; color: #2c5aa0;">Контакты</div>
+                        <div class="section-desc" style="color: #666; font-size: 14px;">Контактная информация, форма</div>
+                    </div>
+                </div>
+
+                <div id="content-editor" style="margin-top: 30px; display: none;">
+                    <div class="basic-editor">
+                        <div class="form-group">
+                            <label>Заголовок секции:</label>
+                            <input type="text" class="form-control" id="section-title">
+                        </div>
+                        <div class="form-group">
+                            <label>Описание:</label>
+                            <textarea class="form-control" id="section-description" rows="4"></textarea>
+                        </div>
+                        <button class="btn-admin" id="save-section-button">
+                            <i class="fas fa-save"></i> Сохранить изменения
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Universal Sync System -->
+    <script src="universal-sync-system.js"></script>
+    
+    <!-- Complete Editor with Blocks Management -->
+    <script src="complete-editor-with-blocks.js"></script>
+    
+    <!-- Enhanced Editor -->
+    <script src="enhanced-editor-universal.js"></script>
+
+    <script>
+        // Setup full editor toggle
+        document.getElementById('full-editor-toggle').addEventListener('click', function() {
+            if (window.CompleteEditor) {
+                window.CompleteEditor.showEditor();
+            } else {
+                alert('Полный редактор загружается...');
+            }
+        });
+
+        // Setup blocks management toggle
+        document.getElementById('blocks-toggle').addEventListener('click', function() {
+            if (window.DynamicBlocksEditor) {
+                // Open full editor first
+                if (window.CompleteEditor) {
+                    window.CompleteEditor.showEditor();
+                }
+                // Then scroll to blocks management
+                setTimeout(() => {
+                    const blocksSection = document.querySelector('[data-type="stats"]');
+                    if (blocksSection) {
+                        blocksSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    }
+                }, 500);
+            } else {
+                alert('Управление блоками загружается...');
+            }
+        });
+
+        // Setup section selection
+        document.querySelectorAll('.section-item').forEach(section => {
+            section.addEventListener('click', function() {
+                document.querySelectorAll('.section-item').forEach(s => {
+                    s.style.borderColor = '#e9ecef';
+                    s.style.background = '#f8f9fa';
+                });
+                
+                this.style.borderColor = '#2c5aa0';
+                this.style.background = '#e3f2fd';
+                
+                const sectionName = this.getAttribute('data-section');
+                if (window.editor) {
+                    window.editor.loadSection(sectionName);
+                }
+            });
+        });
+
+        console.log('🎉 Full Editor with Blocks Management Loaded!');
+    </script>
+</body>
+</html>
