@@ -291,7 +291,15 @@
                             <label>Описание:</label>
                             <textarea class="form-control" id="section-description" rows="4"></textarea>
                         </div>
-                        <button class="btn-admin" onclick="return window.editor && window.editor.saveSection ? window.editor.saveSection() : (alert("Редактор загружается..."), false)">
+    <button class="btn-admin" id="save-section-button">
+        <i class="fas fa-save"></i> Сохранить изменения
+    </button>
+    <button class="btn-admin" id="save-section-button">
+        <i class="fas fa-save"></i> Сохранить изменения
+    </button>
+    <button class="btn-admin" id="save-section-button">
+        <i class="fas fa-save"></i> Сохранить изменения
+    </button>
                             <i class="fas fa-save"></i> Сохранить изменения
                         </button>
                     </div>
@@ -307,3 +315,4 @@
     <script src="fixed-page-editor.js"></script>
 </body>
 </html>
+<script>document.getElementById("save-section-button").addEventListener("click", function() { if (window.editor && typeof window.editor.saveSection === "function") { return window.editor.saveSection(); } else { alert("Редактор загружается..."); return false; } });</script>

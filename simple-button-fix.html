@@ -1,0 +1,16 @@
+<!-- САМАЯ ПРОСТАЯ И НАДЕЖНАЯ ВЕРСИЯ -->
+<button class="btn-admin" id="save-section-button">
+    <i class="fas fa-save"></i> Сохранить изменения
+</button>
+
+<script>
+// Простой обработчик без сложного синтаксиса
+document.getElementById('save-section-button').addEventListener('click', function() {
+    if (window.editor && typeof window.editor.saveSection === 'function') {
+        return window.editor.saveSection();
+    } else {
+        alert('Редактор загружается...');
+        return false;
+    }
+});
+</script>
