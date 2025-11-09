@@ -1,0 +1,31 @@
+<!-- REPLACE THIS LINE in page-editor.html:294 -->
+<button class="btn-admin" onclick="editor.saveSection()">
+    <i class="fas fa-save"></i> Сохранить изменения
+</button>
+
+<!-- WITH THIS SAFE VERSION -->
+<button class="btn-admin" onclick="return window.editor.saveSection()">
+    <i class="fas fa-save"></i> Сохранить изменения
+</button>
+
+<!-- ALSO REPLACE THESE LINES -->
+
+<!-- REPLACE: -->
+<button class="btn-admin warning" onclick="editor.safeRefresh()">
+    <i class="fas fa-sync"></i> Обновить
+</button>
+
+<!-- WITH: -->
+<button class="btn-admin warning" onclick="return window.editor.safeRefresh()">
+    <i class="fas fa-sync"></i> Обновить
+</button>
+
+<!-- REPLACE: -->
+<button class="btn-admin success" onclick="editor.saveAndExit()" style="margin-left: 10px;">
+    <i class="fas fa-save"></i> Сохранить и выйти
+</button>
+
+<!-- WITH: -->
+<button class="btn-admin success" onclick="return window.editor.saveAndExit()" style="margin-left: 10px;">
+    <i class="fas fa-save"></i> Сохранить и выйти
+</button>
